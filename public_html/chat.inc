@@ -25,26 +25,23 @@ function print_chat_logs ($channel, $date, $logs) {
 	$date = $date ? $date : date("y-m-d");
 	$logs = $logs ? $logs : $log_dir;
 
+	$link = "";
 	$_GET['date'] = date("y-m-d", strtotime("-1 day", strtotime($date)));
 	if (file_exists("$logs/$channel/$_GET[date].txt")) {
 		$prev_link = build_query($_SERVER['PHP_SELF'], $_GET);
+		$link .= "<a href=\"$prev_link\">Previous Day's Logs</a> | ";
 	}
 
 	$_GET['date'] = date("y-m-d", strtotime("+1 day", strtotime($date)));
 	if (file_exists("$logs/$channel/$_GET[date].txt")) {
 		$next_link = build_query($_SERVER['PHP_SELF'], $_GET);
+		$link .= "<a href=\"$next_link\">Next Day's Logs</a> | ";
 	}
+	$link .= "<a href=\"/~logs/$channel\">Raw Logs</a>";
 
 	$filename = "$logs/$channel/$date.txt";
 	if (file_exists($filename) && ($file = fopen($filename, "r"))) {
-		if ($prev_link) {
-			echo("<a href=\"$prev_link\">Previous Day's Logs</a> | ");
-		}
-		if ($next_link) {
-			echo("<a href=\"$next_link\">Next Day's Logs</a> | ");
-		}
-		echo("<a href=\"/~logs/$channel\">Raw Logs</a>");
-		echo("<br>\n");
+		echo("$link<br>\n");
 		echo("<table cellspacing=0>\n");
 		while ($line = fgets($file)) {
 			$line = rtrim($line);
@@ -54,6 +51,7 @@ function print_chat_logs ($channel, $date, $logs) {
 			echo("<tr><td>$line</td></tr>\n");
 		}
 		echo("</table>\n");
+		echo("$link\n");
 		fclose($file);
 		return(true);
 	}

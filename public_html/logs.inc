@@ -15,22 +15,26 @@ function print_log_search ($channel, $logs) {
 
 function search_logs ($channel, $logs, $phrase) {
 	global $log_dir;
+	$hits = 0;
 	$logs = $logs ? $logs : $log_dir;
 	if ($channel && is_dir("$logs/$channel") && ($dir = opendir("$logs/$channel"))) {
 		while ($filename = readdir($dir)) {
-			search_log_file("$logs/$channel/$filename", $phrase);
+			$hits += search_log_file("$logs/$channel/$filename", $phrase);
 		}
 		closedir($dir);
+		echo("$hits hits found<br>\n");
 		return(true);
 	}
 	return(false);
 }
 
 function search_log_file ($filename, $phrase) {
+	$hits = 0;
 	preg_match("/.*\/(\w*)\/(\S*)\.txt$/", $filename, $entry);
 	if ($file = fopen($filename, "r")) {
 		while ($line = fgets($file)) {
 			if (strstr($line, $phrase)) {
+				$hits++;
 				$line = rtrim($line);
 				$line = str_replace("<", "&lt;", $line);
 				$line = str_replace(">", "&gt;", $line);
@@ -38,9 +42,9 @@ function search_log_file ($filename, $phrase) {
 			}
 		}
 		fclose($file);
-		return(true);
+		return($hits);
 	}
-	return(false);
+	return(0);
 }
 
 ?>
