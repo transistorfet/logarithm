@@ -3,6 +3,7 @@ current		* Changed directory layout
 		* Added logarithm privalleges to module_execute
 		* Added irc get message queue
 		* Changed on_join/on_leave command execution
+		* Added plugin feature
 
 0.6		* Changed channel options to use only arrays of values
 		* Added csv.pm

@@ -4,7 +4,9 @@
 	* Add Line Length Limiter to break up lines longer than the max
 	* Auto Numbering in Definitions (?)
 	* Add support for Multiple Hostmasks
-	* Link Catcher
-	* Execute commands on start up
 	* Multiserver??
+	* Fix topic number thing
+	* Fix topicifier plugin
+	* Make audio.lm more general in its search thingy
+	* Make the php search page nicer/quicker/etc
 
