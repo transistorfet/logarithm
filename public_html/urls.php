@@ -5,8 +5,10 @@
 <body>
 
 <?php
+	require_once("links.inc");
+
 	if ($channel) {
-		include("../etc/$channel/url.lst");
+		print_links("../etc/$channel/url.lst");
 	}
 ?>
 
