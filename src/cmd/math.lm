@@ -11,7 +11,7 @@ sub do_math {
 
 	$pi = 3.141592653589793238462643383279502884197169399375105;
 	$msg->{'text'} =~ s/math //i;
-	if ($msg->{'text'} =~ /^(\(|\)|\+|-|\*|\/|\$pi|cos|sin|abs|sqrt|exp|hex|oct|int|log|\d|\.|\s)*$/) {
+	if ($msg->{'text'} =~ /^(\(|\)|\+|-|\*|\/|\$pi|cos|sin|abs|sqrt|exp|hex|oct|int|log|0x(\d|a|b|c|d|e|f)+|\d|\.|\s)*$/) {
 		my $ans = 0;
 		$equation = '$ans = ' . $msg->{'text'} . ';';
 		return(-1) unless (defined(eval "$equation"));
