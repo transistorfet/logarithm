@@ -3,7 +3,18 @@
 require_once("misc.inc");
 
 $log_dir = "../logs";
-//$log_dir = "/home/logarithm/logs";
+
+function print_channels ($logs) {
+	global $log_dir;
+	$logs = $logs ? $logs : $log_dir;
+	if (is_dir($logs) && ($dir = opendir($logs))) {
+		echo("<ul>\n");
+		while ($channel = readdir($dir)) {
+			echo("<li><a href=\"$_SERVER[PHP_SELF]?channel=$channel\">#$channel</a></li>\n");
+		}
+		echo("</ul>\n");
+	}
+}
 
 function print_logs ($channel, $date, $logs) {
 	global $log_dir;
