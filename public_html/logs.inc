@@ -18,7 +18,12 @@ function search_logs ($channel, $logs, $phrase) {
 	$hits = 0;
 	$logs = $logs ? $logs : $log_dir;
 	if ($channel && is_dir("$logs/$channel") && ($dir = opendir("$logs/$channel"))) {
+		$files = array();
 		while ($filename = readdir($dir)) {
+			$files[] = $filename;
+		}
+		rsort($files);
+		foreach ($files as $filename) {
 			$hits += search_log_file("$logs/$channel/$filename", $phrase);
 		}
 		closedir($dir);
