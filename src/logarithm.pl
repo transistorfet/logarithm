@@ -48,6 +48,7 @@ sub main_loop {
 		}
 		elsif ($msg->{'cmd'} eq "KICK") {
 			if ($msg->{'msg'}->[1] =~ /$irc->{'nick'}/i) {
+				irc_leave_channel($irc, $msg->{'channel'});
 				irc_join_channel($irc, $msg->{'channel'});
 			}
 		}

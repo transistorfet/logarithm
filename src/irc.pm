@@ -403,8 +403,6 @@ sub irc_parse_msg {
 	}
 	elsif ($cmd eq "KICK") {
 		irc_log($irc, $channel, "--- kick: $params[1] by $nick ($text) $channel");
-		channel_leave($irc->{'channels'}, $channel);
-		irc_end_logs($irc, $channel);
 	}
 
 	$respond = $channel;
