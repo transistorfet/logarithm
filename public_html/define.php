@@ -11,8 +11,8 @@
 
 <?php
 	require_once("defines.inc");
-	$file = $channel ? "$channel/defines.lst" : "defines.lst";
-	find_define("/home/logarithm/etc/$file", $def);
+	$file = $_GET[channel] ? "$_GET[channel]/defines.lst" : "defines.lst";
+	find_define("/home/logarithm/etc/$file", $_GET[def]);
 ?>
 
 <form action="define.php" method="get">
