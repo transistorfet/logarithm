@@ -28,7 +28,7 @@ function print_chat_logs ($channel, $date, $logs) {
 	$yest_link = build_query($_SERVER['PHP_SELF'], $_GET);
 	$filename = "$logs/$channel/$date.txt";
 	if (file_exists($filename) && ($file = fopen($filename, "r"))) {
-		echo("<a href=\"$yest_link\">Yesterday's Logs</a><br>\n");
+		echo("<a href=\"$yest_link\">Previous Day's Logs</a><br>\n");
 		echo("<table>\n");
 		while ($line = fgets($file)) {
 			$line = rtrim($line);
