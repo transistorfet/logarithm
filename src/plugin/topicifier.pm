@@ -5,7 +5,7 @@ $module_info = {
 	]
 };
 
-my %topicifier_info = ( 'day' => 0, 'list' = [ ] );
+my %topicifier_info = ( 'day' => 0, 'list' => [ ] );
 
 sub init_topicifier {
 	local($irc, $msg, $privs) = @_;
