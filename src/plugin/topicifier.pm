@@ -19,22 +19,22 @@ sub do_topicifier_alarm {
 	local($irc, $msg, $privs) = @_;
 
 	my $time = get_time();
-	if ($time{'wday'} != $topicifier_info->{'day'}) {
-		$topicifier_info->{'day'} = $time{'wday'};
-		do_topicifier_change_topic($irc, $msg) if ($time{'wday'} == 5);
+	if ($time->{'wday'} != $topicifier_info{'day'}) {
+		$topicifier_info{'day'} = $time->{'wday'};
+		do_topicifier_change_topic($irc, $msg) if ($time->{'wday'} == 5);
 	}
 }
 
 sub do_topicifier_change_topic {
 	local($irc, $msg) = @_;
 
-	unless (scalar(@{ $autotopic_info{'list'} })) {
-		@{ $autotopic_info{'list'} } = csv_search($msg->{'respond'}, "autotopics.lst", ':', undef);
-		return unless (scalar(@{ $autotopic_info{'list'} }));
-		$i = scalar(@{ $autotopic_info{'list'} });
+	unless (scalar(@{ $topicifier_info{'list'} })) {
+		@{ $topicifier_info{'list'} } = csv_search($msg->{'respond'}, "autotopics.lst", ':', undef);
+		return unless (scalar(@{ $topicifier_info{'list'} }));
+		$i = scalar(@{ $topicifier_info{'list'} });
 		irc_notice($irc, "transistor", "Loaded $i topics");
 	}
 
-	my $topic = shift(@{ $autotopic_info{'list'} })->[0];	
+	my $topic = shift(@{ $topicifier_info{'list'} })->[0];	
 	irc_send_msg($irc, "PRIVMSG chanserv :topic $msg->{'respond'} $topic\n");
 }
