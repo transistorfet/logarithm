@@ -33,7 +33,7 @@ function search_log_file ($filename, $phrase) {
 	preg_match("/.*\/(\w*)\/(\S*)\.txt$/", $filename, $entry);
 	if ($file = fopen($filename, "r")) {
 		while ($line = fgets($file)) {
-			if (strstr($line, $phrase)) {
+			if (stristr($line, $phrase)) {
 				$hits++;
 				$line = rtrim($line);
 				$line = str_replace("<", "&lt;", $line);
