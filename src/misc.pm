@@ -47,10 +47,10 @@ sub strip_colour {
 }
 
 sub get_time {
-	local($sec, $min, $hour, $mday, $mon, $year) = localtime(time);
+	local($sec, $min, $hour, $mday, $mon, $year, $wday) = localtime(time);
 	$mon++;
 	$year =~ s/^\d?//;
-	return( { 'sec' => $sec, 'min' => $min, 'hour' => $hour, 'month' => $mon, 'year' => $year, 'day' => $mday } );
+	return( { 'sec' => $sec, 'min' => $min, 'hour' => $hour, 'month' => $mon, 'year' => $year, 'day' => $mday, 'wday' => $wday } );
 }
 
 
