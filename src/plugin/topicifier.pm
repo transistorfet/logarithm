@@ -38,3 +38,4 @@ sub do_topicifier_change_topic {
 	my $topic = shift(@{ $topicifier_info{'list'} })->[0];	
 	irc_send_msg($irc, "PRIVMSG chanserv :topic $msg->{'respond'} $topic\n");
 }
+
