@@ -37,7 +37,7 @@ function print_chat_logs ($channel, $date, $logs) {
 		$next_link = build_query($_SERVER['PHP_SELF'], $_GET);
 		$link .= "<a href=\"$next_link\">Next Day's Logs</a> | ";
 	}
-	$link .= "<a href=\"/~logs/$channel\">Raw Logs</a>";
+	$link .= "<a href=\"/~logs/$channel\">Full Logs</a>";
 
 	$filename = "$logs/$channel/$date.txt";
 	if (file_exists($filename) && ($file = fopen($filename, "r"))) {
