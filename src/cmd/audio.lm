@@ -5,13 +5,29 @@ $module_info = {
 		"Description: Displays the audio files website for channel (current if unspecified)"
 	]
 };
+
 sub do_audio {
 	local($irc, $msg, $privs) = @_;
 
 	my ($audio) = channel_get_option($irc->{'channels'}, $msg->{'params'}->[0], "audio", "");
 
 	if ($audio) {
-		irc_private_msg($irc, $msg->{'respond'}, $audio);
+		$msg->{'text'} =~ /^audio\s*(.+)\s*$/;
+		$search = $1;
+		if ($search) {
+			opendir(DIR, "/home/ftp/pub/audio/") or return(-1);
+			@files = readdir(DIR);
+			closedir(DIR);
+			foreach $file (@files) {
+				if ($file =~ /$search/i) {
+					$file =~ s/ /\%20/g;
+					irc_private_msg($irc, $msg->{'respond'}, "$audio$file");
+				}
+			}
+		}
+		else {
+			irc_private_msg($irc, $msg->{'respond'}, $audio);
+		}
 	}
 	else {
 		irc_notice($irc, $msg->{'nick'}, "Sorry, No Audio For This Channel");
