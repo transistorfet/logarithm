@@ -1,0 +1,29 @@
+
+$module_info = {
+	'help' => [
+		"Usage: search <phrase>",
+		"Description: Displays the website link for a logs search for phrase"
+	]
+};
+
+sub do_search {
+	local($irc, $msg, $privs) = @_;
+
+	$website = "http://jabberwocky.hn.org/~logarithm";
+
+	return(-20) if (scalar(@{ $msg->{'params'} }) < 2);
+	$msg->{'text'} =~ /^search\s*(.+)\s*$/;
+	$phrase = $1;
+	$phrase =~ s/ /\+/g;
+	$channel = $msg->{'respond'};
+	$channel =~ s/^#//;
+
+	if ($website) {
+		irc_private_msg($irc, $msg->{'respond'}, "$website/search.php?channel=$channel&q=$phrase");
+	}
+	else {
+		irc_notice($irc, $msg->{'nick'}, "Sorry, No Website for Logs");
+	}
+	return(0);
+}
+
