@@ -1,5 +1,5 @@
 <?php
-	require_once("chat.inc");
+	require_once("logs.inc");
 
-	print_chat_logs($_GET['channel'], $_GET['date'], "");
+	print_logs($_GET['channel'], $_GET['date'], "");
 ?>
