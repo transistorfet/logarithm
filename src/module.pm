@@ -101,8 +101,15 @@ sub module_load {
 		}
 	}
 
-	$file = "cmd/$script.lm";
-	return(0) if (!(-e $file));
+	if ($script =~ /\.pm$/) {
+		$file = "plugin/$script";
+	}
+	else {
+		$file = "cmd/$script";
+		$file .= ".lm" unless ($file =~ /\.lm/);
+	}
+
+	return(0) unless (-e $file);
 
 	open(FILE, $file) or return(0);
 	while (<FILE>) {

@@ -33,6 +33,11 @@ sub main_loop {
 		elsif ($msg->{'cmd'} eq "PING") {
 			$time_ping = time();
 		}
+		elsif (($msg->{'cmd'} eq "JOIN") and ($msg->{'nick'} eq $irc->{'nick'})) {
+			foreach $name (channel_get_option($irc->{'channels'}, $msg->{'channel'}, "plugins")) {
+				module_execute($irc, $msg, "$name.pm", "init_$name") if ($name);
+			}
+		}
 		elsif ($msg->{'cmd'} eq "PRIVMSG") {
 			if (irc_in_channel($irc, $msg->{'channel'})) {
 				parse_chat($irc, $msg);
