@@ -1,0 +1,22 @@
+
+$module_info = {
+	'help' => [
+		"Usage: mysite [<name>]",
+		"Description: Displays the website for the nick (current if unspecified)"
+	]
+};
+
+sub do_mysite {
+	local($irc, $msg, $privs) = @_;
+
+	my ($website) = channel_get_option($irc->{'channels'}, $msg->{'params'}->[0], "website", "");
+
+	if ($website) {
+		irc_private_msg($irc, $msg->{'respond'}, "$website?t=$msg->{'nick'}");
+	}
+	else {
+		irc_notice($irc, $msg->{'nick'}, "Sorry, No Website For This User");
+	}
+	return(0);
+}
+

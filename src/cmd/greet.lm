@@ -1,28 +1,26 @@
 
 $module_info = {
 	'help' => [
-		"Usage: greet on|off",
-		"Description: Controls the automatic-join greeter which displays greet_msg (or wb if not defined) when someone joins the channel"
+		"Usage: greet <msg>",
+		"Description: Sets the greet message when you joins the channel"
 	]
 };
 
 sub do_greet {
 	local($irc, $msg, $privs) = @_;
 
-	return(-10) if ($privs < channel_get_option($irc->{'channels'}, $msg->{'respond'}, "greet_access", 100));
-
-	if ($msg->{'params'}->[1] eq "on") {
-		return(-1) if (module_register_chat("greet", "do_greet_chat", $msg->{'respond'}, "JOIN"));
-		irc_private_msg($irc, $msg->{'respond'}, "Greeter On");
+	return(-20) unless ($msg->{'channel'} =~ /^\#/);
+	return(-10) if ($privs < channel_get_option($irc->{'channels'}, $msg->{'respond'}, "greet_access", 50));
+	$msg->{'text'} =~ /^greet\s*(.+)\s*$/;
+	$text = $1;
+	
+	if ($text eq "none") {
+		return(-1) if (channel_delete_option($irc->{'channels'}, $msg->{'channel'}, "greet_$msg->{'nick'}_msg"));
+		irc_notice($irc, $msg->{'nick'}, "Greeting set to $text");
 	}
-	elsif ($msg->{'params'}->[1] eq "off") {
-		return(-1) if (module_unregister_chat("greet", "do_greet_chat", $msg->{'respond'}));
-		irc_private_msg($irc, $msg->{'respond'}, "Greeter Off");
+	else {
+		return(-1) if (channel_set_option($irc->{'channels'}, $msg->{'channel'}, "greet_$msg->{'nick'}_msg", $text));
+		irc_notice($irc, $msg->{'nick'}, "Greeting disabled");
 	}
 }
 
-sub do_greet_chat {
-	local($irc, $msg, $privs) = @_;
-
-	irc_private_msg($irc, $msg->{'respond'}, channel_get_option($irc->{'channels'}, $msg->{'respond'}, "greet_msg", "wb"));
-}
