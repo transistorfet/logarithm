@@ -1,0 +1,36 @@
+
+$module_info = {
+	'help' => [
+		"Usage: define <phrase>",
+		"Description: Displays the definition for the phrase"
+	]
+};
+
+sub do_define {
+	local($irc, $msg, $privs) = @_;
+	local($word, $define, $i, $ln) = ("", "", 0, 0);
+
+	return(-20) if (scalar(@{ $msg->{'params'} }) < 2);
+	$msg->{'text'} =~ /^define\s*(.+)\s*$/;
+	$msg->{'text'} = $1;
+
+	my @results = csv_search($msg->{'respond'}, "defines.lst", "\t", $msg->{'text'});
+	if (scalar(@results)) {
+		my $i = 0;
+		foreach $def (@results) {
+			if ($i) {
+				irc_private_msg($irc, $msg->{'respond'}, $def->[1]);
+			}
+			else {
+				$def->[0] = ucfirst($def->[0]);
+				irc_private_msg($irc, $msg->{'respond'}, "$def->[0]: $def->[1]");
+			}
+			$i = 1;		
+		}
+	}
+	else {
+		irc_private_msg($irc, $msg->{'respond'}, "$msg->{'text'} Not Found");
+	}
+	return(0);
+}
+

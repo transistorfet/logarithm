@@ -1,0 +1,10 @@
+
+	* Line delimiter compatability (Special functions in some common module)
+	* Convert variables for use in regex's
+	* Add Line Length Limiter to break up lines longer than the max
+	* Auto Numbering in Definitions (?)
+	* Add support for Multiple Hostmasks
+	* Link Catcher
+	* Execute commands on start up
+	* Multiserver??
+

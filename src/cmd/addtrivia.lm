@@ -1,0 +1,20 @@
+
+$module_info = {
+	'help' => [
+		"Usage: addtrivia <question>*<answer>",
+		"Description: Adds the trivia question to the trivia file for the current channel"
+	]
+};
+
+sub do_addtrivia {
+	local($irc, $msg, $privs) = @_;
+
+	return(-10) if ($privs < channel_get_option($irc->{'channels'}, $msg->{'respond'}, "addtrivia_access", 50));
+	return(-20) if ((scalar(@{ $msg->{'params'} }) < 2) or (!($msg->{'text'} =~ /\*/)));
+
+	$msg->{'text'} = ucfirst($msg->{'text'});
+	csv_add($msg->{'respond'}, "trivia.lst", '*', $msg->{'text'});
+	irc_notice($irc, $msg->{'nick'}, "Trivia Question Added");
+	return(0);
+}
+

@@ -1,0 +1,26 @@
+
+$module_info = {
+	'help' => [
+		"Usage: adddefine <phrase>: <definition>]",
+		"Description: Adds the definition for phrase to the list for the specified channel"
+	]
+};
+
+sub do_adddefine {
+	local($irc, $msg, $privs) = @_;
+	local($word, $define);
+
+	return(-10) if ($privs < channel_get_option($irc->{'channels'}, $msg->{'respond'}, "adddefine_access", 50));
+	return(-20) if ((scalar(@{ $msg->{'params'} }) < 2) or (!($msg->{'text'} =~ /:/)));
+
+	$msg->{'text'} =~ s/adddefine\s+(.+?)\s*:\s*(.+?)\s*$//;
+	($word, $define) = ($1, $2);
+	return(0) unless ($word);
+	$word = ucfirst($word);
+
+	$channel = $msg->{'respond'} =~ /^\#/ ? $msg->{'respond'} : "";
+	csv_add($msg->{'respond'}, "defines.lst", "\t", $word, $define);
+	irc_notice($irc, $msg->{'nick'}, "Definition Added");
+	return(0);
+}
+

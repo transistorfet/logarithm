@@ -1,0 +1,25 @@
+
+$module_info = {
+	'help' => [
+		"Usage: logs [<channel>]",
+		"Description: Displays the link to the channel logs for channel (current if unspecified)"
+	]
+};
+
+my $logs_prefix = "http://jabberwocky.hn.org/~logs/";
+
+sub do_logs {
+	local($irc, $msg, $privs) = @_;
+
+	my $logs = channel_get_option($irc->{'channels'}, $msg->{'params'}->[0], "logs", "");
+	if ($logs) {
+		irc_private_msg($irc, $msg->{'respond'}, $logs);
+	}
+	else {
+		$msg->{'params'}->[0] =~ s/^\#//;
+		$logs = "$logs_prefix$msg->{'params'}->[0]";
+		irc_private_msg($irc, $msg->{'respond'}, $logs);
+	}
+	return(0);
+}
+

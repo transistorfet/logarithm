@@ -1,0 +1,23 @@
+
+$module_info = {
+	'help' => [
+		"Usage: addtopic [<category>:]<topic>",
+		"Description: Adds the topic to the topics list for the current channel under the category if specified"
+	]
+};
+
+
+sub do_addtopic {
+	local($irc, $msg, $privs) = @_;
+
+	return(-10) if ($privs < channel_get_option($irc->{'channels'}, $msg->{'respond'}, "addtopic_access", 50));
+	return(-20) if (scalar(@{ $msg->{'params'} }) < 2);
+
+	$msg->{'text'} = ucfirst($msg->{'text'});
+	$msg->{'text'} = ":$msg->{'text'}" unless ($msg->{'text'} =~ /:/);
+
+	csv_add($msg->{'respond'}, "topics.lst", ':', $msg->{'text'});
+	irc_notice($irc, $msg->{'nick'}, "Topic Added");
+	return(0);
+}
+

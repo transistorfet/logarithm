@@ -1,0 +1,14 @@
+
+$module_info = {
+	'help' => [
+		"Usage: uptime",
+		"Description: Displays the current uptime"
+	]
+};
+
+sub do_uptime {
+	local($irc, $msg, $privs) = @_;
+
+	irc_private_msg($irc, $msg->{'respond'}, `uptime`);
+	return(0);
+}

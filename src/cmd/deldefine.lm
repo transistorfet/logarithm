@@ -1,0 +1,25 @@
+
+$module_info = {
+	'help' => [
+		"Usage: deldefine <phrase>",
+		"Description: Deletes all definition of phrase in the current channel's definitions list"
+	]
+};
+
+sub do_deldefine {
+	local($irc, $msg, $privs) = @_;
+
+	return(-10) if ($privs < channel_get_option($irc->{'channels'}, $msg->{'respond'}, "deldefine_access", 100));
+	return(-20) if (scalar(@{ $msg->{'params'} }) < 2);
+
+	$msg->{'text'} =~ /^deldefine\s*(.+)\s*$/;
+	$msg->{'text'} = lc($1);
+	if (csv_remove($msg->{'respond'}, "defines.lst", "\t", $msg->{'text'})) {
+		irc_notice($irc, $msg->{'nick'}, "Error deleting $msg->{'text'}");
+	}
+	else {
+		irc_notice($irc, $msg->{'nick'}, "$msg->{'text'} Deleted");
+	}
+	return(0);
+}
+

@@ -1,0 +1,44 @@
+
+current		* Changed directory layout
+		* Added logarithm privalleges to module_execute
+		* Added irc get message queue
+		* Changed on_join/on_leave command execution
+
+0.6		* Changed channel options to use only arrays of values
+		* Added csv.pm
+		* Added the module_set_help function to module.pm
+		* Added check for hostmask on command request
+		* Merged irc.pm and log.pm
+		* Added misc.pm
+		* Fixed up irc.pm
+		* Added parameter to users.pm functions to specify users list
+		* Put message logging into irc.pm
+		* Authenticated users will have at least access 1 instead of 0
+		* Rewrote commands
+		* changed command extension to .lm
+		* Added run_cmd and allowed ! commands in pm's
+		* Changed channel to take hash in first param plus extra functions
+		* Added channel calls to irc
+		* Added help system
+		* Added URL catching command
+		* Added Auto-Topic changing command
+		* Added On Join command execution
+
+v0.5		* Changed module_register_chat to allow a channel to specified
+		* Changed module_register_alarm to allow more than one alarm per
+		  function
+		* Added channel.pm
+		* Added user authentication
+		* Changed user.pm to allow access level based on channel
+		* Fixed bug where nick changes and signoffs are still logged in
+		  channels no longer occupied by logarithm
+		* Added flood protection
+		* Fixed logging of mode command
+
+v0.4		* Completely rewrote old code (called v0.3 since it was the 3rd
+		  major rewrite since logarithm was first written despite the fact
+		  that no version numbers were assigned previously)
+
+v0.1 - v0.3	* Initial re-writes and bugfixed from initial writing 28-11-2002 to
+		  version 0.4 re-write 08-11-2003.
+

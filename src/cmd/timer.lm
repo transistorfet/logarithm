@@ -1,0 +1,26 @@
+
+$module_info = {
+	'help' => [
+		"Usage: timer on|off",
+		"Description: Activates the timer which displays a message after a certain length of time"
+	]
+};
+
+sub do_timer {
+	local($irc, $msg, $privs) = @_;
+
+	if ($msg->{'params'}->[1] eq "on") {
+		module_register_alarm("timer", "do_timer_alarm", $msg->{'respond'}, 15, $msg);
+		irc_private_msg($irc, $msg->{'respond'}, "Timer On");
+	}
+	elsif ($msg->{'params'}->[1] eq "off") {
+		module_unregister_alarm("timer", "do_timer_alarm", $msg->{'respond'});
+		irc_private_msg($irc, $msg->{'respond'}, "Timer Off");
+	}
+}
+
+sub do_timer_alarm {
+	local($irc, $msg, $privs) = @_;
+
+	irc_private_msg($irc, $msg->{'respond'}, "Timered!");
+}

@@ -1,0 +1,21 @@
+
+$module_info = {
+	'help' => [
+		"Usage: audio [<channel>]",
+		"Description: Displays the audio files website for channel (current if unspecified)"
+	]
+};
+sub do_audio {
+	local($irc, $msg, $privs) = @_;
+
+	my ($audio) = channel_get_option($irc->{'channels'}, $msg->{'params'}->[0], "audio", "");
+
+	if ($audio) {
+		irc_private_msg($irc, $msg->{'respond'}, $audio);
+	}
+	else {
+		irc_notice($irc, $msg->{'nick'}, "Sorry, No Audio For This Channel");
+	}
+	return(0);
+}
+

@@ -1,0 +1,28 @@
+
+$module_info = {
+	'help' => [
+		"Usage: greet on|off",
+		"Description: Controls the automatic-join greeter which displays greet_msg (or wb if not defined) when someone joins the channel"
+	]
+};
+
+sub do_greet {
+	local($irc, $msg, $privs) = @_;
+
+	return(-10) if ($privs < channel_get_option($irc->{'channels'}, $msg->{'respond'}, "greet_access", 100));
+
+	if ($msg->{'params'}->[1] eq "on") {
+		return(-1) if (module_register_chat("greet", "do_greet_chat", $msg->{'respond'}, "JOIN"));
+		irc_private_msg($irc, $msg->{'respond'}, "Greeter On");
+	}
+	elsif ($msg->{'params'}->[1] eq "off") {
+		return(-1) if (module_unregister_chat("greet", "do_greet_chat", $msg->{'respond'}));
+		irc_private_msg($irc, $msg->{'respond'}, "Greeter Off");
+	}
+}
+
+sub do_greet_chat {
+	local($irc, $msg, $privs) = @_;
+
+	irc_private_msg($irc, $msg->{'respond'}, channel_get_option($irc->{'channels'}, $msg->{'respond'}, "greet_msg", "wb"));
+}

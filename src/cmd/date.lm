@@ -1,0 +1,14 @@
+
+$module_info = {
+	'help' => [
+		"Usage: date",
+		"Description: Displays the current date"
+	]
+};
+
+sub do_date {
+	local($irc, $msg, $privs) = @_;
+
+	irc_private_msg($irc, $msg->{'respond'}, `date`);
+	return(0);
+}

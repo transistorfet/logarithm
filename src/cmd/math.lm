@@ -1,0 +1,21 @@
+
+$module_info = {
+	'help' => [
+		"Usage: math <math expression>",
+		"Description: Calculates the answer to simple math equations containing the operations +, -, *, /, cos, sin, abs, sqrt, exp, log, hex, oct, and int"
+	]
+};
+
+sub do_math {
+	local($irc, $msg, $privs) = @_;
+
+	$msg->{'text'} =~ s/math //i;
+	if ($msg->{'text'} =~ /^(\(|\)|\+|-|\*|\/|cos|sin|abs|sqrt|exp|hex|oct|int|log|\d|\.|\s)*$/) {
+		my $ans = 0;
+		$equation = '$ans = ' . $msg->{'text'} . ';';
+		return(-1) unless (defined(eval "$equation"));
+		irc_private_msg($irc, $msg->{'respond'}, "The answer is: $ans");
+		return(0);
+	}
+	return(-20);
+}

@@ -1,0 +1,17 @@
+
+$module_info = {
+	'help' => [
+		"Usage: access [[<channel>] <nick>]",
+		"Description: Returns the access level of nick (you if unspecified) in channel (current if unspecified)"
+	]
+};
+
+sub do_list {
+	local($irc, $msg, $privs) = @_;
+
+	foreach (channel_list($irc->{'channels'})) {
+		irc_notice($irc, $msg->{'nick'}, "$_");
+	}
+	return(0);
+}
+
