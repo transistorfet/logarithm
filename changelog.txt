@@ -4,6 +4,7 @@ current		* Changed directory layout
 		* Added irc get message queue
 		* Changed on_join/on_leave command execution
 		* Added plugin feature
+		* Added formatted logs php page
 
 0.6		* Changed channel options to use only arrays of values
 		* Added csv.pm

@@ -1,26 +1,25 @@
 
 $module_info = {
 	'help' => [
-		"Usage: timer on|off",
-		"Description: Activates the timer which displays a message after a certain length of time"
+		"Usage: timer <number>",
+		"Description: Activates the timer which displays a message after a specified length of time"
 	]
 };
 
 sub do_timer {
 	local($irc, $msg, $privs) = @_;
 
-	if ($msg->{'params'}->[1] eq "on") {
-		module_register_alarm("timer", "do_timer_alarm", $msg->{'respond'}, 15, $msg);
-		irc_private_msg($irc, $msg->{'respond'}, "Timer On");
+	if ($msg->{'params'}->[1] < 60) {
+		module_register_alarm("timer", "do_timer_alarm", $msg->{'nick'}, $msg->{'params'}->[1] * 60, $msg);
+		irc_notice($irc, $msg->{'nick'}, "Timer On");
+		return(0);
 	}
-	elsif ($msg->{'params'}->[1] eq "off") {
-		module_unregister_alarm("timer", "do_timer_alarm", $msg->{'respond'});
-		irc_private_msg($irc, $msg->{'respond'}, "Timer Off");
-	}
+	return(-10);
 }
 
 sub do_timer_alarm {
 	local($irc, $msg, $privs) = @_;
 
-	irc_private_msg($irc, $msg->{'respond'}, "Timered!");
+	my $nick = uc($msg->{'nick'});
+	irc_private_msg($irc, $msg->{'respond'}, "$nick: Your timer has expired.");
 }
