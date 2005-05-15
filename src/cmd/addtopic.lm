@@ -13,6 +13,7 @@ sub do_addtopic {
 	return(-10) if ($privs < channel_get_option($irc->{'channels'}, $msg->{'respond'}, "addtopic_access", 50));
 	return(-20) if (scalar(@{ $msg->{'params'} }) < 2);
 
+	$msg->{'text'} =~ s/^addtopic\s*//i;
 	$msg->{'text'} = ucfirst($msg->{'text'});
 	$msg->{'text'} = ":$msg->{'text'}" unless ($msg->{'text'} =~ /:/);
 
