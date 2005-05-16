@@ -15,7 +15,7 @@ sub do_chantopic {
 
 	$msg->{'text'} =~ s/^chantopic\s*//;
 
-	csv_add($msg->{'respond'}, "chantopics.lst", ':', $msg->{'text'});
+	csv_add($msg->{'respond'}, "autotopics.lst", ':', $msg->{'text'});
 	irc_notice($irc, $msg->{'nick'}, "Topic Added");
 	return(0);
 }
