@@ -1,9 +1,4 @@
 
-	* make reply topic names be Re: old title
-	* fix fortnight remember thingy
-	* fix blog when msg is added it does not appear at first
-	* strip slashes or clear the fields after a message has been posted
-	* fix chantopic commands to write to autotopic.lst
 	* if nickserv sends a message like "please identify" then identify
 	* make logging options and stuff based/partially based on regexes?
 	* make log print the names of people in the chan to logs on join (is this the blank line thing)
@@ -21,6 +16,5 @@
 	* Add support for Multiple Hostmasks
 	* Multiserver??
 	* Fix topic number thing
-	* Fix topicifier plugin (is it working now?) (seems to.  what was wrong?  it seemed to work after i reinstalled)
 	* Make audio.lm more general in its search thingy
 
