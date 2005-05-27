@@ -10,7 +10,7 @@ sub do_timer {
 	local($irc, $msg, $privs) = @_;
 
 	my $time = $msg->{'params'}->[1];
-	return(-10) unless ($time =~ /^(\d*)(h|m|s)$/i);
+	return(-20) unless ($time =~ /^(\d*)(|h|m|s)$/i);
 
 	if ($2 eq "h") {
 		$time = $1 * 3600;
@@ -27,7 +27,7 @@ sub do_timer {
 		irc_notice($irc, $msg->{'nick'}, "Timer On");
 		return(0);
 	}
-	return(-10);
+	return(-1);
 }
 
 sub do_timer_alarm {
