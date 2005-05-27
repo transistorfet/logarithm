@@ -22,4 +22,5 @@ sub do_timer_alarm {
 
 	my $nick = uc($msg->{'nick'});
 	irc_private_msg($irc, $msg->{'respond'}, "$nick: Your timer has expired.");
+	module_unregister_alarm("timer", "do_timer_alarm", $msg->{'nick'});
 }
