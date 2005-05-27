@@ -2,15 +2,28 @@
 $module_info = {
 	'help' => [
 		"Usage: timer <number>",
-		"Description: Activates the timer which displays a message after a specified length of time"
+		"Description: Activates the timer which displays a message after a the specified time given in hours, minutes, or seconds specified by an h, m, or s following the number (default to minutes)"
 	]
 };
 
 sub do_timer {
 	local($irc, $msg, $privs) = @_;
 
-	if ($msg->{'params'}->[1] < 60) {
-		module_register_alarm("timer", "do_timer_alarm", $msg->{'nick'}, $msg->{'params'}->[1] * 60, $msg);
+	my $time = $msg->{'params'}->[1];
+	return(-10) unless ($time =~ /^(\d*)(h|m|s)$/i);
+
+	if ($2 eq "h") {
+		$time = $1 * 3600;
+	}
+	elsif ($2 eq "s") {
+		$time = $1;
+	}
+	else {
+		$time = $1 * 60;
+	}
+
+	if ($time < 86400) {
+		module_register_alarm("timer", "do_timer_alarm", $msg->{'nick'}, $time, $msg);
 		irc_notice($irc, $msg->{'nick'}, "Timer On");
 		return(0);
 	}
