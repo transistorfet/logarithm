@@ -372,7 +372,7 @@ sub irc_parse_msg {
 	}
 	elsif ($cmd eq "TOPIC" or $cmd eq "332") {
 		if ($channel eq $irc->{'nick'}) {
-			$channel = $params[2];
+			$channel = $params[1];
 		}
 		irc_log($irc, $channel, "--- topic: ($channel) $text");
 	}
