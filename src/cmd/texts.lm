@@ -1,0 +1,37 @@
+
+$module_info = {
+	'help' => [
+		"Usage: texts [<search term>]",
+		"Description: Displays the text files website for channel (current if unspecified)"
+	]
+};
+
+sub do_texts {
+	local($irc, $msg, $privs) = @_;
+
+	my ($texts) = channel_get_option($irc->{'channels'}, $msg->{'params'}->[0], "texts", "");
+
+	if ($texts) {
+		$msg->{'text'} =~ /^texts\s*(.+)\s*$/;
+		$search = $1;
+		if ($search) {
+			opendir(DIR, "/home/ftp/pub/texts/") or return(-1);
+			@files = readdir(DIR);
+			closedir(DIR);
+			foreach $file (@files) {
+				if ($file =~ /$search/i) {
+					$file =~ s/ /\%20/g;
+					irc_private_msg($irc, $msg->{'respond'}, "$texts$file");
+				}
+			}
+		}
+		else {
+			irc_private_msg($irc, $msg->{'respond'}, $texts);
+		}
+	}
+	else {
+		irc_notice($irc, $msg->{'nick'}, "Sorry, No Texts For This Channel");
+	}
+	return(0);
+}
+
