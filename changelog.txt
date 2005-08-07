@@ -1,5 +1,7 @@
 
 current		* Changed directory layout
+		* Added automagical definition number to define.lm
+		* Added the 'phrase' field to command messages
 		* Added some minor commands
 		* Added logarithm privalleges to module_execute
 		* Added irc get message queue
