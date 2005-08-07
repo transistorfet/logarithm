@@ -123,7 +123,11 @@ sub run_cmd {
 
 	$msg->{'params'} = [ split(" ", $msg->{'text'}) ];
 	my $cmd = lc(shift(@{ $msg->{'params'} }));
+	$msg->{'cmd'} = $cmd;
+	$msg->{'phrase'} = $msg->{'text'};
+	$msg->{'phrase'} =~ s/^$cmd\s*//;
 	unshift(@{ $msg->{'params'} }, $msg->{'respond'}) unless ($msg->{'params'}->[0] =~ /^\#/);
+
 	my $ret = module_execute($irc, $msg, $cmd);
 	if ($ret == -1) {
 		irc_notice($irc, $msg->{'nick'}, "Sorry, Command Failed");
