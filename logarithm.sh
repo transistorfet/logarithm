@@ -3,5 +3,8 @@
 cd src
 
 while true
-do perl logarithm.pl; done
+do
+	perl logarithm.pl;
+	sleep 15
+done
 
