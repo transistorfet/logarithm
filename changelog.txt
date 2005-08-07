@@ -1,5 +1,6 @@
 
 current		* Changed directory layout
+		* Added some minor commands
 		* Added logarithm privalleges to module_execute
 		* Added irc get message queue
 		* Changed on_join/on_leave command execution

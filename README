@@ -1,6 +1,6 @@
 
-Logarithm 0.5 Perl IRC Bot
-02/06/2004
+Logarithm Perl IRC Bot
+07/08/2005
 
 
 Installing:
