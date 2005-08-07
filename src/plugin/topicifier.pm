@@ -1,4 +1,6 @@
 
+use List::Util;
+
 $module_info = {
 	'help' => [
 		"Description: Automatic topic setter which changes the topic after a certain length of time"
@@ -28,14 +30,17 @@ sub do_topicifier_alarm {
 sub do_topicifier_change_topic {
 	local($irc, $msg) = @_;
 
-	unless (scalar(@{ $topicifier_info{'list'} })) {
-		@{ $topicifier_info{'list'} } = csv_search($msg->{'respond'}, "autotopics.lst", ':', undef);
-		return unless (scalar(@{ $topicifier_info{'list'} }));
-		$i = scalar(@{ $topicifier_info{'list'} });
-		irc_notice($irc, "transistor", "Loaded $i topics");
-	}
+	do_load_topics($msg->{'respond'}) unless (scalar(@{ $topicifier_info{'list'} }));
 
 	my $topic = shift(@{ $topicifier_info{'list'} })->[0];	
 	irc_send_msg($irc, "PRIVMSG chanserv :topic $msg->{'respond'} $topic\n");
+}
+
+sub do_load_topics {
+	local($channel) = @_;
+
+	my @topics = csv_search($channel, "autotopics.lst", ':', undef);
+	return unless (scalar(@topics));
+	@{ $topicifier_info{'list'} } = shuffle(@topics);
 }
 
