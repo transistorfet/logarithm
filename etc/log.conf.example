@@ -6,24 +6,11 @@
 ; logs
 ; join
 
-server=irc.new-wave.net
-#server=buddha.othersideirc.net
-server=irc2.othersideirc.net
-server=irc.madhamster.org
-server=irc.eggheads.org
-server=irc2.fire-com.net
-server=irc.vhirc.us
-server=irc.thefrontnetwords.net
-server=irc.fearthedark.net
-server=toronto.megairc.net
+server=irc.othersideirc.net
 
+nick=logarithm
+password=
 logging=1
-password=
 
-;join=#philosophy
-;join=#kaosabound
-;join=#coffeelounge
-
-nick=logarithm2
-password=
 join=#logarithm
+
