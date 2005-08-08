@@ -1,8 +1,9 @@
 
+	* Fix topic number thing
+	* improve module interface
 	* randomize the list of topics used by topicifier when it loads the list
 	* have a list of recomened readings
 	* if nickserv sends a message like "please identify" then identify
-	* make logging options and stuff based/partially based on regexes?
 	* make log print the names of people in the chan to logs on join (is this the blank line thing)
 	* logarithm prints a blank line in the logs when he joins a channel
 	* update documentation
@@ -16,6 +17,5 @@
 	* Add Line Length Limiter to break up lines longer than the max
 	* Add support for Multiple Hostmasks
 	* Multiserver??
-	* Fix topic number thing
 	* Make audio.lm more general in its search thingy
 
