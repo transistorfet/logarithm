@@ -22,6 +22,7 @@ require Exporter;
 	irc_private_msg
 	irc_action_msg
 	irc_notice
+	irc_identify
 	irc_log
 	irc_set_logging
 	irc_set_log_directory
@@ -46,6 +47,7 @@ my $default_max_tick = 0.5;
 my $irc_trys = 3;
 my $irc_max_flush = 5;
 my $irc_flush_delay = 1;
+my $irc_max_length = 512;
 
 my $irc_time = get_time();
 
@@ -76,7 +78,7 @@ sub irc_connect {
 	return if ($irc->{'connected'});
 
 	return(-1) if (irc_server_connect($irc));
-	irc_send_msg($irc, "NICKSERV :identify $irc->{'password'}\n") if ($irc->{'password'});
+	irc_identify($irc);
 	status_log("Joining Channels...");
 	foreach (channel_list($irc->{'channels'})) {
 		irc_send_msg($irc, "JOIN $_\n");
@@ -133,7 +135,7 @@ sub irc_change_nick {
 sub irc_change_password {
 	local($irc, $password) = @_;
 	$irc->{'password'} = $password;
-	irc_send_msg($irc, "NICKSERV :identify $password\n") if ($password);
+	irc_identify($irc);
 }
 
 sub irc_in_channel {
@@ -183,6 +185,12 @@ sub irc_notice {
 
 	$msg =~ s/(\r|)\n$//;
 	irc_send_msg($irc, "NOTICE $channel :$msg\n");
+}
+
+sub irc_identify {
+	local($irc) = @_;
+
+	irc_send_msg($irc, "NICKSERV :identify $irc->{'password'}\n") if ($irc->{'password'});
 }
 
 sub irc_log {
@@ -356,6 +364,9 @@ sub irc_parse_msg {
 		}
 	}
 	elsif ($cmd eq "NOTICE") {
+		if ($text =~ /please identify/) {
+			irc_identify($irc);
+		}
 		if ($irc->{'connected'}) {
 			status_log("-$nick!$server- $text");
 		}
