@@ -1,5 +1,6 @@
 
 current		* Changed directory layout
+		* Added irc_identify command
 		* Added automagical definition number to define.lm
 		* Added the 'phrase' field to command messages
 		* Added some minor commands
