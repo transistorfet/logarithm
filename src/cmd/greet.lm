@@ -2,7 +2,7 @@
 $module_info = {
 	'help' => [
 		"Usage: greet <msg>",
-		"Description: Sets the greet message when you joins the channel"
+		"Description: Sets the greet message displayed when you join the channel.  Use 'none' to disable."
 	]
 };
 
@@ -16,11 +16,11 @@ sub do_greet {
 	
 	if ($text eq "none") {
 		return(-1) if (channel_delete_option($irc->{'channels'}, $msg->{'channel'}, "greet_$msg->{'nick'}_msg"));
-		irc_notice($irc, $msg->{'nick'}, "Greeting set to $text");
+		irc_notice($irc, $msg->{'nick'}, "Greeting disabled");
 	}
 	else {
 		return(-1) if (channel_set_option($irc->{'channels'}, $msg->{'channel'}, "greet_$msg->{'nick'}_msg", $text));
-		irc_notice($irc, $msg->{'nick'}, "Greeting disabled");
+		irc_notice($irc, $msg->{'nick'}, "Greeting set to $text");
 	}
 }
 
