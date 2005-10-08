@@ -146,7 +146,8 @@ sub user_check_hostmask {
 	local($users, $nick, $mask) = @_;
 	return(-1) if (!defined($users->{$nick}));
 	my ($entry) = csv_search("", "passwd", ':', $nick);
-	return(-1) unless (($entry->[0] eq $nick) and ($mask =~ /\Q$entry->[2]\E/));
+	my $regex = encode_regex($entry->[2]);
+	return(-1) unless (($entry->[0] eq $nick) and ($mask =~ /$regex/));
 	$users->{$nick}->{'authorized'} = 1;
 	return(0);
 }
