@@ -10,7 +10,7 @@ $module_info = {
 sub do_addtopic {
 	local($irc, $msg, $privs) = @_;
 
-	return(-10) if ($privs < channel_get_option($irc->{'channels'}, $msg->{'respond'}, "addtopic_access", 50));
+	return(-10) if ($privs < (channel_get_option($irc->{'channels'}, $msg->{'respond'}, "addtopic_access", 50))[0]);
 	return(-20) if (scalar(@{ $msg->{'params'} }) < 2);
 
 	$msg->{'text'} =~ s/^addtopic\s*//i;

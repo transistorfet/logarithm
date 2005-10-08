@@ -9,7 +9,7 @@ $module_info = {
 sub do_texts {
 	local($irc, $msg, $privs) = @_;
 
-	my ($texts) = channel_get_option($irc->{'channels'}, $msg->{'params'}->[0], "texts", "");
+	my $texts = (channel_get_option($irc->{'channels'}, $msg->{'params'}->[0], "texts", ""))[0];
 
 	if ($texts) {
 		$msg->{'text'} =~ /^texts\s*(.+)\s*$/;

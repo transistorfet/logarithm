@@ -11,7 +11,7 @@ my $logs_prefix = "http://jabberwocky.hn.org/~logarithm/logs.php?channel=";
 sub do_logs {
 	local($irc, $msg, $privs) = @_;
 
-	my $logs = channel_get_option($irc->{'channels'}, $msg->{'params'}->[0], "logs", "");
+	my $logs = (channel_get_option($irc->{'channels'}, $msg->{'params'}->[0], "logs", ""))[0];
 	if ($logs) {
 		irc_private_msg($irc, $msg->{'respond'}, $logs);
 	}

@@ -14,6 +14,6 @@ sub init_greet {
 sub do_greet_chat {
 	local($irc, $msg, $privs) = @_;
 
-	($greet) = channel_get_option($irc->{'channels'}, $msg->{'respond'}, "greet_" . $msg->{'nick'} . "_msg", "");
+	$greet = (channel_get_option($irc->{'channels'}, $msg->{'respond'}, "greet_" . $msg->{'nick'} . "_msg", ""))[0];
 	irc_private_msg($irc, $msg->{'respond'}, $greet) if ($greet);
 }

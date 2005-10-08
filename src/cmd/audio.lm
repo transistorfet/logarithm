@@ -9,7 +9,7 @@ $module_info = {
 sub do_audio {
 	local($irc, $msg, $privs) = @_;
 
-	my ($audio) = channel_get_option($irc->{'channels'}, $msg->{'params'}->[0], "audio", "");
+	my $audio = (channel_get_option($irc->{'channels'}, $msg->{'params'}->[0], "audio", ""))[0];
 
 	if ($audio) {
 		$msg->{'text'} =~ /^audio\s*(.+)\s*$/;

@@ -10,7 +10,7 @@ sub do_greet {
 	local($irc, $msg, $privs) = @_;
 
 	return(-20) unless ($msg->{'channel'} =~ /^\#/);
-	return(-10) if ($privs < channel_get_option($irc->{'channels'}, $msg->{'respond'}, "greet_access", 50));
+	return(-10) if ($privs < (channel_get_option($irc->{'channels'}, $msg->{'respond'}, "greet_access", 50))[0]);
 	$msg->{'text'} =~ /^greet\s*(.+)\s*$/;
 	$text = $1;
 	

@@ -20,3 +20,4 @@ sub do_plugin {
 	irc_notice($irc, $msg->{'nick'}, "Plugin $name loaded successfully");
 	return(0);
 }
+

@@ -16,7 +16,7 @@ sub do_option {
 	return(-10) if (user_get_access($irc->{'users'}, $channel, $msg->{'nick'}) < 300);
 
 	if ($cmd eq "set") {
-		$msg->{'text'} =~ s/(.*?)$option\s*//;
+		$msg->{'text'} =~ s/(.*?)\Q$option\E\s*//;
 		channel_set_option($irc->{'channels'}, $channel, $option, $msg->{'text'});
 		irc_notice($irc, $msg->{'nick'}, "$option Set To $msg->{'text'}");
 	}
@@ -26,14 +26,14 @@ sub do_option {
 		irc_notice($irc, $msg->{'nick'}, "$line");
 	}
 	elsif ($cmd eq "add") {
-		$msg->{'text'} =~ s/(.*?)$option\s*//;
+		$msg->{'text'} =~ s/(.*?)\Q$option\E\s*//;
 		channel_append_to_option($irc->{'channels'}, $channel, $option, $msg->{'text'});
 		my @value = channel_get_option($irc->{'channels'}, $channel, $option);
 		my $line = "$option = (" . join(', ', @value) . ")";
 		irc_notice($irc, $msg->{'nick'}, "$line");
 	}
 	elsif ($cmd eq "remove") {
-		$msg->{'text'} =~ s/(.*?)$option\s*//;
+		$msg->{'text'} =~ s/(.*?)\Q$option\E\s*//;
 		channel_remove_from_option($irc->{'channels'}, $channel, $option, $msg->{'text'});
 		my @value = channel_get_option($irc->{'channels'}, $channel, $option);
 		my $line = "$option = (" . join(', ', @value) . ")";
