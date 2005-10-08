@@ -97,9 +97,9 @@ sub channel_remove_from_option {
 }
 
 sub channel_get_option {
-	local($channels, $channel, $option, $def) = @_;
+	local($channels, $channel, $option, @def) = @_;
 	my $option = lc($option);
-	return($def) unless (defined($channels->{$channel}) and defined($channels->{$channel}->{$option}));
+	return(@def) unless (defined($channels->{$channel}) and defined($channels->{$channel}->{$option}));
 	return(@{ $channels->{$channel}->{$option} });
 }
 
