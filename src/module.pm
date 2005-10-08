@@ -42,7 +42,7 @@ sub module_execute {
 	return(-10) unless (channel_allowed($irc->{'channels'}, $msg->{'respond'}, $script));
 	return(0) unless (module_load($script));
 	if ($msg->{'nick'} eq $irc->{'nick'}) {
-		$privs = channel_get_option($irc->{'channels'}, $msg->{'respond'}, "say_access", 200);
+		$privs = (channel_get_option($irc->{'channels'}, $msg->{'respond'}, "say_access", 200))[0];
 	}
 	else {
 		$privs = user_get_access($irc->{'users'}, $msg->{'respond'}, $msg->{'nick'});
@@ -69,7 +69,7 @@ sub module_execute_chats {
 
 	foreach $key (keys(%chats)) {
 		if (($chats{$key}->{'channel'} eq "") or ($chats{$key}->{'channel'} eq $msg->{'channel'})) {
-			if (($chats{$key}->{'cmds'} eq "") or ($msg->{'cmd'} =~ /$chats{$key}->{'cmds'}/)) {
+			if (($chats{$key}->{'cmds'} eq "") or ($msg->{'cmd'} =~ /\Q$chats{$key}->{'cmds'}\E/)) {
 				module_execute($irc, $msg, $chats{$key}->{'script'}, $chats{$key}->{'func'});
 			}
 		}
@@ -141,7 +141,7 @@ sub module_alias {
 sub module_unalias {
 	local($alias) = @_;
 
-	return(1) if ($modules{$alias}->{'file'} =~ /$alias/i);
+	return(1) if ($modules{$alias}->{'file'} =~ /\Q$alias\E/i);
 	delete($modules{$alias});
 	return(0);
 }
