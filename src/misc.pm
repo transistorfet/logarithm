@@ -7,7 +7,7 @@
 package misc;
 require Exporter;
 @ISA 	= qw(Exporter);
-@EXPORT = qw(status_log strip_return strip_colour get_time);
+@EXPORT = qw(status_log encode_regex strip_return strip_colour get_time);
 
 
 ### MISC.PM START ###
@@ -23,6 +23,13 @@ sub status_log {
 	print STATUS "$msg\n";
 	close(STATUS);
 	return(0);
+}
+
+sub encode_regex {
+	local($str) = @_;
+	$str =~ s/(\\|\/|\^|\.|\~|\@|\$|\||\(|\)|\[|\]|\+|\?|\{|\})/\\$1/g;
+	$str =~ s/\*/\.\*/g;
+	return($str);
 }
 
 sub strip_return {
