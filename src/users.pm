@@ -31,6 +31,7 @@ require Exporter;
 ### USERS.PM START ###
 
 use csv;
+use misc;
 
 sub user_create {
 	return({ });
