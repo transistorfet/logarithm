@@ -31,7 +31,6 @@ require Exporter;
 ### USERS.PM START ###
 
 use csv;
-use misc;
 
 sub user_create {
 	return({ });
@@ -147,8 +146,7 @@ sub user_check_hostmask {
 	local($users, $nick, $mask) = @_;
 	return(-1) if (!defined($users->{$nick}));
 	my ($entry) = csv_search("", "passwd", ':', $nick);
-	my $regex = encode_regex($entry->[2]);
-	return(-1) unless (($entry->[0] eq $nick) and ($mask =~ /$regex/));
+	return(-1) unless (($entry->[0] eq $nick) and ($mask =~ /\Q$entry->[2]\E/));
 	$users->{$nick}->{'authorized'} = 1;
 	return(0);
 }
