@@ -47,7 +47,7 @@ sub main_loop {
 			}
 		}
 		elsif ($msg->{'cmd'} eq "KICK") {
-			if ($msg->{'msg'}->[1] =~ /$irc->{'nick'}/i) {
+			if ($msg->{'msg'}->[1] =~ /\Q$irc->{'nick'}\E/i) {
 				irc_leave_channel($irc, $msg->{'channel'});
 				irc_join_channel($irc, $msg->{'channel'});
 			}
@@ -62,20 +62,20 @@ sub main_loop {
 sub parse_cmd {
 	local($irc, $msg) = @_;
 
-	my $lead = channel_get_option($irc->{'channels'}, $msg->{'respond'}, "command_designator", "!");
-	$msg->{'text'} =~ s/^$lead//;
+	my $lead = (channel_get_option($irc->{'channels'}, $msg->{'respond'}, "command_designator", "!"))[0];
+	$msg->{'text'} =~ s/^\Q$lead\E//;
 	run_cmd($irc, $msg);
 }
 
 sub parse_chat {
 	local($irc, $msg) = @_;
 
-	my $lead = channel_get_option($irc->{'channels'}, $msg->{'respond'}, "command_designator", "!");
-	if ($msg->{'text'} =~ /^(hi|hey|hello) $irc->{'nick'}/i) {
+	my $lead = (channel_get_option($irc->{'channels'}, $msg->{'respond'}, "command_designator", "!"))[0];
+	if ($msg->{'text'} =~ /^(hi|hey|hello) \Q$irc->{'nick'}\E/i) {
 		irc_private_msg($irc, $msg->{'respond'}, "hello $msg->{'nick'}");
 	}
-	elsif ($msg->{'text'} =~ /^$lead/) {
-		$msg->{'text'} =~ s/^$lead//;
+	elsif ($msg->{'text'} =~ /^\Q$lead\E/) {
+		$msg->{'text'} =~ s/^\Q$lead\E//;
 		run_cmd($irc, $msg);
 	}
 	return(0);
@@ -125,7 +125,7 @@ sub run_cmd {
 	my $cmd = lc(shift(@{ $msg->{'params'} }));
 	$msg->{'cmd'} = $cmd;
 	$msg->{'phrase'} = $msg->{'text'};
-	$msg->{'phrase'} =~ s/^$cmd\s*//;
+	$msg->{'phrase'} =~ s/^\Q$cmd\E\s*//;
 	unshift(@{ $msg->{'params'} }, $msg->{'respond'}) unless ($msg->{'params'}->[0] =~ /^\#/);
 
 	my $ret = module_execute($irc, $msg, $cmd);
