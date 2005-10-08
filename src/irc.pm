@@ -364,8 +364,10 @@ sub irc_parse_msg {
 		}
 	}
 	elsif ($cmd eq "NOTICE") {
-		if ($text =~ /please identify/) {
+		if ($nick =~ /NickServ/i and $text =~ /please identify/) {
 			irc_identify($irc);
+			status_log("-$nick!$server- $text");
+			status_log("Identifying...");
 		}
 		if ($irc->{'connected'}) {
 			status_log("-$nick!$server- $text");
@@ -457,7 +459,7 @@ sub irc_end_logs {
 
 sub irc_open_logs {
 	local($irc, $channel, $time) = @_;
-	if ($irc->{'connected'} and channel_get_option($irc->{'channels'}, $channel, "log_enable", $irc->{'log_enable'})) {
+	if ($irc->{'connected'} and (channel_get_option($irc->{'channels'}, $channel, "log_enable", $irc->{'log_enable'}))[0]) {
 		$channel =~ s/#//;
 		mkdir "$irc->{'logdir'}/$channel" if (!(-e "$irc->{'logdir'}/$channel"));
 		$file = sprintf("$irc->{'logdir'}/$channel/%02d-%02d-%02d.txt", $time->{'year'}, $time->{'month'}, $time->{'day'});
