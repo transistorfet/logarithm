@@ -1,0 +1,30 @@
+#
+# Command Name:	8ball.lm
+# Version:	0.1
+# Author:	kaos havoc
+# Package:	8ball
+#
+
+$module_info = 
+	{	
+	'help' =>[
+		"Ask me any question and the answer is yours.",
+		"Just type !8ball <Your question here>"
+		 ]
+        };
+
+sub do_8ball
+        {
+                local($irc, $msg, $privs) = @_;
+                if($msg->{'params'}->[1])
+		{
+			my @answers = csv_search($msg->{'respond'}, '8ball.lst', ':',undef);
+                	$ln = int(rand(scalar(@answers)));
+                	my $answer = $answers[$ln]->[1];
+			$answer = strip_return($answer);
+                	$answer =~ s/^\s*//;
+			irc_private_msg($irc, $msg->{'respond'}, $answer);
+		}
+		return(0);
+        }
+
