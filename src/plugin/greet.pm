@@ -1,5 +1,5 @@
 #
-# Command Name:	greet.pm
+# Plugin Name:	greet.pm
 # Version:	0.1
 # Package:	Greet
 #

@@ -1,5 +1,5 @@
 #
-# Command Name:	urler.pm
+# Plugin Name:	urler.pm
 # Version:	0.1
 # Package:	Urler
 #

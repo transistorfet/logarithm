@@ -1,5 +1,5 @@
 #
-# Command Name:	topicifier.pm
+# Plugin Name:	topicifier.pm
 # Version:	0.1
 # Package:	Topicifier
 #
