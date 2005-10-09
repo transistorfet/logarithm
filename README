@@ -1,27 +1,27 @@
 
 Logarithm Perl IRC Bot
-07/08/2005
+Last Updated: 09/10/2005
 
 
 Installing:
-	To install, uncompress the core code into a directory of your choice which
-	will create a sub-directory called logarithm with the code.  Uncompress any
-	optional modules inside this logarithm directory.  By default, logs will be
-	kept in a directory called logs in the directory containing the logarithm
-	sub-directory.
+	To install, uncompress the core code into a directory of your choice or
+	cvs checkout logarithm which will create a sub-directory called logarithm
+	with the code.  Uncompress any optional modules inside this logarithm
+	directory.  By default, logs will be kept in a directory called logs in
+	the directory containing the logarithm sub-directory.
 
 	Modify the logarithm/etc/log.conf file to set the nick, nickserv password,
 	list of irc servers, and any additional settings you wish to specify.
 	Modify the logarithm/etc/access file to contain a line with your nick
 	followed by a colon and the number 500 (enabling all possible commands for
 	your nick).  Once you start logarithm for the first time, you must run the
-	register command on your nick in order to access any functions.
+	register command on your nick in order to access any functions using a
+	command like /msg <botname> register <password>.
 
 Running:
-	To run, cd to the logarithm directory and type
-		perl logarithm.pl
-	The bot will print the status and while connected, echo the chat messages it
-	receives.
+	To run, cd to the logarithm directory and either run the unix shell script,
+	logarithm.sh or directly with the command "perl logarithm.pl".  The bot will
+	print the status and while connected, echo the chat messages it receives.
 
 Using:
 	Logarithm will automatically log all the chat messages in the channels which
@@ -42,20 +42,23 @@ Using:
 	by irc'ing from the location specified in your hostmask or the user will
 	have an access of 0.  The hostmask can be specified using the user command.
 
-	Access number are divided into 6 groups.  Users with an access level of 0
+	Access number are divided into 6 ranges (this can be changed by using the
+	access overrides or by modifying directly).  Users with an access level of 0
 	can run all of the unprivalleged commands such as access, help, id, register,
 	and user.  Users with an access of 50-299 are privalleged users and can
-	run the say and me commands (200) as well as the commands in the optional
-	modules.  The access levels required for specific commands can be specifed
+	run the say and me commands (200) as well as the basic commands such as date,
+	fortune, define, topic (all 50).  (Note: these commands require an access
+	level of 50 in order to avoid possible abuse and distruption with them).
+	The access levels required for specific commands can be specifed
 	on a per-channel basis using the option command.  Channel admins have a level
 	of 300 and are able to use the option command to change the options for a
-	channel.  Privalleged channel admins have an access of 350 and can run the
+	channel.  Privileged channel admins have an access of 350 and can run the
 	add, del, and mod commands to control the access list for the channel.  A
 	level greater than that of the user controlling access cannot be set.
 	A user with access level of 450 is a Logarithm admin and can run the join
 	and leave commands to make logarithm join and leave channels.  A level of
 	500 can use the bye command which causes logarithm to terminate.  Only one
-	person (you) should have this level.
+	person (the owner of the bot) should have this level.
 
 Options:
 	Commands can be allowed or denied for each channel using the options.  By
@@ -67,12 +70,31 @@ Options:
 	The commands which can use a variable access level will check for an option
 	named '<command>_access' and use the value as the access level.
 
+Plugins:
+	Plugins must be activated on a per-channel basis.  This is done using the
+	plugin command.  Once a plugin is activated, it cannot be unloaded.
+
+	greet
+		This plugin will print a greeting to specific users when they join
+		the channel.  The message is set by the user using the !greet command.
+
+	topicifier
+		When this plugin is activated, the channel topic will be changed to
+		a new topic selected at random from a list of topics specified using
+		the chantopic command.  Each topic will be cycled through before being
+		repeating.
+
+	urler
+		All urls sent to the channel will be logged seperately when this plugin
+		is running.  The list is accessible through the web using the urls.php
+		webpage.
 
 Commands:
 	All commands can either be sent to logarithm as a private message or sent to
 	the channel occupied by logarithm with a special prefix append to the command
 	name.  Certain commands will assume the channel is the current channel if
-	one is not provided.  The prefix is '!' by default but can be changed later.
+	one is not provided.  The prefix is '!' by default but can be changed using
+	the 'command_designator' channel option.
 
 	access [<channel>] [<nick>]
 		Outputs the access granted to the nick for the specified channel.  If
@@ -85,13 +107,15 @@ Commands:
 		specified access level.
 
 	bye
-		Terminate logarithm.
+		Terminate logarithm.  If the logarithm.sh script is being used, logarithm
+		will restart after 15 seconds so this acts more like a reboot command.
 
 	del [<channel>] <nick>
 		Delete the nick from the access list for the specified channel.
 
-	help
-		Print a list of commands available to the current channel
+	help [<command>]
+		Print a list of commands available to the current channel.  If a
+		command is given, the detailed help for that command will be displayed.
 
 	id <password>
 		Identify yourself to logarithm.
