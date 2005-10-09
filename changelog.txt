@@ -9,6 +9,9 @@ current		* Changed directory layout
 		* Changed on_join/on_leave command execution
 		* Added plugin feature
 		* Added formatted logs php page
+		* Fixed greet command text
+		* Fixed channel_get_option to always return an array
+		* Added comment blocks to commands and plugins
 
 0.6		* Changed channel options to use only arrays of values
 		* Added csv.pm

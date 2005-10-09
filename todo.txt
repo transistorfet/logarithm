@@ -1,23 +1,23 @@
 
-	* Fix topic number thing
-	* improve module interface
+	* when you /msg logarithm topics it says command failed (because topics are channel specific)
+	* if logs= (in log.conf) is not specified, / will be used
+
+	* messages system so that people can leave others messages (maybe autoprint on join + access commands)
+	* uno function game thingie
 	* have a list of recomened readings
-	* make log print the names of people in the chan to logs on join (is this the blank line thing)
-	* logarithm prints a blank line in the logs when he joins a channel
-	* update documentation
-	* add autodoc tags?
-	* finish implementing timer.lm
 	* Quote feature
 	* Signifigant events list (?)
+
+	* Check to see if the channel allow/deny thing is slowing down command execution.
+	* Fix topic number thing
+	* improve module interface
+	* add autodoc tags?
+	* finish implementing timer.lm
+	* Added date specifier to search page to limit the range of the search
 	* Make the php search page nicer/quicker/etc
-	* Line delimiter compatability (Special functions in some common module)
-	* Convert variables for use in regex's
 	* Add Line Length Limiter to break up lines longer than the max
 	* Add support for Multiple Hostmasks
 	* Multiserver??
 	* Make audio.lm more general in its search thingy
 
-Test:
-	* randomize the list of topics used by topicifier when it loads the list
-	* if nickserv sends a message like "please identify" then identify
 
