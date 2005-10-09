@@ -1,8 +1,13 @@
+#
+# Command Name:	list.lm
+# Version:	0.1
+# Package:	Core
+#
 
 $module_info = {
 	'help' => [
-		"Usage: access [[<channel>] <nick>]",
-		"Description: Returns the access level of nick (you if unspecified) in channel (current if unspecified)"
+		"Usage: list",
+		"Description: Lists all the channels currently joined"
 	]
 };
 

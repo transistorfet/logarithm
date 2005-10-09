@@ -1,3 +1,8 @@
+#
+# Command Name:	greet.pm
+# Version:	0.1
+# Package:	Greet
+#
 
 $module_info = {
 	'help' => [

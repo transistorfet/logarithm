@@ -1,3 +1,8 @@
+#
+# Command Name:	website.lm
+# Version:	0.1
+# Package:	Links
+#
 
 $module_info = {
 	'help' => [

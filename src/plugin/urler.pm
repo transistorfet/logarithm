@@ -1,3 +1,8 @@
+#
+# Command Name:	urler.pm
+# Version:	0.1
+# Package:	Urler
+#
 
 $module_info = {
 	'help' => [

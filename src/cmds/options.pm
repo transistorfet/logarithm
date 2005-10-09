@@ -1,3 +1,8 @@
+#
+# Command Name:	option.lm
+# Version:	0.1
+# Package:	Core
+#
 
 $module_info = {
 	'help' => [

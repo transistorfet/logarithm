@@ -1,3 +1,8 @@
+#
+# Command Name:	search.lm
+# Version:	0.1
+# Package:	Links
+#
 
 $module_info = {
 	'help' => [
@@ -12,7 +17,7 @@ sub do_search {
 	$website = "http://jabberwocky.hn.org/~logarithm";
 
 	return(-20) if (scalar(@{ $msg->{'params'} }) < 2);
-	$msg->{'text'} =~ /^search\s*(.+)\s*$/;
+	$msg->{'phrase'} =~ /^\s*(.+)\s*$/;
 	$phrase = $1;
 	$phrase =~ s/ /\+/g;
 	$channel = $msg->{'respond'};

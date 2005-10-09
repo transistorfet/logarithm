@@ -1,3 +1,8 @@
+#
+# Command Name:	topicifier.pm
+# Version:	0.1
+# Package:	Topicifier
+#
 
 $module_info = {
 	'help' => [

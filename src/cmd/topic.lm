@@ -1,3 +1,8 @@
+#
+# Command Name:	topic.lm
+# Version:	0.1
+# Package:	Topics
+#
 
 $module_info = {
 	'help' => [

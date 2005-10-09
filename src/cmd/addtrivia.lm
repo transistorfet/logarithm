@@ -1,3 +1,8 @@
+#
+# Command Name:	addtrivia.lm
+# Version:	0.1
+# Package:	Trivia
+#
 
 $module_info = {
 	'help' => [

@@ -1,3 +1,8 @@
+#
+# Command Name:	random.lm
+# Version:	0.1
+# Package:	Misc
+#
 
 $module_info = {
 	'help' => [

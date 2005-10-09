@@ -1,3 +1,8 @@
+#
+# Command Name:	deldefine.lm
+# Version:	0.1
+# Package:	Definitions
+#
 
 $module_info = {
 	'help' => [
@@ -12,13 +17,13 @@ sub do_deldefine {
 	return(-10) if ($privs < (channel_get_option($irc->{'channels'}, $msg->{'respond'}, "deldefine_access", 100))[0]);
 	return(-20) if (scalar(@{ $msg->{'params'} }) < 2);
 
-	$msg->{'text'} =~ /^deldefine\s*(.+)\s*$/;
-	$msg->{'text'} = lc($1);
-	if (csv_remove($msg->{'respond'}, "defines.lst", "\t", $msg->{'text'})) {
-		irc_notice($irc, $msg->{'nick'}, "Error deleting $msg->{'text'}");
+	$msg->{'phrase'} =~ /^\s*(.+)\s*$/;
+	$phrase = lc($1);
+	if (csv_remove($msg->{'respond'}, "defines.lst", "\t", $phrase)) {
+		irc_notice($irc, $msg->{'nick'}, "Error deleting $phrase");
 	}
 	else {
-		irc_notice($irc, $msg->{'nick'}, "$msg->{'text'} Deleted");
+		irc_notice($irc, $msg->{'nick'}, "$phrase Deleted");
 	}
 	return(0);
 }

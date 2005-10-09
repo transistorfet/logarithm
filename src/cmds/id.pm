@@ -1,3 +1,8 @@
+#
+# Command Name:	id.lm
+# Version:	0.1
+# Package:	Users
+#
 
 $module_info = {
 	'help' => [

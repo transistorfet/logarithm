@@ -1,3 +1,8 @@
+#
+# Command Name:	chantopic.lm
+# Version:	0.1
+# Package:	Topicifier
+#
 
 $module_info = {
 	'help' => [
