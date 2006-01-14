@@ -168,6 +168,7 @@ sub irc_private_msg {
 	local($irc, $channel, $msg) = @_;
 
 	$msg =~ s/(\r|)\n$//;
+	return if ($msg =~ /^\~/);
 	irc_send_msg($irc, "PRIVMSG $channel :$msg\n");
 	irc_log($irc, $channel, "<$irc->{'nick'}> $msg");
 }
@@ -343,8 +344,7 @@ sub irc_flush_queue {
 
 	my $sock = $irc->{'sock'};
 	for (1..$size) {
-		my $line = shift(@{ $irc->{'send_queue'} });
-		print $sock $line unless ($line =~ /^\~/);
+		print $sock shift(@{ $irc->{'send_queue'} });
 	}
 	$irc->{'flush_count'} += $size;
 	return(0);
