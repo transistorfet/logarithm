@@ -275,6 +275,7 @@ sub irc_init_connection {
 			$irc->{'connected'} = 1;
 			return(0);
 		}
+		# TODO add time check and abort if we don't recevie a response within 30s-1min
 	} while (!($msg->{'cmd'} eq -1));
 	status_log("Failed to Initialize");
 	return(-1);
@@ -342,7 +343,8 @@ sub irc_flush_queue {
 
 	my $sock = $irc->{'sock'};
 	for (1..$size) {
-		print $sock shift(@{ $irc->{'send_queue'} });
+		my $line = shift(@{ $irc->{'send_queue'} });
+		print $sock $line unless ($line =~ /^\~/);
 	}
 	$irc->{'flush_count'} += $size;
 	return(0);
