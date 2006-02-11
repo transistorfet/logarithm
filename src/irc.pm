@@ -248,7 +248,7 @@ sub irc_server_connect {
 		for $i (0..$#{ $irc->{'servers'} }) {
 			status_log("Connecting to $irc->{'servers'}->[$i]...");
 			for (1..$irc_trys) {
-				if ($sock = IO::Socket::INET->new(PeerAddr => $irc->{'servers'}->[$i], PeerPort => 6667, Proto => 'tcp')) {
+				if ($sock = IO::Socket::INET->new(PeerAddr => $irc->{'servers'}->[$i], PeerPort => 6667, Proto => 'tcp', Timeout => 30)) {
 					$irc->{'sock'} = $sock;
 					print $sock "NICK $irc->{'nick'}\n";
 					print $sock "USER $irc->{'nick'} 0 0 :The Bot\n";
