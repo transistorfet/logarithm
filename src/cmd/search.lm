@@ -14,7 +14,7 @@ $module_info = {
 sub do_search {
 	local($irc, $msg, $privs) = @_;
 
-	$website = "http://jabberwocky.hn.org/~logarithm";
+	$website = "http://jabberwocky.ca/~logarithm";
 
 	return(-20) if (scalar(@{ $msg->{'params'} }) < 2);
 	$msg->{'phrase'} =~ /^\s*(.+)\s*$/;

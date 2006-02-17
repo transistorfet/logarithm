@@ -11,7 +11,7 @@ $module_info = {
 	]
 };
 
-my $logs_prefix = "http://jabberwocky.hn.org/~logarithm/logs.php?channel=";
+my $logs_prefix = "http://jabberwocky.ca/~logarithm/logs.php?channel=";
 
 sub do_logs {
 	local($irc, $msg, $privs) = @_;
