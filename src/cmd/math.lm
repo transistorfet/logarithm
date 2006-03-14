@@ -7,13 +7,13 @@
 $module_info = {
 	'help' => [
 		"Usage: math <math expression>",
-		"Description: Calculates the answer to simple math equations containing the operations +, -, *, /, cos, sin, abs, sqrt, exp, log, hex, oct, int, and $pi"
+		"Description: Calculates the answer to simple math equations containing the operations +, -, *, /, cos, sin, abs, sqrt, exp, log, hex, oct, and int. The variables $pi and $ans can also be used."
 	]
 };
 
 $math_data = {
 	'ans' => 0
-}
+};
 
 sub do_math {
 	local($irc, $msg, $privs) = @_;
@@ -22,7 +22,6 @@ sub do_math {
 	$pi = 3.141592653589793238462643383279502884197169399375105;
 	$msg->{'text'} =~ s/math //i;
 	if ($msg->{'text'} =~ /^(\(|\)|\+|-|\*|\/|\$pi|\$ans|cos|sin|abs|sqrt|exp|hex|oct|int|log|0x(\d|a|b|c|d|e|f)+|\d|\.|\s)*$/) {
-		my $ans = 0;
 		$equation = '$ans = ' . $msg->{'text'} . ';';
 		return(-1) unless (defined(eval "$equation"));
 		irc_private_msg($irc, $msg->{'respond'}, "The answer is: $ans");
