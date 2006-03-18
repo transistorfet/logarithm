@@ -1,5 +1,7 @@
 
-current		* Changed directory layout
+v0.7:
+		* Modified irc.pm to change the nick if it's in use when connecting
+		* Changed directory layout
 		* Added irc_identify command
 		* Added automagical definition number to define.lm
 		* Added the 'phrase' field to command messages
@@ -13,7 +15,8 @@ current		* Changed directory layout
 		* Fixed channel_get_option to always return an array
 		* Added comment blocks to commands and plugins
 
-0.6		* Changed channel options to use only arrays of values
+v0.6
+		* Changed channel options to use only arrays of values
 		* Added csv.pm
 		* Added the module_set_help function to module.pm
 		* Added check for hostmask on command request
@@ -33,7 +36,8 @@ current		* Changed directory layout
 		* Added Auto-Topic changing command
 		* Added On Join command execution
 
-v0.5		* Changed module_register_chat to allow a channel to specified
+v0.5
+		* Changed module_register_chat to allow a channel to specified
 		* Changed module_register_alarm to allow more than one alarm per
 		  function
 		* Added channel.pm
@@ -44,10 +48,12 @@ v0.5		* Changed module_register_chat to allow a channel to specified
 		* Added flood protection
 		* Fixed logging of mode command
 
-v0.4		* Completely rewrote old code (called v0.3 since it was the 3rd
+v0.4
+		* Completely rewrote old code (called v0.3 since it was the 3rd
 		  major rewrite since logarithm was first written despite the fact
 		  that no version numbers were assigned previously)
 
-v0.1 - v0.3	* Initial re-writes and bugfixed from initial writing 28-11-2002 to
+v0.1 - v0.3
+		* Initial re-writes and bugfixed from initial writing 28-11-2002 to
 		  version 0.4 re-write 08-11-2003.
 

@@ -1,8 +1,14 @@
 
+	* when logarithm doesn't come back after a disconnect it is because it is trying to reconnect
+	  but hangs for some reason so find the reason and fix it!
 	* when you /msg logarithm topics it says command failed (because topics are channel specific)
 	* if logs= (in log.conf) is not specified, / will be used
 
+	* a command that randomly prints something from one of the site blogs?
+	* french plugin for #french that greets and chats with people in french (possibly french trivia/word
+	  testing) as well as a french dictionary.
 	* messages system so that people can leave others messages (maybe autoprint on join + access commands)
+	  (this is like memoserv so is it needed?)
 	* uno function game thingie
 	* have a list of recomened readings
 	* Quote feature
@@ -13,7 +19,7 @@
 	* improve module interface
 	* add autodoc tags?
 	* finish implementing timer.lm
-	* Added date specifier to search page to limit the range of the search
+	* Add date specifier to search page to limit the range of the search
 	* Make the php search page nicer/quicker/etc
 	* Add Line Length Limiter to break up lines longer than the max
 	* Add support for Multiple Hostmasks
