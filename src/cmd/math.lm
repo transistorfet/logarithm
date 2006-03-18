@@ -7,7 +7,7 @@
 $module_info = {
 	'help' => [
 		"Usage: math <math expression>",
-		"Description: Calculates the answer to simple math equations containing the operations +, -, *, /, cos, sin, abs, sqrt, exp, log, hex, oct, and int. The variables $pi and $ans can also be used."
+		"Description: Calculates the answer to simple math equations containing the operations +, -, *, /, cos, sin, abs, sqrt, exp, log, hex, oct, and int. The variables \$pi and \$ans can also be used."
 	]
 };
 
