@@ -276,6 +276,11 @@ sub irc_init_connection {
 			$irc->{'connected'} = 1;
 			return(0);
 		}
+		elsif ($msg->{'cmd'} eq "433") {
+			$irc->{'nick'} = "$irc->{'nick'}_";
+			status_log("Nick in use.  Changing to $irc->{'nick'}");
+			print $sock "NICK $irc->{'nick'}\n";
+		}
 		# TODO add time check and abort if we don't recevie a response within 30s-1min
 	} while (!($msg->{'cmd'} eq -1));
 	status_log("Failed to Initialize");
