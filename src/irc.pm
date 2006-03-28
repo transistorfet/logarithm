@@ -281,6 +281,10 @@ sub irc_init_connection {
 			status_log("Nick in use.  Changing to $irc->{'nick'}");
 			print $sock "NICK $irc->{'nick'}\n";
 		}
+		elsif ($msg->{'cmd'} eq "ERROR") {
+			status_log("Received error on connect ($msg->{'text'}).  Aborting.");
+			return(-1);
+		}
 		# TODO add time check and abort if we don't recevie a response within 30s-1min
 	} while (!($msg->{'cmd'} eq -1));
 	status_log("Failed to Initialize");
@@ -298,11 +302,11 @@ sub irc_read_msg {
 	if ($irc->{'connected'}) {
 		return({ 'cmd' => "TICK" }) if (!($num = select($rin, undef, undef, $irc->{'tick'})));
 	}
-	return({ 'cmd' => "ERROR" }) if (!($line = <$sock>) || ($line =~ /^ERROR/));
+	return({ 'cmd' => "ERROR", 'text' => $line }) if (!($line = <$sock>) || ($line =~ /^ERROR/));
 
 	#print $line;
 	if ($line =~ /^PING/) {
-		$line =~ s/PING/PONG/;
+		$line =~ s/PING/PONG/i;
 		print $sock "$line";
 		return({ 'cmd' => "PING", 'nick' => "", 'server' => "", 'channel' => $irc->{'nick'}, 'respond' => $irc->{'nick'}, 'msg' => "", 'text' => "" });
 	}
@@ -349,6 +353,7 @@ sub irc_flush_queue {
 
 	my $sock = $irc->{'sock'};
 	for (1..$size) {
+		#print $irc->{'send_queue'}->[0];
 		print $sock shift(@{ $irc->{'send_queue'} });
 	}
 	$irc->{'flush_count'} += $size;
