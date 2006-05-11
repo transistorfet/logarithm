@@ -9,7 +9,7 @@ use channels;
 ##### SCRIPT VARIABLES #####
 
 my $time_ping = time();
-my $ping_timeout = 1200;
+my $ping_timeout = 900;
 my $irc_connection = irc_create();
 
 ##### MAIN START #####
