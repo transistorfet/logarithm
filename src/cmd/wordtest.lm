@@ -79,13 +79,15 @@ sub do_wordtest_chat {
 
 	return(0) unless (exists($wordtest{$msg->{'respond'}}));
 
-	local($answer) = lc($wordtest{$msg->{'respond'}}->{'answer'});
-	if (lc($msg->{'text'}) =~ /$answer/) {
-		$score = wordtest_score($msg->{'respond'}, $msg->{'nick'});
-		irc_private_msg($irc, $msg->{'respond'}, "Correct $msg->{'nick'}!  Your Score Is Now $score");
-		module_reset_alarm("wordtest", "do_wordtest_alarm", $msg->{'respond'});
-		sleep 1;
-		wordtest_next_question($irc, $msg);
+	foreach $answer ($wordtest{$msg->{'respond'}}->{'answers'}) {
+		if ($msg->{'text'} =~ /^$answer$/i) {
+			$score = wordtest_score($msg->{'respond'}, $msg->{'nick'});
+			irc_private_msg($irc, $msg->{'respond'}, "Correct $msg->{'nick'}!  Your Score Is Now $score");
+			module_reset_alarm("wordtest", "do_wordtest_alarm", $msg->{'respond'});
+			sleep 1;
+			wordtest_next_question($irc, $msg);
+			last;
+		}
 	}
 }
 
@@ -113,7 +115,8 @@ sub wordtest_next_question {
 		$ln = rand(scalar(@{ $wordtest{$msg->{'respond'}}->{'words'} }));
 		$question = $wordtest{$msg->{'respond'}}->{'words'}->[$ln];
 		splice(@{ $wordtest{$msg->{'respond'}}->{'words'} }, $ln, 1);
-		($question, $wordtest{$msg->{'respond'}}->{'answer'}) = split(/\*/, $question);
+		($question, $answers) = split(/\*/, $question);
+		$wordtest{$msg->{'respond'}}->{'answers'} = [ split(",", $answers) ];
 		irc_private_msg($irc, $msg->{'respond'}, $question);
 	}
 }
@@ -128,7 +131,7 @@ sub wordtest_load_questions {
 		$file = "../etc/wordtest.lst";
 	}
 	open(FILE, $file) or return(0);
-	$wordtest{$channel} = { 'words' => [ ], 'scores' => [ ], 'answer' => "", 'time' => 60, 'count' => 0, 'max' => 0 };
+	$wordtest{$channel} = { 'words' => [ ], 'scores' => [ ], 'answers' => "", 'time' => 60, 'count' => 0, 'max' => 0 };
 	while (<FILE>) {
 		if (/\*/) {
 			s/(\r|)\n$//;
