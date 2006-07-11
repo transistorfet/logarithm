@@ -1,0 +1,171 @@
+#
+# Command Name:	wordtest.lm
+# Version:	0.1
+# Package:	Timer
+#
+
+$module_info = {
+	'help' => [
+		"Usage: wordtest on|off [<language>]",
+		"Description: Activates the word test game which runs for a sequence of 20 words or until !wordtest stop is said"
+	]
+};
+
+my $wordtest_started = 0;
+my %wortest = ( );
+
+sub do_wordtest {
+	local($irc, $msg, $privs) = @_;
+
+	return(-10) if ($privs < channel_get_option($irc->{'channels'}, $msg->{'respond'}, "wordtest_access", 50));
+	if ($msg->{'params'}->[1] eq "on") {
+		do_wordtest_on($irc, $msg, $privs);
+	}
+	elsif ($msg->{'params'}->[1] eq "off") {
+		do_wordtest_off($irc, $msg, $privs);
+	}
+	return(0);
+}
+
+sub do_wordtest_on {
+	local($irc, $msg, $privs) = @_;
+
+	if (exists($wordtest{$msg->{'respond'}})) {
+		irc_private_msg($irc, $msg->{'respond'}, "Already Started");
+		return(0);
+	}
+
+	if (wordtest_load_questions($msg->{'respond'}, $msg->{'params'}->[2])) {
+		module_register_chat("wordtest", "do_wordtest_chat", $msg->{'respond'}, "PRIVMSG");
+		module_register_alarm("wordtest", "do_wordtest_alarm", $msg->{'respond'}, $wordtest{$msg->{'respond'}}->{'time'}, $msg);
+		$wordtest{$msg->{'respond'}}->{'scores'} = [ ];
+		$wordtest{$msg->{'respond'}}->{'count'} = 0;
+		wordtest_next_question($irc, $msg);
+		$wordtest_started++;
+	}
+	else {
+		irc_private_msg($irc, $msg->{'respond'}, "I Can't Find The Questions! =(");
+	}
+}
+
+sub do_wordtest_off {
+	local($irc, $msg, $privs) = @_;
+
+	return(0) unless (exists($wordtest{$msg->{'respond'}}));
+
+	if (@scores = wordtest_high_scores($msg->{'respond'})) {
+		if (scalar(@scores) == 1) {
+			irc_private_msg($irc, $msg->{'respond'}, "$scores[0]->{'nick'} Is The Winner With $scores[0]->{'score'}!");
+		}
+		else {
+			$nicks = "$scores[0]->{'nick'}";
+			for $i (1..$#scores) {
+				$nicks = "$nicks, $scores[$i]->{'nick'}";
+			}
+			irc_private_msg($irc, $msg->{'respond'}, "Its A Tie Between $nicks With $scores[0]->{'score'}!");
+		}
+	}
+	delete($wordtest{$msg->{'respond'}});
+
+	if (--$wordtest_started == 0) {
+		module_unregister_chat("wordtest", "do_wordtest_chat", $msg->{'respond'}, "PRIVMSG");
+		module_unregister_alarm("wordtest", "do_wordtest_alarm", $msg->{'respond'});
+		irc_private_msg($irc, $msg->{'respond'}, "K Bye!");
+	}
+}
+
+sub do_wordtest_chat {
+	local($irc, $msg, $privs) = @_;
+
+	return(0) unless (exists($wordtest{$msg->{'respond'}}));
+
+	local($answer) = lc($wordtest{$msg->{'respond'}}->{'answer'});
+	if (lc($msg->{'text'}) =~ /$answer/) {
+		$score = wordtest_score($msg->{'respond'}, $msg->{'nick'});
+		irc_private_msg($irc, $msg->{'respond'}, "Correct $msg->{'nick'}!  Your Score Is Now $score");
+		module_reset_alarm("wordtest", "do_wordtest_alarm", $msg->{'respond'});
+		sleep 1;
+		wordtest_next_question($irc, $msg);
+	}
+}
+
+sub do_wordtest_alarm {
+	local($irc, $msg, $privs) = @_;
+
+	irc_private_msg($irc, $msg->{'respond'}, "Time's Up");
+	sleep 1;
+	wordtest_next_question($irc, $msg);
+}
+
+sub wordtest_next_question {
+	local($irc, $msg) = @_;
+	local($ln, $question) = (0, "");
+
+	$wordtest{$msg->{'respond'}}->{'count'}++;
+	if ($wordtest{$msg->{'respond'}}->{'max'} and ($wordtest{$msg->{'respond'}}->{'count'} > $wordtest{$msg->{'respond'}}->{'max'})) {
+		do_wordtest_off($irc, $msg, 0);
+	}
+	elsif (scalar(@{ $wordtest{$msg->{'respond'}}->{'words'} }) == 0) {
+		irc_private_msg($irc, $msg->{'respond'}, "No More Questions Left");
+		do_wordtest_off($irc, $msg, 0);
+	}
+	else {
+		$ln = rand(scalar(@{ $wordtest{$msg->{'respond'}}->{'words'} }));
+		$question = $wordtest{$msg->{'respond'}}->{'words'}->[$ln];
+		splice(@{ $wordtest{$msg->{'respond'}}->{'words'} }, $ln, 1);
+		($question, $wordtest{$msg->{'respond'}}->{'answer'}) = split(/\*/, $question);
+		irc_private_msg($irc, $msg->{'respond'}, $question);
+	}
+}
+
+sub wordtest_load_questions {
+	local($channel, $language) = @_;
+
+	if ($language =~ /^(\w+)$/) {
+		$file = "../etc/$language.lst";
+	}
+	else {
+		$file = "../etc/wordtest.lst";
+	}
+	open(FILE, $file) or return(0);
+	$wordtest{$channel} = { 'words' => [ ], 'scores' => [ ], 'answer' => "", 'time' => 60, 'count' => 0, 'max' => 0 };
+	while (<FILE>) {
+		if (/\*/) {
+			s/(\r|)\n$//;
+			s/^\s*//;
+			push(@{ $wordtest{$channel}->{'words'} }, $_);
+		}
+	}
+	close(FILE);
+	return(1);
+}
+
+sub wordtest_score {
+	local($channel, $nick) = @_;
+
+	foreach $score (@{ $wordtest{$channel}->{'scores'} }) {
+		if ($score->{'nick'} eq $nick) {
+			return(++$score->{'score'});
+		}
+	}
+	push(@{ $wordtest{$channel}->{'scores'} }, { 'nick' => $nick, 'score' => 1 });
+	return(1);
+}
+
+sub wordtest_high_scores {
+	local($channel) = @_;
+
+	local(@scores) = ();
+	foreach $score (@{ $wordtest{$channel}->{'scores'} }) {
+		if ($score->{'score'} > $scores[0]->{'score'}) {
+			@scores = ($score);
+		}
+		elsif ($score->{'score'} == $scores[0]->{'score'}) {
+			push(@scores, $score);
+		}
+	}
+	return(@scores);
+}
+
+
+
