@@ -31,6 +31,7 @@ sub main_loop {
 			irc_connect($irc);
 		}
 		elsif ($msg->{'cmd'} eq "PING") {
+			status_log("Received Ping (Time since last ping: " . time() - $time_ping . ")");
 			$time_ping = time();
 		}
 		elsif (($msg->{'cmd'} eq "JOIN") and ($msg->{'nick'} eq $irc->{'nick'})) {
