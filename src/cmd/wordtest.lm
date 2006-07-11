@@ -79,7 +79,7 @@ sub do_wordtest_chat {
 
 	return(0) unless (exists($wordtest{$msg->{'respond'}}));
 
-	foreach $answer ($wordtest{$msg->{'respond'}}->{'answers'}) {
+	foreach $answer (@{ $wordtest{$msg->{'respond'}}->{'answers'} }) {
 		if ($msg->{'text'} =~ /^$answer$/i) {
 			$score = wordtest_score($msg->{'respond'}, $msg->{'nick'});
 			irc_private_msg($irc, $msg->{'respond'}, "Correct $msg->{'nick'}!  Your Score Is Now $score");
