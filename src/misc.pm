@@ -34,7 +34,7 @@ sub encode_regex {
 
 sub strip_return {
 	local($str) = @_;
-	$str =~ s/(\r|)\n//;
+	$str =~ s/(\r|)\n$//;
 	return($str);
 }
 

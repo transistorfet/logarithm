@@ -28,6 +28,7 @@ require Exporter;
 	irc_set_log_directory
 	irc_set_echo
 	irc_set_tick
+	irc_make_msg
 );
 
 
@@ -46,7 +47,7 @@ my $default_max_tick = 0.5;
 
 my $irc_trys = 3;
 my $irc_max_flush = 5;
-my $irc_flush_delay = 1;
+my $irc_flush_delay = 2;
 my $irc_max_length = 512;
 
 my $irc_time = get_time();
@@ -66,7 +67,7 @@ sub irc_create {
 		'users' => user_create(),
 		'channels' => channel_create(),
 		'servers' => [ ],
-		'get_queue' => [ ],
+		'recv_queue' => [ ],
 		'send_queue' => [ ],
 		'last_flush' => 0,
 		'flush_count' => 0,
@@ -102,18 +103,24 @@ sub irc_disconnect {
 
 sub irc_get_msg {
 	local($irc) = @_;
-	if (scalar(@{ $irc->{'get_queue'} })) {
-		return(shift(@{ $irc->{'get_queue'} }));
+	if (scalar(@{ $irc->{'recv_queue'} })) {
+		return(shift(@{ $irc->{'recv_queue'} }));
 	}
 	else {
-		return(irc_read_msg($irc));
+		my $msg = irc_read_msg($irc);
+		irc_process_msg($irc, $msg);
+		return($msg);
 	}
 }
 
 sub irc_send_msg {
-	local($irc, $msg) = @_;
-	push(@{ $irc->{'send_queue'} }, $msg);
+	local($irc, $msgtext) = @_;
+	push(@{ $irc->{'send_queue'} }, $msgtext);
 	irc_flush_queue($irc);
+	my $msg = irc_parse_msg($msgtext);
+	$msg->{'nick'} = $irc->{'nick'};
+	push(@{ $irc->{'recv_queue'} }, $msg);
+	irc_process_msg($irc, $msg);
 }
 
 sub irc_add_server {
@@ -156,7 +163,7 @@ sub irc_leave_channel {
 
 	return unless (defined($irc->{'channels'}->{$channel}));
 	foreach (channel_get_option($irc->{'channels'}, $channel, "on_leave")) {
-		push(@{ $irc->{'get_queue'} }, irc_parse_msg($irc, $irc->{'nick'}, "", "PRIVMSG", $channel, $_));
+		push(@{ $irc->{'recv_queue'} }, irc_process_msg($irc, irc_make_msg($irc->{'nick'}, "", "PRIVMSG", $channel, $_)));
 	}
 	irc_send_msg($irc, "PART $channel\n");
 	channel_leave($irc->{'channels'}, $channel);
@@ -165,32 +172,29 @@ sub irc_leave_channel {
 }
 
 sub irc_private_msg {
-	local($irc, $channel, $msg) = @_;
+	local($irc, $channel, $text) = @_;
 
-	$msg =~ s/(\r|)\n$//;
+	$text = strip_return($text);
 	return if ($msg =~ /^\~/);
-	irc_send_msg($irc, "PRIVMSG $channel :$msg\n");
-	irc_log($irc, $channel, "<$irc->{'nick'}> $msg");
+	irc_send_msg($irc, "PRIVMSG $channel :$text\n");
 }
 
 sub irc_action_msg {
-	local($irc, $channel, $msg) = @_;
+	local($irc, $channel, $text) = @_;
 
-	$msg =~ s/(\r|)\n$//;
-	irc_send_msg($irc, "PRIVMSG $channel :\x01ACTION $msg\x01\n");
-	irc_log($irc, $channel, "* $irc->{'nick'} $msg");
+	$text = strip_return($text);
+	irc_send_msg($irc, "PRIVMSG $channel :\x01ACTION $text\x01\n");
 }
 
 sub irc_notice {
-	local($irc, $channel, $msg) = @_;
+	local($irc, $channel, $text) = @_;
 
-	$msg =~ s/(\r|)\n$//;
-	irc_send_msg($irc, "NOTICE $channel :$msg\n");
+	$text = strip_return($text);
+	irc_send_msg($irc, "NOTICE $channel :$text\n");
 }
 
 sub irc_identify {
 	local($irc) = @_;
-
 	irc_send_msg($irc, "NICKSERV :identify $irc->{'password'}\n") if ($irc->{'password'});
 }
 
@@ -240,6 +244,14 @@ sub irc_set_tick {
 	return(-1);
 }
 
+sub irc_make_msg {
+	local($nick, $hostmask, $cmd, @params) = @_;
+	my $channel = $params[0];
+	my $respond = $channel;
+	$respond = $nick unless ($channel =~ /^#/);
+	return({ 'cmd' => $cmd, 'nick' => $nick, 'hostmask' => $hostmask, 'channel' => $channel, 'respond' => $respond, 'msgparams' => [ @params ], 'text' => $params[$#params] });
+}
+
 ### LOCAL SUBS ###
 
 sub irc_server_connect {
@@ -272,7 +284,7 @@ sub irc_init_connection {
 	local($irc) = @_;
 	do {
 		$msg = irc_get_msg($irc);
-		if ($msg->{'cmd'} eq "INIT") {
+		if ($msg->{'cmd'} =~ /(376|422)/) {
 			$irc->{'connected'} = 1;
 			return(0);
 		}
@@ -293,48 +305,43 @@ sub irc_init_connection {
 
 sub irc_read_msg {
 	local($irc) = @_;
-	my $nick, $serv, $cmd, $msg, $text = ("", "", "", "", "");
 
 	irc_check_all_logs($irc);
+	# TODO is this flush needed???
 	irc_flush_queue($irc);
 	$sock = $irc->{'sock'};
 	vec($rin, fileno($sock), 1) = 1;
-	if ($irc->{'connected'}) {
-		return({ 'cmd' => "TICK" }) if (!($num = select($rin, undef, undef, $irc->{'tick'})));
-	}
+	return({ 'cmd' => "TICK" }) if ($irc->{'connected'} && !($num = select($rin, undef, undef, $irc->{'tick'})));
 	return({ 'cmd' => "ERROR", 'text' => $line }) if (!($line = <$sock>) || ($line =~ /^ERROR/));
 
 	#print $line;
 	if ($line =~ /^PING/) {
 		$line =~ s/PING/PONG/i;
 		print $sock "$line";
-		return({ 'cmd' => "PING", 'nick' => "", 'server' => "", 'channel' => $irc->{'nick'}, 'respond' => $irc->{'nick'}, 'msg' => "", 'text' => "" });
+		return({ 'cmd' => "PING", 'nick' => "", 'server' => "", 'channel' => $irc->{'nick'}, 'respond' => $irc->{'nick'}, 'msgparams' => "", 'text' => "" });
 	}
-	else {
-		$line = strip_return($line);
-		if ($line =~ /(^:\S+ )?(\S+) (.*)$/) {
-			my ($nick, $cmd, $msg) = ($1, $2, $3);
-			$nick =~ s/^(:)//;
-			chop($nick);
-			($nick, $serv) = split("!", $nick);
-			if ($msg =~ /:(.*)$/) {
-				$text = $1;
-				$msg =~ s/( |):.*$//;
-			}
+	return(irc_parse_msg($line));
+}
 
-			if ($text =~ /^\x01PING/) {
-				print $sock "NOTICE $nick :$text\n";
-				return({ 'cmd' => "PING", 'nick' => $nick, 'server' => $serv, 'channel' => $irc->{'nick'}, 'respond' => $nick, 'msg' => [ split(" ", $msg), $text ], 'text' => $text });
-			}
-			elsif ($cmd =~ /(376|422)/i) {
-				return({ 'cmd' => "INIT", 'nick' => $nick, 'server' => $serv, 'channel' => $irc->{'nick'}, 'respond' => $nick, 'msg' => [ split(" ", $msg), $text ], 'text' => $text });
-			}
-			else {
-				return(irc_parse_msg($irc, $nick, $serv, uc($cmd), $msg, $text));
-			}
+sub irc_parse_msg {
+	local($line) = @_;
+
+	my $nick, $hostmask, $cmd, $msg, $text;
+	$line = strip_return($line);
+	if ($line =~ /(^:\S+ )?(\S+) (.*)$/) {
+		my ($nick, $cmd, $msg) = ($1, $2, $3);
+		$nick =~ s/^(:)//;
+		chop($nick);
+		($nick, $hostmask) = split("!", $nick);
+		if ($msg =~ /:(.*)$/) {
+			$text = $1;
+			$msg =~ s/( |):.*$//;
 		}
-		return({ 'cmd' => 'ERROR' });
+		@params = split(" ", $msg);
+		push(@params, $text) if ($text);
+		return(irc_make_msg($nick, $hostmask, uc($cmd), @params));
 	}
+	return({ 'cmd' => 'ERROR' });
 }
 
 sub irc_flush_queue {
@@ -353,86 +360,82 @@ sub irc_flush_queue {
 
 	my $sock = $irc->{'sock'};
 	for (1..$size) {
-		#print $irc->{'send_queue'}->[0];
 		print $sock shift(@{ $irc->{'send_queue'} });
 	}
 	$irc->{'flush_count'} += $size;
 	return(0);
 }
 
-sub irc_parse_msg {
-	local($irc, $nick, $serv, $cmd, $msg, $text) = @_;
+sub irc_process_msg {
+	local($irc, $msg) = @_;
 
-	my @params = split(" ", $msg);
-	my $channel = $params[0];
-	if ($cmd eq "PRIVMSG") {
-		if (irc_in_channel($irc, $channel)) {
-			if ($text =~ /^\x01ACTION (.*)\x01$/) {
-				irc_log($irc, $channel, "* $nick $1");
+	if ($msg->{'cmd'} eq "PRIVMSG") {
+		if ($msg->{'text'} =~ /^\x01PING/) {
+			irc_notice($irc, $msg->{'nick'}, $msg->{'text'});
+		}
+		elsif (irc_in_channel($irc, $msg->{'channel'})) {
+			if ($msg->{'text'} =~ /^\x01ACTION (.*)\x01$/) {
+				irc_log($irc, $msg->{'channel'}, "* $msg->{'nick'} $1");
 			}
 			else {
-				irc_log($irc, $channel, "<$nick> $text");
+				irc_log($irc, $msg->{'channel'}, "<$msg->{'nick'}> $msg->{'text'}");
 			}
 		}
 	}
-	elsif ($cmd eq "NOTICE") {
-		if ($nick =~ /NickServ/i and $text =~ /please identify/) {
+	elsif ($msg->{'cmd'} eq "NOTICE") {
+		if ($msg->{'nick'} =~ /NickServ/i and $msg->{'text'} =~ /please identify/i) {
 			irc_identify($irc);
-			status_log("-$nick!$server- $text");
+			status_log("-$msg->{'nick'}!$msg->{'hostmask'}- $msg->{'text'}");
 			status_log("Identifying...");
 		}
 		if ($irc->{'connected'}) {
-			status_log("-$nick!$server- $text");
+			status_log("-$msg->{'nick'}!$msg->{'hostmask'}- $msg->{'text'}");
 		}
 	}	
-	elsif ($cmd eq "NICK") {
-		foreach (user_changenick($irc->{'users'}, $nick, $text)) {
-			irc_log($irc, $_, "--- nick: $nick -> $text");
+	elsif ($msg->{'cmd'} eq "NICK") {
+		foreach $channel (user_changenick($irc->{'users'}, $msg->{'nick'}, $msg->{'text'})) {
+			irc_log($irc, $channel, "--- nick: $msg->{'nick'} -> $msg->{'text'}");
 		}
 	}
-	elsif ($cmd eq "QUIT") {
-		foreach (user_quit($irc->{'users'}, $nick)) {
-			irc_log($irc, $_, "--- quit: $nick ($text)");
+	elsif ($msg->{'cmd'} eq "QUIT") {
+		foreach $channel (user_quit($irc->{'users'}, $msg->{'nick'})) {
+			irc_log($irc, $channel, "--- quit: $msg->{'nick'} ($msg->{'text'})");
 		}
 	}
-	elsif ($cmd eq "TOPIC" or $cmd eq "332") {
-		if ($channel eq $irc->{'nick'}) {
-			$channel = $params[1];
+	elsif ($msg->{'cmd'} eq "TOPIC" or $msg->{'cmd'} eq "332") {
+		if ($msg->{'channel'} eq $irc->{'nick'}) {
+			$msg->{'channel'} = $msg->{'msgparams'}->[1];
 		}
-		irc_log($irc, $channel, "--- topic: ($channel) $text");
+		irc_log($irc, $msg->{'channel'}, "--- topic: ($msg->{'channel'}) $msg->{'text'}");
 	}
-	elsif ($cmd eq "JOIN") {
-		$channel = $text;
-		user_join($irc->{'users'}, $channel, $nick, $server);
-		irc_log($irc, $channel, "--- join: $nick ($serv) $channel");
-		if ($nick eq $irc->{'nick'}) {	
-			foreach (channel_get_option($irc->{'channels'}, $channel, "on_join")) {
-				push(@{ $irc->{'get_queue'} }, irc_parse_msg($irc, $irc->{'nick'}, "", "PRIVMSG", $channel, $_));
+	elsif ($msg->{'cmd'} eq "JOIN") {
+		$msg->{'channel'} = $msg->{'text'};
+		user_join($irc->{'users'}, $msg->{'channel'}, $msg->{'nick'}, $msg->{'hostmask'}) unless ($msg->{'nick'} eq $irc->{'nick'});
+		irc_log($irc, $msg->{'channel'}, "--- join: $msg->{'nick'} ($msg->{'hostmask'}) $msg->{'channel'}");
+		if ($msg->{'nick'} eq $irc->{'nick'}) {	
+			foreach $command (channel_get_option($irc->{'channels'}, $msg->{'channel'}, "on_join")) {
+				push(@{ $irc->{'recv_queue'} }, irc_process_msg($irc, irc_make_msg($irc->{'nick'}, "", "PRIVMSG", $msg->{'channel'}, $command)));
 			}
 		}
 	}
-	elsif ($cmd eq "PART") {
-		user_leave($irc->{'users'}, $channel, $nick);
-		irc_log($irc, $channel, "--- part: $nick ($text) $channel");
+	elsif ($msg->{'cmd'} eq "PART") {
+		user_leave($irc->{'users'}, $msg->{'channel'}, $msg->{'nick'});
+		irc_log($irc, $msg->{'channel'}, "--- part: $msg->{'nick'} ($msg->{'text'}) $msg->{'channel'}");
 	}
-	elsif ($cmd eq "NAMES" or $cmd eq "353") {
-		$channel = @params[2];
-		irc_log($irc, $channel, "--- names: $channel ($text)");
-		foreach (split(" ", $text)) {
+	elsif ($msg->{'cmd'} eq "NAMES" or $msg->{'cmd'} eq "353") {
+		$msg->{'channel'} = $msg->{'msgparams'}->[2];
+		irc_log($irc, $msg->{'channel'}, "--- names: $msg->{'channel'} ($msg->{'text'})");
+		foreach $nick (split(" ", $msg->{'text'})) {
 			s/^(\@|\+)//;
-			user_join($irc->{'users'}, $channel, $_, $server) unless ($_ eq $irc->{'nick'});
+			user_join($irc->{'users'}, $msg->{'channel'}, $nick, $msg->{'hostmask'}) unless ($nick eq $irc->{'nick'});
 		}
 	}
-	elsif ($cmd eq "MODE") {
-		irc_log($irc, $channel, "--- mode: ($nick) @params");
+	elsif ($msg->{'cmd'} eq "MODE") {
+		irc_log($irc, $msg->{'channel'}, "--- mode: ($msg->{'nick'}) @{ $msg->{'msgparams'} }");
 	}
-	elsif ($cmd eq "KICK") {
-		irc_log($irc, $channel, "--- kick: $params[1] by $nick ($text) $channel");
+	elsif ($msg->{'cmd'} eq "KICK") {
+		irc_log($irc, $msg->{'channel'}, "--- kick: $msg->{'msgparams'}->[1] by $msg->{'nick'} ($msg->{'text'}) $msg->{'channel'}");
 	}
-
-	$respond = $channel;
-	$respond = $nick unless ($channel =~ /^#/);
-	return({ 'cmd' => $cmd, 'nick' => $nick, 'server' => $serv, 'channel' => $channel, 'respond' => $respond, 'msg' => [ @params ], 'text' => $text });
 }
 
 ### LOGGING FUNCTIONS ###

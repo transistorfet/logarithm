@@ -8,8 +8,8 @@ use channels;
 
 ##### SCRIPT VARIABLES #####
 
-my $time_ping = time();
-my $ping_timeout = 900;
+my $ping_timeout = 300;
+my $time_last_msg = time();
 my $irc_connection = irc_create();
 
 ##### MAIN START #####
@@ -24,15 +24,12 @@ sub main_loop {
 	local($irc) = @_;
 	while (1) {
 		local($msg) = irc_get_msg($irc);
+		$time_last_msg = time() if ($msg->{'cmd'} ne "TICK");
 
 		if ($msg->{'cmd'} eq "ERROR") {
 			status_log("ERROR! Restarting...");
 			irc_disconnect($irc);
 			irc_connect($irc);
-		}
-		elsif ($msg->{'cmd'} eq "PING") {
-			status_log("Received Ping (Time since last ping: " . (time() - $time_ping) . " secs)");
-			$time_ping = time();
 		}
 		elsif (($msg->{'cmd'} eq "JOIN") and ($msg->{'nick'} eq $irc->{'nick'})) {
 			foreach $name (channel_get_option($irc->{'channels'}, $msg->{'channel'}, "plugins")) {
@@ -48,7 +45,7 @@ sub main_loop {
 			}
 		}
 		elsif ($msg->{'cmd'} eq "KICK") {
-			if ($msg->{'msg'}->[1] =~ /\Q$irc->{'nick'}\E/i) {
+			if ($msg->{'msgparams'}->[1] =~ /\Q$irc->{'nick'}\E/i) {
 				irc_leave_channel($irc, $msg->{'channel'});
 				irc_join_channel($irc, $msg->{'channel'});
 			}
@@ -120,7 +117,7 @@ sub parse_config {
 sub run_cmd {
 	local($irc, $msg) = @_;
 
-	user_check_hostmask($irc->{'users'}, $msg->{'nick'}, $msg->{'server'}) unless (user_is_authorized($irc->{'users'}, $msg->{'nick'}));
+	user_check_hostmask($irc->{'users'}, $msg->{'nick'}, $msg->{'hostmask'}) unless (user_is_authorized($irc->{'users'}, $msg->{'nick'}));
 
 	$msg->{'params'} = [ split(" ", $msg->{'text'}) ];
 	my $cmd = lc(shift(@{ $msg->{'params'} }));
@@ -143,9 +140,9 @@ sub run_cmd {
 }
 
 sub check_ping_timeout {
-	if ((time() - $time_ping) >= $ping_timeout) {
+	if ((time() - $time_last_msg) >= $ping_timeout) {
 		status_log("Ping Timeout, Restarting...");
-		$time_ping = time();
+		$time_last_msg = time();
 		irc_disconnect($irc);
 		irc_connect($irc);
 	}
