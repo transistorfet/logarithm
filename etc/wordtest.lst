@@ -4,7 +4,7 @@ kih*word joiner
 tih*no
 a*yes
 sha*hello
-sho*goodbye
+sho*goodbye,bye
 se*ok
 tu*please,thank you
 ri*prompt word
@@ -66,7 +66,7 @@ natuh*need
 zihva*talk,speak,say
 tufu*feel,emotion
 tuzo*location
-tura*earth
+tura*earth,ground,dirt
 vuto*feel,touch
 rubuh*temperature
 tizuh*air
@@ -122,7 +122,7 @@ lo*9
 muhkihkizo*sea,ocean
 vitokihbizo*school,university
 setokihfuma*bed
-ladokihvothi*program
+ladokihvothi*program,code
 fukihki*young
 muhkihki*old
 fukihrih*slow
@@ -133,3 +133,10 @@ krokihsuta*previous
 krokihli*bad
 krokihkora*timeless,eternity
 krokihtika*certain
+voduhkihduhgu*purple,violet
+voduhkihsuma*orange
+kogukihlitho*grey,gray
+voduhkihlitho*pink
+fukihbuto*quiet
+muhkihbuto*loud,noisy
+tihkihbuto*silent
