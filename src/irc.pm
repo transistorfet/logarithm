@@ -175,7 +175,7 @@ sub irc_private_msg {
 	local($irc, $channel, $text) = @_;
 
 	$text = strip_return($text);
-	$text =~ s/^\~/  \~/;
+	$text = "Nice try! =P" if ($text =~ /^\~/);
 	irc_send_msg($irc, "PRIVMSG $channel :$text\n");
 }
 
