@@ -77,7 +77,7 @@ sub do_wordtest_off {
 sub do_wordtest_chat {
 	local($irc, $msg, $privs) = @_;
 
-	return(0) unless (exists($wordtest{$msg->{'respond'}}));
+	return(0) unless (exists($wordtest{$msg->{'respond'}}) or ($msg->{'nick'} eq $irc->{'nick'}));
 
 	foreach $answer (@{ $wordtest{$msg->{'respond'}}->{'answers'} }) {
 		if ($msg->{'text'} =~ /^$answer$/i) {
