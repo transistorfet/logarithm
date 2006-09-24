@@ -1,6 +1,6 @@
 
 current
-	* 
+	* Added wordtest game
 
 v0.7
 	* Modified irc.pm to change the nick if it's in use when connecting
