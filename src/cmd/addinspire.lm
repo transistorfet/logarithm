@@ -1,0 +1,28 @@
+#
+# Command Name:	addinspire.lm
+# Version:	0.1
+# Package:	Inspire
+#
+
+$module_info = {
+	'help' => [
+		"Usage: addinspire <inspirational quote>",
+		"Description: Adds the inspirational quote to the inspire list for the current channel"
+	]
+};
+
+
+sub do_addinspire {
+	local($irc, $msg, $privs) = @_;
+
+	return(-10) if ($privs < (channel_get_option($irc->{'channels'}, $msg->{'respond'}, "addinspire_access", 50))[0]);
+	return(-20) if (scalar(@{ $msg->{'params'} }) < 2);
+
+	$msg->{'text'} =~ s/^addtopic\s*//i;
+	$msg->{'text'} = ucfirst($msg->{'text'});
+
+	csv_add($msg->{'respond'}, "inspire.lst", ':', $msg->{'text'});
+	irc_notice($irc, $msg->{'nick'}, "Inspirational Quote Added");
+	return(0);
+}
+
