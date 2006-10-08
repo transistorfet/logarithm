@@ -18,7 +18,7 @@ sub do_addinspire {
 	return(-10) if ($privs < (channel_get_option($irc->{'channels'}, $msg->{'respond'}, "addinspire_access", 50))[0]);
 	return(-20) if (scalar(@{ $msg->{'params'} }) < 2);
 
-	$msg->{'text'} =~ s/^addtopic\s*//i;
+	$msg->{'text'} =~ s/^addinspire\s*//i;
 	$msg->{'text'} = ucfirst($msg->{'text'});
 
 	csv_add($msg->{'respond'}, "inspire.lst", ':', $msg->{'text'});
