@@ -5,6 +5,7 @@
 #
 
 package misc;
+
 require Exporter;
 @ISA 	= qw(Exporter);
 @EXPORT = qw(
@@ -14,10 +15,10 @@ require Exporter;
 	get_time
 	create_file_directory
 	create_directory
+	copy_file
 );
 
-
-### MISC.PM START ###
+use strict;
 
 my $misc_status_file = "../logs/status.log";
 
@@ -72,6 +73,23 @@ sub create_directory {
 	}
 }
 
+sub copy_file {
+	my ($source, $dest, $overwrite) = @_;
+
+	my $data;
+	return(-1) if (!$overwrite and (-e $dest));
+	open(FILE, $source) or return(-1);
+	{
+		$/ = undef;
+		$data = <FILE>;
+	}
+	close(FILE);
+
+	open(FILE, ">$dest") or return(-1);
+	print FILE $data;
+	close(FILE);
+	return(0);
+}
+
 1;
 
-### END OF MISC.PM ###
