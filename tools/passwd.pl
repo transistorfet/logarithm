@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 #
 # Script Name:	passwd.pl
 # Description:	Modify the passwd file from the command line.
