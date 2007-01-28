@@ -21,6 +21,11 @@ sub init_plugin {
 	module->register_hook("log", "irc_quit_channel", "hook_quit_channel");
 
 	module->register_command_directory("$install_dir/cmds");
+	return(0);
+}
+
+sub release_plugin {
+	return(0);
 }
 
 sub hook_connect {
