@@ -1,119 +1,126 @@
 #
 # Module Name:	csv.pm
-# Version:	0.6
 # Description:	CSV Module
 #
 
 package csv;
-require Exporter;
-@ISA 	= qw(Exporter);
-@EXPORT = qw(csv_add csv_remove csv_modify csv_search);
 
-
-### CSV.PM START ###
-
+use strict;
 use misc;
 
-my $etc_dir = "../etc";
+sub open_file {
+	my ($this, $file, $delim) = @_;
+	my $class = ref($this) || $this;
+	my $self = { };
+	bless($self, $class);
+	$self->{'file'} = $file;
+	$self->{'delim'} = $delim ? $delim : ":";
+	$self->load_file();
+	return($self);
+}
 
-sub csv_add {
-	my($channel, $file, $delim, $value, @entries) = @_;
+sub close_file {
+	my ($self) = @_;
 
-	$delim = ":" unless ($delim);
-	my $dir = csv_get_directory($channel);
+	$self->write_file();
+}
 
-	open(FILE, ">>$dir/$file") or return(-1);
-	print FILE join($delim, $value, @entries) . "\r\n";
-	close(FILE);
+sub add_entry {
+	my ($self, @values) = @_;
+
+	$self->check_age();
+	push(@{ $self->{'entries'} }, [ @values ]);
+	$self->write_file();
 	return(0);
 }
 
-sub csv_remove {
-	my($channel, $file, $delim, $value) = @_;
+sub remove_entry {
+	my ($self, $index) = @_;
 
-	$delim = ":" unless ($delim);
-	$value = lc($value);
-	my $dir = csv_get_directory($channel);
-
-	open(FILE, "$dir/$file") or return(-1);
-	open(TMP, ">$dir/$file.tmp") or return(-1);
-	while ($line = <FILE>) {
-		($name) = split($delim, $line);
-		next if ($value eq lc($name));
-		print TMP $line;
+	$self->check_age();
+	for my $i (0..$#{ $self->{'entries'} }) {
+		if ($self->{'entries'}->[$i]->[0] eq $index) {
+			splice(@{ $self->{'entries'} }, $i, 1);
+			$self->write_file();
+			return(0);
+		}
 	}
-	close(TMP);
-	close(FILE);
-	unlink("$dir/$file");
-	rename("$dir/$file.tmp", "$dir/$file");
+	return(-1);
+}
+
+sub replace_entry {
+	my ($self, $index, @values) = @_;
+
+	$self->check_age();
+	for my $i (0..$#{ $self->{'entries'} }) {
+		if ($self->{'entries'}->[$i]->[0] eq $index) {
+			$self->{'entries'}->[$i] = [ $index, @values ];
+			$self->write_file();
+			return(0);
+		}
+	}
 	return(0);
 }
 
-sub csv_modify {
-	my($channel, $file, $delim, $value, @entries) = @_;
+sub find_entry {
+	my ($self, $index) = @_;
 
-	$delim = ":" unless ($delim);
-	$value = lc($value);
-	my $dir = csv_get_directory($channel);
-
-	open(FILE, "$dir/$file") or return(-1);
-	open(TMP, ">$dir/$file.tmp") or return(-1);
-	while ($line = <FILE>) {
-		($name) = split($delim, $line);
-		if ($value eq lc($name)) {
-			print TMP join($delim, $name, @entries) . "\r\n";
-		}
-		else {
-			print TMP $line;
+	$self->check_age();
+	for my $i (0..$#{ $self->{'entries'} }) {
+		if ($self->{'entries'}->[$i]->[0] eq $index) {
+			return(@{ $self->{'entries'}->[$i] });
 		}
 	}
-	close(TMP);
+	return(undef);
+}
+
+sub find_all_entries {
+	my ($self, $index) = @_;
+
+	$self->check_age();
+	my @entries = ();
+	for my $i (0..$#{ $self->{'entries'} }) {
+		if ($self->{'entries'}->[$i]->[0] eq $index) {
+			push(@entries, $self->{'entries'}->[$i]);
+		}
+	}
+	return(@entries);
+}
+
+### Local Functions ###
+
+sub check_age {
+	my ($self) = @_;
+
+	if ((-M $self->{'file'}) != $self->{'age'}) {
+		$self->load_file();
+	}
+}
+
+sub load_file {
+	my ($self) = @_;
+
+	$self->{'entries'} = [ ];
+	return(0) unless (-e $self->{'file'});
+	$self->{'age'} = -M $self->{'file'};
+	open(FILE, $self->{'file'}) or return;
+	while (my $line = <FILE>) {
+		$line = strip_return($line);
+		push(@{ $self->{'entries'} }, [ split($self->{'delim'}, $line) ]);
+	}
 	close(FILE);
-	unlink("$dir/$file");
-	rename("$dir/$file.tmp", "$dir/$file");
-	return(0);
 }
 
-sub csv_search {
-	my($channel, $file, $delim, $value) = @_;
+sub write_file {
+	my ($self) = @_;
 
-	$delim = ":" unless ($delim);
-	$value = lc($value) if (defined($value));
-	my $dir = csv_get_directory($channel);
-
-	my @results = ();
-	my $filename = "$dir/$file";
-	for (0..1) {
-		if (open(FILE, "$filename")) {
-			while (<FILE>) {
-				$_ = strip_return($_);
-				my @entry = split($delim, $_);
-				if (!defined($value) or ($entry[0] and (lc($entry[0]) eq $value))) {
-					push(@results, \@entry);
-				}
-			}
-			close(FILE);
-			last unless ($channel);
-		}
-		$filename = "$etc_dir/$file";
+	create_file_directory($self->{'file'});
+	open(FILE, ">$self->{'file'}") or return(-1);
+	foreach my $entry (@{ $self->{'entries'} }) {
+		print FILE join($self->{'delim'}, @{ $entry }) . "\n";
 	}
-	return(@results);
+	close(FILE);
 }
-
-### LOCAL FUNCTIONS ###
-
-sub csv_get_directory {
-	local($channel) = @_;
-
-	my $dir = $etc_dir;
-	return($dir) unless ($channel =~ /^\#/);
-	$channel =~ s/^\#//;
-	$dir = "$dir/$channel" if ($channel);
-	mkdir($dir) unless (-e $dir);
-	return($dir);
-}
-
 
 1;
 
-### END OF CSV.PM ###

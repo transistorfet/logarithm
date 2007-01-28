@@ -7,15 +7,23 @@
 package misc;
 require Exporter;
 @ISA 	= qw(Exporter);
-@EXPORT = qw(status_log encode_regex strip_return strip_colour get_time);
+@EXPORT = qw(
+	status_log
+	encode_regex
+	strip_return
+	get_time
+	create_file_directory
+	create_directory
+);
 
 
 ### MISC.PM START ###
 
-my $misc_status_file = "status.log";
+my $misc_status_file = "../logs/status.log";
 
 sub status_log {
-	local($msg) = @_;
+	my ($msg) = @_;
+
 	open(STATUS, ">>$misc_status_file") or return(-1);
 	print "$msg\n";
 	my $time = get_time();
@@ -26,33 +34,43 @@ sub status_log {
 }
 
 sub encode_regex {
-	local($str) = @_;
+	my ($str) = @_;
+
 	$str =~ s/(\\|\/|\^|\.|\~|\@|\$|\||\(|\)|\[|\]|\+|\?|\{|\})/\\$1/g;
 	$str =~ s/\*/\.\*/g;
 	return($str);
 }
 
 sub strip_return {
-	local($str) = @_;
+	my ($str) = @_;
+
 	$str =~ s/(\r|)\n$//;
 	return($str);
 }
 
-sub strip_colour {
-	local($msg) = @_;
-	$msg =~ s/(\x03)+\d{1,2}(,\d{1,2})?//g;
-	$msg =~ s/(\x03)*//g;
-	$msg =~ s/(\x02|\x06|\x07|\x16)//g;
-	return($msg);
-}
-
 sub get_time {
-	local($sec, $min, $hour, $mday, $mon, $year, $wday) = localtime(time);
+	my ($sec, $min, $hour, $mday, $mon, $year, $wday) = localtime(time);
 	$mon++;
 	$year =~ s/^\d?//;
 	return( { 'sec' => $sec, 'min' => $min, 'hour' => $hour, 'month' => $mon, 'year' => $year, 'day' => $mday, 'wday' => $wday } );
 }
 
+sub create_file_directory {
+	my ($file) = @_;
+
+	$file =~ /^(.*)(\\|\/)(.*?)$/;
+	create_directory($1) if ($1);
+}
+
+sub create_directory {
+	my ($dir) = @_;
+
+	my $rel = "";
+	foreach (split(/(\/|\\)/, $dir)) {
+		$rel .= $_;
+		mkdir($rel) if (!(-e $rel));
+	}
+}
 
 1;
 

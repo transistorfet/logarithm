@@ -1,187 +1,199 @@
 #
 # Module Name:	users.pm
-# Version:	0.6
 # Description:	Users Manager
 #
 
 package users;
-require Exporter;
-@ISA 	= qw(Exporter);
-@EXPORT = qw(
-	user_create
-	user_join
-	user_leave
-	user_quit
-	user_changenick
-	user_purge_channel
-	user_register
-	user_unregister
-	user_change_password
-	user_change_hostmask
-	user_login
-	user_is_authorized
-	user_check_hostmask
-	user_get_access
-	user_add_access
-	user_remove_access
-	user_modify_access
-);
 
-
-### USERS.PM START ###
+use strict;
 
 use csv;
 use misc;
 
-sub user_create {
-	return({ });
+my $config_dir = "../etc";
+my $passwd_file = csv->open_file("$config_dir/passwd");
+
+sub new {
+	my ($this, $file) = @_;
+	my $class = ref($this) || $this;
+	my $self = { };
+	bless($self, $class);
+	return($self);
 }
 
-sub user_join {
-	local($users, $chan, $nick, $mask) = @_;
-	if (defined($users->{$nick})) {
-		foreach $user_channel (@{ $users->{$nick}->{'channels'} }) {
-			return if ($user_channel eq $chan);
+sub join_channel {
+	my ($self, $channel, $nick, $mask) = @_;
+
+	if (defined($self->{ $nick })) {
+		foreach my $user_channel (@{ $self->{ $nick }->{'channels'} }) {
+			return if ($user_channel eq $channel);
 		}
-		push(@{ $users->{$nick}->{'channels'} }, $chan);
+		push(@{ $self->{ $nick }->{'channels'} }, $channel);
 	}
 	else {
-		$users->{$nick} = { 'authorized' => 0, 'channels' => [ $chan ] };
-		user_check_hostmask($nick, $mask);
+		$self->{ $nick } = {
+			'authorized' => 0,
+			'channels' => [ $channel ]
+		};
+		$self->check_hostmask($nick, $mask) if (defined($mask));
 	}
 }
 
-sub user_leave {
-	local($users, $chan, $nick) = @_;
-	if (defined($users->{$nick})) {
-		for $j (0..$#{ $users->{$nick}->{'channels'} }) {
-			if ($users->{$nick}->{'channels'}->[$j] eq $chan) {
-				splice(@{ $users->{$nick}->{'channels'} }, $j, 1);
-				delete($users->{$nick}) if (scalar(@{ $users->{$nick}->{'channels'} }) == 0);
+sub leave_channel {
+	my ($self, $channel, $nick) = @_;
+
+	if (defined($self->{ $nick })) {
+		for my $i (0..scalar(@{ $self->{ $nick }->{'channels'} })) {
+			if ($self->{ $nick }->{'channels'}->[$i] eq $channel) {
+				splice(@{ $self->{ $nick }->{'channels'} }, $i, 1);
+				delete($self->{ $nick }) if (scalar(@{ $self->{ $nick }->{'channels'} }) == 0);
 				return;
 			}
 		}
 	}
 }
 
-sub user_quit {
-	local($users, $nick) = @_;
-	if (defined($users->{$nick})) {
-		my @user = @{ $users->{$nick}->{'channels'} };
-		delete($users->{$nick});
-		return(@user);
+sub quit {
+	my ($self, $nick) = @_;
+
+	if (defined($self->{ $nick })) {
+		my @channels = @{ $self->{ $nick }->{'channels'} };
+		delete($self->{ $nick });
+		return(@channels);
 	}
 	return("");
 }
 
-sub user_changenick {
-	local($users, $oldnick, $newnick) = @_;
-	if (defined($users->{$oldnick})) {
-		my @user = @{ $users->{$oldnick}->{'channels'} };
-		$users->{$newnick} = $users->{$oldnick};
-		delete($users->{$oldnick});
-		return(@user);
+sub change_nick {
+	my ($self, $oldnick, $newnick) = @_;
+
+	if (defined($self->{ $oldnick })) {
+		my @channels = @{ $self->{ $oldnick }->{'channels'} };
+		$self->{ $newnick } = $self->{ $oldnick };
+		delete($self->{ $oldnick });
+		return(@channels);
 	}
 	return("");
 }
 
-sub user_purge_channel {
-	local($users, $channel) = @_;
+sub purge_channel {
+	my ($self, $channel) = @_;
 
-	foreach $key (keys(%users)) {
-		user_leave($key, $channel);
+	foreach my $nick (keys(%{ $self })) {
+		$self->leave_channel($channel, $nick);
 	}
 	return(0);
 }
 
-sub user_register {
-	local($users, $nick, $password) = @_;
-	return(-1) if (!defined($users->{$nick}));
+
+sub register {
+	my ($self, $nick, $password) = @_;
+
 	$password = crypt($password, $nick);
-	return(-1) if (scalar(csv_search("", "passwd", ":", $nick)) > 0);
-	return(csv_add("", "passwd", ':', $nick, $password, ""));
-}
-
-sub user_unregister {
-	local($users, $nick) = @_;
-	return(-1) if (!(defined($users->{$nick}) and $users->{$nick}->{'authorized'}));
-	return(csv_remove("", "passwd", ':', $nick));
-}
-
-sub user_change_password {
-	local($users, $nick, $password) = @_;
-	return(-1) if (!(defined($users->{$nick}) and $users->{$nick}->{'authorized'}));
-	$password = crypt($password, $nick);
-	my ($entry) = csv_search("", "passwd", ':', $nick);
-	($check, $blank, @rest) = @{ $entry };
-	return(-1) if ($check ne $nick);
-	return(csv_modify("", "passwd", ':', $nick, $password, @rest));
-}
-
-sub user_change_hostmask {
-	local($users, $nick, $mask) = @_;
-	return(-1) if (!(defined($users->{$nick}) and $users->{$nick}->{'authorized'}));
-	my ($entry) = csv_search("", "passwd", ':', $nick);
-	($check, $password, $blank, @rest) = @{ $entry };
-	return(-1) if ($check ne $nick);
-	return(csv_modify("", "passwd", ':', $nick, $password, $mask, @rest));
-}
-
-sub user_login {
-	local($users, $nick, $password) = @_;
-	return(-1) if (!defined($users->{$nick}));
-	$password = crypt($password, $nick);
-	my ($entry) = csv_search("", "passwd", ':', $nick);
-	return(-1) if (($entry->[0] ne $nick) or ($entry->[1] ne $password));
-	$users->{$nick}->{'authorized'} = 1;
+	return(-1) if ($passwd_file->find_entry($nick));
+	$passwd_file->add_entry($nick, $password, "");
 	return(0);
 }
 
-sub user_is_authorized {
-	local($users, $nick) = @_;
-	return(0) if (!defined($users->{$nick}));
-	return($users->{$nick}->{'authorized'});
+sub unregister {
+	my ($self, $nick) = @_;
+
+	$passwd_file->remove_entry($nick);
 }
 
-sub user_check_hostmask {
-	local($users, $nick, $mask) = @_;
-	return(-1) if (!defined($users->{$nick}));
-	my ($entry) = csv_search("", "passwd", ':', $nick);
-	my $regex = encode_regex($entry->[2]);
-	return(-1) unless (($entry->[0] eq $nick) and ($mask =~ /$regex/));
-	$users->{$nick}->{'authorized'} = 1;
+sub change_password {
+	my ($self, $nick, $password) = @_;
+
+	return(-1) unless (defined($self->{ $nick }) and $self->{ $nick }->{'authorized'});
+	$password = crypt($password, $nick);
+	my @entry = $passwd_file->find_entry($nick);
+	return(-1) unless ($entry[0] eq $nick);
+	$passwd_file->replace_entry($nick, $password, $entry[2]);
+}
+
+sub change_hostmask {
+	my ($self, $nick, $mask) = @_;
+
+	return(-1) unless (defined($self->{ $nick }) and $self->{ $nick }->{'authorized'});
+	my @entry = $passwd_file->find_entry($nick);
+	return(-1) unless ($entry[0] eq $nick);
+	$passwd_file->replace_entry($nick, $entry[1], $mask);
+}
+
+sub login {
+	my ($self, $nick, $password) = @_;
+
+	return(-1) unless (defined($self->{ $nick }));
+	$password = crypt($password, $nick);
+	my @entry = $passwd_file->find_entry($nick);
+	return(-1) unless (($entry[0] eq $nick) and ($entry[1] eq $password));
+	$self->{ $nick }->{'authorized'} = 1;
 	return(0);
 }
 
-sub user_get_access {
-	local($users, $channel, $nick) = @_;
-	return(0) unless (defined($users->{$nick}) and $users->{$nick}->{'authorized'});
-	my ($entry) = csv_search($channel, "access", ':', $nick);
-	return(1) if ($entry->[0] ne $nick);
-	return($entry->[1]);
+sub is_authorized {
+	my ($self, $nick) = @_;
+
+	return(0) unless (defined($self->{ $nick }));
+	return($self->{ $nick }->{'authorized'});
 }
 
-sub user_add_access {
-	local($users, $channel, $nick, $privs) = @_;
+sub check_hostmask {
+	my ($self, $nick, $mask) = @_;
+
+	return(-1) unless (defined($self->{ $nick }));
+	my @entry = $passwd_file->find_entry($nick);
+	my $regex = encode_regex($entry[2]);
+	return(-1) unless (($entry[0] eq $nick) and ($mask =~ /$regex/));
+	$self->{ $nick }->{'authorized'} = 1;
+	return(0);
+}
+
+
+sub get_access {
+	my ($self, $channel, $nick) = @_;
+
+	$channel =~ s/^#+//;
+	return(0) unless (defined($self->{ $nick }) and $self->{ $nick }->{'authorized'});
+	my $access_file = csv->open_file("$config_dir/access");
+	my @entry = $access_file->find_entry($nick);
+	unless ($entry[0]) {
+		$access_file = csv->open_file("$config_dir/$channel/access");
+		@entry = $access_file->find_entry($nick);
+	}
+	return(1) unless ($entry[0] eq $nick);
+	return($entry[1]);
+}
+
+sub add_access {
+	my ($self, $channel, $nick, $privs) = @_;
+
+	$channel =~ s/^#+//;
 	return if ($privs == 0);
-	return(-1) if (scalar(csv_search($channel, "access", ":", $nick)) > 0);
-	return(csv_add($channel, "access", ':', $nick, $privs));
+	my $access_file = csv->open_file("$config_dir/$channel/access");
+	my @entry = $access_file->find_entry($nick);
+	return(-1) if ($entry[0] eq $nick);
+	$access_file->add_entry($nick, $privs);
 }
 
-sub user_remove_access {
-	local($users, $channel, $nick) = @_;
-	return(csv_remove($channel, "access", ':', $nick));
+sub remove_access {
+	my ($self, $channel, $nick) = @_;
+
+	$channel =~ s/^#+//;
+	my $access_file = csv->open_file("$config_dir/$channel/access");
+	$access_file->remove_entry($nick);
 }
 
-sub user_modify_access {
-	local($users, $channel, $nick, $privs) = @_;
-	my ($entry) = csv_search($channel, "access", ':', $nick);
-	($nick, @values) = @{ $entry };
-	$values[0] = $privs;
-	return(csv_modify($channel, "access", ':', $nick, @values));
-}
+sub modify_access {
+	my ($self, $channel, $nick, $privs) = @_;
 
+	$channel =~ s/^#+//;
+	return if ($privs == 0);
+	my $access_file = csv->open_file("$config_dir/$channel/access");
+	my @entry = $access_file->find_entry($nick);
+	return(-1) unless ($entry[0] eq $nick);
+	$access_file->replace_entry($nick, $privs);
+}
 
 1;
 
-### END OF USERS.PM ###

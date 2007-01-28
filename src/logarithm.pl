@@ -1,154 +1,150 @@
 #!/usr/bin/perl
+#
+# Name:		logarithm.pl
+# Description:	Logarithm IRC Bot
+#
+
+use strict;
 
 use irc;
 use misc;
-use users;
 use module;
-use channels;
-
-##### SCRIPT VARIABLES #####
 
 my $ping_timeout = 300;
 my $time_last_msg = time();
-my $irc_connection = irc_create();
 
-##### MAIN START #####
+main();
+exit(0);
 
-parse_config($irc_connection);
-irc_connect($irc_connection);
-main_loop($irc_connection);
-
-##### MAIN END #####
+sub main {
+	my $irc = irc->new();
+	foreach my $plugin ($irc->{'options'}->get_value("plugins")) {
+		module->load_plugin("plugins/$plugin/$plugin.pm");
+	}
+	foreach my $dir ($irc->{'options'}->get_value("command_path")) {
+		module->register_command_directory($dir);
+	}
+	$irc->connect();
+	main_loop($irc);
+}
 
 sub main_loop {
-	local($irc) = @_;
+	my ($irc) = @_;
+
 	while (1) {
-		local($msg) = irc_get_msg($irc);
+		my $msg = $irc->receive_msg();
 		$time_last_msg = time() if ($msg->{'cmd'} ne "TICK");
 
 		if ($msg->{'cmd'} eq "ERROR") {
 			status_log("ERROR! Restarting...");
-			irc_disconnect($irc);
-			irc_connect($irc);
+			$irc->disconnect();
+			$irc->connect();
 		}
 		elsif (($msg->{'cmd'} eq "JOIN") and ($msg->{'nick'} eq $irc->{'nick'})) {
-			foreach $name (channel_get_option($irc->{'channels'}, $msg->{'channel'}, "plugins")) {
-				module_execute($irc, $msg, "$name.pm", "init_$name") if ($name);
-			}
+			#foreach my $name (channel_get_option($irc->{'channels'}, $msg->{'channel'}, "plugins")) {
+			#	module_execute($irc, $msg, "$name.pm", "init_$name") if ($name);
+			#}
 		}
 		elsif ($msg->{'cmd'} eq "PRIVMSG") {
-			if (irc_in_channel($irc, $msg->{'channel'})) {
+			if ($irc->{'channels'}->in_channel($msg->{'channel'})) {
 				parse_chat($irc, $msg);
 			}
 			elsif ($msg->{'channel'} eq $irc->{'nick'}) {
-				parse_cmd($irc, $msg);
+				parse_cmd($irc, $msg, 1);
 			}
 		}
 		elsif ($msg->{'cmd'} eq "KICK") {
-			if ($msg->{'msgparams'}->[1] =~ /\Q$irc->{'nick'}\E/i) {
-				irc_leave_channel($irc, $msg->{'channel'});
-				irc_join_channel($irc, $msg->{'channel'});
+			if ($msg->{'params'}->[1] =~ /\Q$irc->{'nick'}\E/i) {
+				$irc->join_channel($msg->{'channel'});
 			}
 		}
 
-		check_ping_timeout();
-		module_execute_chats($irc, $msg);
-		module_execute_alarms($irc);
+		check_ping_timeout($irc);
+		module->check_timers();
 	}
-}
-
-sub parse_cmd {
-	local($irc, $msg) = @_;
-
-	my $lead = (channel_get_option($irc->{'channels'}, $msg->{'respond'}, "command_designator", "!"))[0];
-	$msg->{'text'} =~ s/^\Q$lead\E//;
-	run_cmd($irc, $msg);
 }
 
 sub parse_chat {
-	local($irc, $msg) = @_;
+	my ($irc, $msg) = @_;
 
-	my $lead = (channel_get_option($irc->{'channels'}, $msg->{'respond'}, "command_designator", "!"))[0];
-	if ($msg->{'text'} =~ /^(hi|hey|hello) \Q$irc->{'nick'}\E/i) {
-		irc_private_msg($irc, $msg->{'respond'}, "hello $msg->{'nick'}");
+	if ($msg->{'text'} =~ /^(hi|hey|hello) \Q$irc->{'nick'}\E$/i) {
+		$irc->private_msg($msg->{'respond'}, "hello $msg->{'nick'}");
 	}
-	elsif ($msg->{'text'} =~ /^\Q$lead\E/) {
-		$msg->{'text'} =~ s/^\Q$lead\E//;
-		run_cmd($irc, $msg);
+	else {
+		parse_cmd($irc, $msg, 0);
 	}
 	return(0);
 }
 
-sub parse_config {
-	local($irc) = @_;
-	local($cmd, $value);
+sub parse_cmd {
+	my ($irc, $msg, $allow_bare_commands) = @_;
 
-	open(CONFIG, "../etc/log.conf") or return(0);
-	while (<CONFIG>) {
-		chomp;
-		s/;(.)*$//;
-		s/\r$//;
-		($cmd, $value) = split("=");
-		if (/server/i) {
-			irc_add_server($irc, $value);
-		}
-		elsif (/nick/i) {
-			irc_change_nick($irc, $value);
-		}
-		elsif (/password/i) {
-			irc_change_password($irc, $value);
-		}
-		elsif (/echo/i) {
-			irc_set_echo($irc, $value);
-		}
-		elsif (/logging/i) {
-			irc_set_logging($irc, "", $value);
-		}
-		elsif (/logs/i) {
-			irc_set_log_directory($irc, $value);
-		}
-		elsif (/join/i) {
-			irc_join_channel($irc, $value);
-		}
-	}
-	close(CONFIG);
-}
+	my ($options, $lead);
+	$options = $irc->{'channels'}->get_options($msg->{'respond'});
+	$lead = $options->get_scalar_value("command_designator") if ($options);
+	$lead = $irc->{'options'}->get_scalar_value("command_designator", "!") unless ($lead);
+	return(0) unless (($msg->{'text'} =~ /^\Q$lead\E/) or $allow_bare_commands);
+	$msg->{'text'} =~ s/^\Q$lead\E//;
+	$irc->{'users'}->check_hostmask($msg->{'nick'}, $msg->{'host'}) unless ($irc->{'users'}->is_authorized($msg->{'nick'}));
 
-sub run_cmd {
-	local($irc, $msg) = @_;
-
-	user_check_hostmask($irc->{'users'}, $msg->{'nick'}, $msg->{'hostmask'}) unless (user_is_authorized($irc->{'users'}, $msg->{'nick'}));
-
-	$msg->{'params'} = [ split(" ", $msg->{'text'}) ];
-	my $cmd = lc(shift(@{ $msg->{'params'} }));
-	$msg->{'cmd'} = $cmd;
+	$msg->{'args'} = [ split(" ", $msg->{'text'}) ];
+	my $command = lc(shift(@{ $msg->{'args'} }));
+	$msg->{'command'} = $command;
 	$msg->{'phrase'} = $msg->{'text'};
-	$msg->{'phrase'} =~ s/^\Q$cmd\E\s*//;
-	unshift(@{ $msg->{'params'} }, $msg->{'respond'}) unless ($msg->{'params'}->[0] =~ /^\#/);
+	$msg->{'phrase'} =~ s/^\Q$command\E\s*//;
+	unshift(@{ $msg->{'args'} }, $msg->{'respond'}) unless ($msg->{'args'}->[0] =~ /^\#/);
 
-	my $ret = module_execute($irc, $msg, $cmd);
+	return(0) unless (command_enabled($irc, $msg->{'respond'}, $command));
+	my $privs = $irc->{'users'}->get_access($msg->{'args'}->[0], $msg->{'nick'});
+
+	my $ret = module->evaluate_command($command, $irc, $msg, $privs);
 	if ($ret == -1) {
-		irc_notice($irc, $msg->{'nick'}, "Sorry, Command Failed");
+		$irc->notice($msg->{'nick'}, "Sorry, Command Failed");
 	}
 	elsif ($ret == -10) {
-		irc_notice($irc, $msg->{'nick'}, "Sorry, Permission Denied");
+		$irc->notice($msg->{'nick'}, "Sorry, Permission Denied");
 	}
 	elsif ($ret == -20) {
-		irc_notice($irc, $msg->{'nick'}, "Sorry, Invalid Syntax");
+		$irc->notice($msg->{'nick'}, "Sorry, Invalid Syntax");
 	}
 	return(0);
 }
 
 sub check_ping_timeout {
+	my ($irc) = @_;
+
 	if ((time() - $time_last_msg) >= $ping_timeout) {
 		status_log("Ping Timeout, Restarting...");
 		$time_last_msg = time();
-		irc_disconnect($irc);
-		irc_connect($irc);
+		$irc->disconnect();
+		$irc->connect();
 	}
 }
 
+sub command_enabled {
+	my ($irc, $channel, $command) = @_;
 
+	my ($options, $disable_all, @commands);
+	$options = $irc->{'channels'}->get_options($channel);
+	$disable_all = $options->get_scalar_value("disable_all") if ($options);
+	$disable_all = $irc->{'options'}->get_scalar_value("disable_all") unless (defined($disable_all));
+	if ($disable_all) {
+		@commands = $options->get_value("enabled_commands") if ($options);
+		push(@commands, $irc->{'options'}->get_value("enabled_commands"));
+		foreach my $allowed (@commands) {
+			return(1) if ($command eq $allowed);
+		}
+		return(0);
+	}
+	else {
+		@commands = $options->get_value("disabled_commands") if ($options);
+		push(@commands, $irc->{'options'}->get_value("disabled_commands"));
+		foreach my $denied (@commands) {
+			return(0) if ($command eq $denied);
+		}
+		return(1);
+	}
+}
 
 
 
