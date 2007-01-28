@@ -72,8 +72,10 @@ sub get_info {
 sub load_plugin {
 	my ($class, $file, @params) = @_;
 
+	my $dir = $file;
+	$dir =~ s/(.*)(\\|\/)(.*?)$/$1/;
 	my $package = module->load("plugin", $file);
-	module->call_function($package, "init_plugin", @params);
+	module->call_function($package, "init_plugin", $dir, @params);
 }
 
 
