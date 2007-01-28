@@ -16,17 +16,16 @@ sub check_age {
 	my ($class, $package) = @_;
 
 	if ($modules->{ $package }->{'age'} > -M $modules->{ $package }->{'file'}) {
-		module->load($modules->{ $package }->{'type'}, $modules->{ $package }->{'file'})
+		module->load($modules->{ $package }->{'parent'}, $modules->{ $package }->{'type'}, $modules->{ $package }->{'file'})
 	}
 }
 
 sub load {
-	my ($class, $type, $file) = @_;
+	my ($class, $parent, $type, $file) = @_;
 
 	return(0) unless (-e $file);
 	$type = lc($type);
-	my $name = file_to_name($file);
-	my $package = "Logarithm::${type}::${name}";
+	my $package = get_package_name($parent, $type, $file);
 
 	my $module;
 	open(FILE, $file) or return(0);
@@ -46,6 +45,7 @@ sub load {
 	status_log($@) if ($@);
 	$modules->{ $package } = {
 		'package' => $package,
+		'parent' => $parent,
 		'type' => $type,
 		'file' => $file,
 		'age' => -M $file,
@@ -53,6 +53,15 @@ sub load {
 		'timers' => { }
 	};
 	return($package);
+}
+
+sub release {
+	my ($class, $package) = @_;
+
+	return(-1) unless (defined($modules->{ $package }));
+	purge_commands($package);
+	purge_modules($package);
+	return(0);
 }
 
 sub is_loaded {
@@ -68,16 +77,30 @@ sub get_info {
 	return(eval "${package}::module_info;");
 }
 
+### Plugin Functions ###
 
 sub load_plugin {
 	my ($class, $file, @params) = @_;
 
 	my $dir = $file;
 	$dir =~ s/(.*)(\\|\/)(.*?)$/$1/;
-	my $package = module->load("plugin", $file);
+	my $package = get_package_name(undef, "plugin", $file);
+	module->load(undef, "plugin", $file) unless (defined($modules->{ $package }));
 	module->call_function($package, "init_plugin", $dir, @params);
+	return(0);
 }
 
+sub release_plugin {
+	my ($class, $file, @params) = @_;
+
+	my $package = get_package_name(undef, "plugin", $file);
+	return(-1) unless (defined($modules->{ $package }));
+	module->call_function($package, "release_plugin", @params);
+	module->release($package);
+	return(0);
+}
+
+### Hook Functions ###
 
 sub register_hook {
 	my ($class, $id, $hook, $function, @params) = @_;
@@ -115,7 +138,7 @@ sub unregister_hook {
 sub evaluate_hooks {
 	my ($class, $hook, @params) = @_;
 
-	foreach my $package (%{ $modules }) {
+	foreach my $package (keys(%{ $modules })) {
 		if (defined($modules->{ $package }->{'hooks'}->{ $hook })) {
 			foreach my $entry (@{ $modules->{ $package }->{'hooks'}->{ $hook } }) {
 				module->call_function($package, $entry->{'function'}, ( @{ $entry->{'params'} }, @params ));
@@ -124,17 +147,26 @@ sub evaluate_hooks {
 	}
 }
 
+### Command Functions ###
 
-sub register_command_module {
-	my ($class, $command, $file, @params) = @_;
+sub load_command {
+	my ($parent, $command, $file, @params) = @_;
 
-	my $package = module->load("command", $file);
+	my $package = module->load($parent, "command", $file);
 	return(-1) unless ($package);
 	$commands->{ $command } = {
 		'package' => $package,
 		'function' => "do_command",
 		'params' => [ @params ]
 	};
+	return(0);
+}
+
+sub register_command_module {
+	my ($class, $command, $file, @params) = @_;
+
+	my $parent = caller();
+	return(load_command($parent, $command, $file, @params));
 }
 
 sub register_command_directory {
@@ -145,9 +177,10 @@ sub register_command_directory {
 	my @files = readdir(DIR);
 	closedir(DIR);
 
+	my $parent = caller();
 	foreach my $file (@files) {
 		if ($file =~ /(.*)\.pm$/) {
-			module->register_command_module($1, "$dir/$file", @params);
+			load_command($parent, $1, "$dir/$file", @params);
 		}
 	}
 	return(0);
@@ -180,6 +213,7 @@ sub evaluate_command {
 	module->call_function($entry->{'package'}, $entry->{'function'}, ( @{ $entry->{'params'} }, @params ));
 }
 
+### Timer Functions ##
 
 sub register_timer {
 	my ($class, $id, $seconds, $function, @params) = @_;
@@ -229,6 +263,29 @@ sub check_timers {
 	}
 }
 
+### Local Functions ###
+
+sub purge_modules {
+	my ($package) = @_;
+
+	foreach my $key (keys(%{ $modules })) {
+		if ($key =~ /^\Q$package\E/) {
+			delete($modules->{ $key });
+		}
+	}
+	return(0);
+}
+
+sub purge_commands {
+	my ($package) = @_;
+
+	foreach my $key (keys(%{ $commands })) {
+		if ($commands->{ $key }->{'package'} =~ /^\Q$package\E/) {
+			delete($commands->{ $key });
+		}
+	}
+	return(0);
+}
 
 sub call_function {
 	my ($class, $package, $function, @params) = @_;
@@ -244,6 +301,14 @@ sub file_to_name {
 
 	$file =~ tr/A-Za-z0-9/_/cs;
 	return($file);
+}
+
+sub get_package_name {
+	my ($parent, $type, $file) = @_;
+
+	my $name = file_to_name($file);
+	$parent = "Logarithm" unless ($parent and ($parent ne "main"));
+	return("${parent}::${type}::${name}");
 }
 
 1;
