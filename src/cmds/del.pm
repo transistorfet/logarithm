@@ -1,27 +1,23 @@
 #
-# Command Name:	del.lm
-# Version:	0.1
-# Package:	Users
+# Command Name:	del.pm
 #
 
-$module_info = {
+my $module_info = {
 	'help' => [
 		"Usage: del [<channel>] <nick>",
 		"Description: Deletes the access level for nick in channel (current if unspecified)"
 	]
 };
 
-sub do_del {
-	local($irc, $msg, $privs) = @_;
-	local($channel, $nick);
+sub do_command {
+	my ($irc, $msg, $privs) = @_;
 
-	return(-20) if (scalar(@{ $msg->{'params'} }) > 3);
-	my ($channel, $nick, $access) = @{ $msg->{'params'} };
-	$privs = user_get_access($irc->{'users'}, $channel, $msg->{'nick'});
-	return(-10) if (($privs < 350) or ($access > $privs));
+	return(-20) if (scalar(@{ $msg->{'args'} }) != 2);
+	my ($channel, $nick) = @{ $msg->{'args'} };
+	return(-10) if ($privs < $irc->{'options'}->get_scalar_value("del_privs", 400));
 
-	return(-1) if (user_remove_access($irc->{'users'}, $channel, $nick));
-	irc_notice($irc, $msg->{'nick'}, "$nick Access Deleted");
+	return(-1) if ($irc->{'users'}->remove_access($channel, $nick));
+	$irc->notice($msg->{'nick'}, "$nick Access Deleted");
 	return(0);
 }
 

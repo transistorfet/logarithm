@@ -1,26 +1,24 @@
 #
-# Command Name:	me.lm
-# Version:	0.1
-# Package:	Core
+# Command Name:	me.pm
 #
 
-$module_info = {
+my $module_info = {
 	'help' => [
 		"Usage: me [<channel>] <action>",
 		"Description: Causes the bot to say the action in channel (current if unspecified)"
 	]
 };
 
-sub do_me {
-	local($irc, $msg, $privs) = @_;
+sub do_command {
+	my ($irc, $msg, $privs) = @_;
 
-	return(-10) if (user_get_access($irc->{'users'}, $msg->{'params'}->[0], $msg->{'nick'}) < (channel_get_option($irc->{'channels'}, $msg->{'respond'}, "me_access", 200))[0]);
-	return(-20) if (scalar(@{ $msg->{'params'} }) < 2);
+	my $channel = $msg->{'args'}->[0];
+	return(-10) if ($privs < $irc->{'options'}->get_scalar_value("me_privs", 200));
+	return(-20) if (scalar(@{ $msg->{'args'} }) < 2);
+	return(-1) unless ($irc->{'channels'}->in_channel($channel));
 
-	if (irc_in_channel($irc, $msg->{'params'}->[0])) {
-		$msg->{'text'} =~ s/^me ($msg->{'params'}->[0]|)\s*//;
-		irc_action_msg($irc, $msg->{'params'}->[0], "$msg->{'text'}");
-	}
+	$msg->{'phrase'} =~ s/^($channel|)\s*//;
+	$irc->action_msg($channel, $msg->{'phrase'});
 	return(0);
 }
 

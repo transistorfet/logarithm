@@ -1,52 +1,57 @@
 #
-# Command Name:	option.lm
-# Version:	0.1
-# Package:	Core
+# Command Name:	options.pm
 #
 
-$module_info = {
+my $module_info = {
 	'help' => [
-		"Usage: option [<channel>] set|get|add|remove|erase <option> [<value>]",
+		"Usage: options [<channel>] set|get|add|remove|erase <option> [<value>]",
 		"Description: Sets, Displays, Adds to, Removes from, or Erases the specified option (using value if needed) for channel (current if unspecified)"
 	]
 };
 
-sub do_option {
-	local($irc, $msg, $privs) = @_;
-	local($channel, $option);
+sub do_command {
+	my ($irc, $msg, $privs) = @_;
 
-	return(-20) if (scalar(@{ $msg->{'params'} }) < 3);
-	($channel, $cmd, $option) = @{ $msg->{'params'} };
+	return(-20) if (scalar(@{ $msg->{'args'} }) < 3);
+	my ($channel, $cmd, $option) = @{ $msg->{'args'} };
 	$cmd = lc($cmd);
-	return(-10) if (user_get_access($irc->{'users'}, $channel, $msg->{'nick'}) < 300);
+	return(-10) if ($privs < $irc->{'options'}->get_scalar_value("options_privs", 300));
+
+	my $options;
+	if ($channel =~ /^#/) {
+		return(-1) unless ($options = $irc->{'channels'}->get_options($channel));
+	}
+	else {
+		$options = $irc->{'options'};
+	}
 
 	if ($cmd eq "set") {
-		$msg->{'text'} =~ s/(.*?)\Q$option\E\s*//;
-		channel_set_option($irc->{'channels'}, $channel, $option, $msg->{'text'});
-		irc_notice($irc, $msg->{'nick'}, "$option Set To $msg->{'text'}");
+		$msg->{'phrase'} =~ s/(.*?)\Q$option\E\s*//;
+		return(-1) if ($options->set_value($option, $msg->{'phrase'}));
+		$irc->notice($msg->{'nick'}, "$option Set To $msg->{'phrase'}");
 	}
 	elsif ($cmd eq "get") {
-		my @value = channel_get_option($irc->{'channels'}, $channel, $option);
-		my $line = "$option = (" . join(', ', @value) . ")";
-		irc_notice($irc, $msg->{'nick'}, "$line");
+		my @values = $options->get_value($option);
+		my $line = "$option = (" . join(', ', @values) . ")";
+		$irc->notice($msg->{'nick'}, "$line");
 	}
 	elsif ($cmd eq "add") {
-		$msg->{'text'} =~ s/(.*?)\Q$option\E\s*//;
-		channel_append_to_option($irc->{'channels'}, $channel, $option, $msg->{'text'});
-		my @value = channel_get_option($irc->{'channels'}, $channel, $option);
-		my $line = "$option = (" . join(', ', @value) . ")";
-		irc_notice($irc, $msg->{'nick'}, "$line");
+		$msg->{'phrase'} =~ s/(.*?)\Q$option\E\s*//;
+		return(-1) if ($options->add_value($option, $msg->{'phrase'}));
+		my @values = $options->get_value($option);
+		my $line = "$option = (" . join(', ', @values) . ")";
+		$irc->notice($msg->{'nick'}, "$line");
 	}
 	elsif ($cmd eq "remove") {
-		$msg->{'text'} =~ s/(.*?)\Q$option\E\s*//;
-		channel_remove_from_option($irc->{'channels'}, $channel, $option, $msg->{'text'});
-		my @value = channel_get_option($irc->{'channels'}, $channel, $option);
-		my $line = "$option = (" . join(', ', @value) . ")";
-		irc_notice($irc, $msg->{'nick'}, "$line");
+		$msg->{'phrase'} =~ s/(.*?)\Q$option\E\s*//;
+		return(-1) if ($options->remove_value($option, $msg->{'phrase'}));
+		my @values = $options->get_value($option);
+		my $line = "$option = (" . join(', ', @values) . ")";
+		$irc->notice($msg->{'nick'}, "$line");
 	}
 	elsif ($cmd eq "erase") {
-		channel_delete_option($irc->{'channels'}, $channel, $option);
-		irc_notice($irc, $msg->{'nick'}, "$option Deleted");
+		return(-1) if ($options->delete_value($option, $msg->{'phrase'}));
+		$irc->notice($msg->{'nick'}, "$option Deleted");
 	}
 	else {
 		return(-20);

@@ -1,23 +1,22 @@
 #
-# Command Name:	access.lm
-# Version:	0.1
-# Package:	Users
+# Command Name:	access.pm
 #
 
-$module_info = {
+my $module_info = {
 	'help' => [
 		"Usage: access [[<channel>] <nick>]",
 		"Description: Returns the access level of nick (you if unspecified) in channel (current if unspecified)"
 	]
 };
 
-sub do_access {
-	local($irc, $msg, $privs) = @_;
+sub do_command {
+	my ($irc, $msg, $privs) = @_;
 
-	return(-20) if (scalar(@{ $msg->{'params'} }) > 2);
-	$user = $msg->{'params'}->[1] ? $msg->{'params'}->[1] : $msg->{'nick'};
-	$access = user_get_access($irc->{'users'}, $msg->{'params'}->[0], $user);
-	irc_notice($irc, $msg->{'nick'}, "Access Level of $user in $msg->{'params'}->[0] is $access ($msg->{'server'})");
+	return(-20) if (scalar(@{ $msg->{'args'} }) > 2);
+	my $user = $msg->{'args'}->[1] ? $msg->{'args'}->[1] : $msg->{'nick'};
+	my $channel = $msg->{'args'}->[0];
+	my $access = $irc->{'users'}->get_access($channel, $user);
+	$irc->notice($msg->{'nick'}, "Access Level of $user in $channel is $access ($msg->{'host'})");
 	return(0);
 }
 

@@ -1,21 +1,21 @@
 #
-# Command Name:	bye.lm
-# Version:	0.1
-# Package:	Core
+# Command Name:	bye.pm
 #
 
-$module_info = {
+my $module_info = {
 	'help' => [
 		"bye",
 		"Causes logarithm to exit"
 	]
 };
 
-sub do_bye {
-	local($irc, $msg, $privs) = @_;
+sub do_command {
+	my ($irc, $msg, $privs) = @_;
+
 	if ($privs >= 500) {
-		irc_disconnect($irc);
+		$irc->disconnect();
 		exit;
 	}
 	return(-10);
 }
+

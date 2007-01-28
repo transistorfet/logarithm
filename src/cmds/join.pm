@@ -1,23 +1,21 @@
 #
-# Command Name:	join.lm
-# Version:	0.1
-# Package:	Core
+# Command Name:	join.pm
 #
 
-$module_info = {
+my $module_info = {
 	'help' => [
 		"Usage: join <channel>",
 		"Description: Causes the bot to join the specified channel"
 	]
 };
 
-sub do_join {
-	local($irc, $msg, $privs) = @_;
+sub do_command {
+	my ($irc, $msg, $privs) = @_;
 
-	return(-10) if ($privs < 450);
-	return(-20) if (scalar(@{ $msg->{'params'} }) != 1);
-
-	irc_join_channel($irc, $msg->{'params'}->[0]);
+	return(-10) if ($privs < $irc->{'options'}->get_scalar_value("join_privs", 450));
+	return(-20) if (scalar(@{ $msg->{'args'} }) != 1);
+	$irc->{'options'}->add_value("channels", $msg->{'args'}->[0]);
+	$irc->join_channel($msg->{'args'}->[0]);
 	return(0);
 }
 

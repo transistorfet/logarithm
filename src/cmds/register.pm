@@ -1,26 +1,23 @@
 #
-# Command Name:	register.lm
-# Version:	0.1
-# Package:	Users
+# Command Name:	register.pm
 #
 
-$module_info = {
+my $module_info = {
 	'help' => [
 		"Usage: register <password>",
 		"Description: Registers your nick using password"
 	]
 };
 
-sub do_register {
-	local($irc, $msg, $privs) = @_;
+sub do_command {
+	my ($irc, $msg, $privs) = @_;
 
-	return(-20) if (scalar(@{ $msg->{'params'} }) != 2);
-
-	if (user_register($irc->{'users'}, $msg->{'nick'}, $msg->{'params'}->[1])) {
-		irc_notice($irc, $msg->{'nick'}, "Sorry, $msg->{'nick'} is Already Registered");
+	return(-20) if (scalar(@{ $msg->{'args'} }) != 2);
+	if ($irc->{'users'}->register($msg->{'nick'}, $msg->{'args'}->[1])) {
+		$irc->notice($msg->{'nick'}, "Sorry, $msg->{'nick'} is Already Registered");
 	}
 	else {
-		irc_notice($irc, $msg->{'nick'}, "$msg->{'nick'} Registered Successfully");
+		$irc->notice($msg->{'nick'}, "$msg->{'nick'} Registered Successfully");
 	}
 	return(0);
 }

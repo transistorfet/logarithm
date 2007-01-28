@@ -1,24 +1,24 @@
 #
-# Command Name:	say.lm
-# Version:	0.1
-# Package:	Core
+# Command Name:	say.pm
 #
 
-$module_info = {
+my $module_info = {
 	'help' => [
 		"Usage: say [<channel>] <phrase>",
 		"Description: Causes the bot to say the phrase in channel (current if unspecified)"
 	]
 };
 
-sub do_say {
-	local($irc, $msg, $privs) = @_;
+sub do_command {
+	my ($irc, $msg, $privs) = @_;
 
-	return(-10) if (user_get_access($irc->{'users'}, $msg->{'params'}->[0], $msg->{'nick'}) < (channel_get_option($irc->{'channels'}, $msg->{'respond'}, "say_access", 200))[0]);
-	return(-20) if (scalar(@{ $msg->{'params'} }) < 2);
+	my $channel = $msg->{'args'}->[0];
+	return(-10) if ($privs < $irc->{'options'}->get_scalar_value("say_privs", 200));
+	return(-20) if (scalar(@{ $msg->{'args'} }) < 2);
+	return(-1) unless ($irc->{'channels'}->in_channel($channel));
 
-	$msg->{'text'} =~ s/^say ($msg->{'params'}->[0]|)\s*//;
-	irc_private_msg($irc, $msg->{'params'}->[0], $msg->{'text'}) if (irc_in_channel($irc, $msg->{'params'}->[0]));
+	$msg->{'phrase'} =~ s/^($channel|)\s*//;
+	$irc->private_msg($channel, $msg->{'phrase'});
 	return(0);
 }
 
