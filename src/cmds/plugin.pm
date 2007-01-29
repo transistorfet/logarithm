@@ -20,7 +20,7 @@ sub do_command {
 	return(-1) unless (-e $plugin);
 	if ($cmd eq "enable") {
 		$irc->{'options'}->add_value("plugins", $name);
-		module->load_plugin($plugin);
+		module->load_plugin($plugin, $irc);
 		$irc->notice($msg->{'nick'}, "Plugin $name loaded successfully");
 	}
 	elsif ($cmd eq "disable") {
