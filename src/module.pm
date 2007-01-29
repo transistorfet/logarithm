@@ -220,7 +220,7 @@ sub evaluate_command {
 ### Timer Functions ##
 
 sub register_timer {
-	my ($class, $id, $seconds, $function, @params) = @_;
+	my ($class, $id, $seconds, $autoreset, $function, @params) = @_;
 
 	my $package = caller();
 	return(0) unless (defined($modules->{ $package }));
@@ -228,6 +228,7 @@ sub register_timer {
 	$modules->{ $package }->{'timers'}->{ $id } = {
 		'id' => $id,
 		'seconds' => $seconds,
+		'autoreset' => $autoreset,
 		'start' => time(),
 		'function' => $function,
 		'params' => [ @params ]
@@ -262,6 +263,7 @@ sub check_timers {
 			my $timer = $modules->{ $package }->{'timers'}->{ $id };
 			if ((time() - $timer->{'start'}) >= $timer->{'seconds'}) {
 				module->call_function($package, $timer->{'function'}, @{ $timer->{'params'} });
+				$timer->{'start'} = time() if ($timer->{'autoreset'});
 			}
 		}
 	}
