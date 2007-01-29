@@ -76,6 +76,7 @@ sub change_nick {
 	$newnick = lc($newnick);
 	if (defined($self->{ $oldnick })) {
 		my @channels = @{ $self->{ $oldnick }->{'channels'} };
+		return(@channels) if ($newnick eq $oldnick);
 		$self->{ $newnick } = $self->{ $oldnick };
 		delete($self->{ $oldnick });
 		return(@channels);
