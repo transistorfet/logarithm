@@ -12,7 +12,7 @@ sub init_plugin {
 	my ($dir, $irc) = @_;
 
 	$install_dir = $dir;
-	module->register_timer("topic", 86400, "check_time", $irc);
+	module->register_timer("topic", 1800, 1, "check_time", $irc);
 	module->register_command_directory("$install_dir/cmds");
 	return(0);
 }
