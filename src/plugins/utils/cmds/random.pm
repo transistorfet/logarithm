@@ -14,7 +14,8 @@ sub do_command {
 
 	my $max = 100;
 	$max = $msg->{'args'}->[1] if ($msg->{'args'}->[1]);
-	$irc->private_msg($msg->{'respond'}, int(rand($max)));
+	my $number = int(rand($max)) + 1;
+	$irc->private_msg($msg->{'respond'}, $number);
 	return(0);
 }
 
