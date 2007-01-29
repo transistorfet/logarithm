@@ -29,3 +29,5 @@ sub hook_dispatch_msg {
 		$irc->private_msg($msg->{'respond'}, $greet) if ($greet);
 	}
 }
+
+
