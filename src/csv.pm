@@ -9,12 +9,13 @@ use strict;
 use misc;
 
 sub open_file {
-	my ($this, $file, $delim) = @_;
+	my ($this, $file, $delim, $case_insensitive) = @_;
 	my $class = ref($this) || $this;
 	my $self = { };
 	bless($self, $class);
 	$self->{'file'} = $file;
 	$self->{'delim'} = $delim ? $delim : ":";
+	$self->{'insensitive'} = $case_insensitive;
 	$self->load_file();
 	return($self);
 }
@@ -38,8 +39,11 @@ sub remove_entry {
 	my ($self, $index) = @_;
 
 	$self->check_age();
+	$index = lc($index) if ($self->{'insensitive'});
 	for my $i (0..$#{ $self->{'entries'} }) {
-		if ($self->{'entries'}->[$i]->[0] eq $index) {
+		my $key = $self->{'entries'}->[$i]->[0];
+		$key = lc($key) if ($self->{'insensitive'});
+		if ($key eq $index) {
 			splice(@{ $self->{'entries'} }, $i, 1);
 			$self->write_file();
 			return(0);
@@ -52,8 +56,11 @@ sub replace_entry {
 	my ($self, $index, @values) = @_;
 
 	$self->check_age();
+	$index = lc($index) if ($self->{'insensitive'});
 	for my $i (0..$#{ $self->{'entries'} }) {
-		if ($self->{'entries'}->[$i]->[0] eq $index) {
+		my $key = $self->{'entries'}->[$i]->[0];
+		$key = lc($key) if ($self->{'insensitive'});
+		if ($key eq $index) {
 			$self->{'entries'}->[$i] = [ $index, @values ];
 			$self->write_file();
 			return(0);
@@ -66,8 +73,11 @@ sub find_entry {
 	my ($self, $index) = @_;
 
 	$self->check_age();
+	$index = lc($index) if ($self->{'insensitive'});
 	for my $i (0..$#{ $self->{'entries'} }) {
-		if ($self->{'entries'}->[$i]->[0] eq $index) {
+		my $key = $self->{'entries'}->[$i]->[0];
+		$key = lc($key) if ($self->{'insensitive'});
+		if ($key eq $index) {
 			return(@{ $self->{'entries'}->[$i] });
 		}
 	}
@@ -79,8 +89,11 @@ sub find_all_entries {
 
 	$self->check_age();
 	my @entries = ();
+	$index = lc($index) if ($self->{'insensitive'});
 	for my $i (0..$#{ $self->{'entries'} }) {
-		if ($self->{'entries'}->[$i]->[0] eq $index) {
+		my $key = $self->{'entries'}->[$i]->[0];
+		$key = lc($key) if ($self->{'insensitive'});
+		if ($key eq $index) {
 			push(@entries, $self->{'entries'}->[$i]);
 		}
 	}
