@@ -1,19 +1,15 @@
 
-	* rewrite topicifier
-
 	* make help command (needs module.pm support)
 	* add a license and copyright file before the next release
 	* Add Line Length Limiter to break up lines longer than the max
 
+	* rewrite wordtest (make it a plugin)
 	* make wordtest print the correct answer
 	* add a !scores command thing to wordtest to print the partial scores (?)
 	* make it go both directions (with the same file) and select between the two directions (?)
 
-	* should the module->release_plugin call check for a non-zero return from the plugin's release
+	* should the module->unload_plugin call check for a non-zero return from the plugin's release
 	  function and not release the module if that is the case?
-	* possibly add threading for commands or plugins so that you don't have to worry about
-	  making evreything event driven?
-	* when you /msg logarithm topics it says command failed (because topics are channel specific)
 
 	* a command that randomly prints something from one of the site blogs?
 	* french plugin for #french that greets and chats with people in french (possibly french trivia/word
@@ -25,11 +21,11 @@
 	* Quote feature
 	* Signifigant events list (?)
 
-	* Fix topic number thing
-	* finish implementing timer.lm
 	* Add date specifier to search page to limit the range of the search
 	* Make the php search page nicer/quicker/etc
 	* Add support for Multiple Hostmasks
 	* Multiserver??
 
+	* possibly add threading for commands or plugins so that you don't have to worry about
+	  making evreything event driven?
 
