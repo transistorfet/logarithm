@@ -25,7 +25,7 @@ sub do_command {
 	}
 	elsif ($cmd eq "disable") {
 		$irc->{'options'}->remove_value("plugins", $name);
-		module->release_plugin($plugin);
+		module->unload_plugin($plugin);
 		$irc->notice($msg->{'nick'}, "Plugin $name disabled");
 	}
 	else {
