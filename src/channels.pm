@@ -23,6 +23,7 @@ sub new {
 sub join_channel {
 	my ($self, $channel) = @_;
 
+	$channel = lc($channel);
 	return(-1) if (defined($self->{ $channel }));
 	my $name = $channel;
 	$name =~ s/^#+//;
@@ -36,6 +37,7 @@ sub join_channel {
 sub leave_channel {
 	my ($self, $channel) = @_;
 
+	$channel = lc($channel);
 	return(-1) unless (defined($self->{ $channel }));
 	delete($self->{ $channel });
 	return(0);
@@ -50,12 +52,14 @@ sub get_channel_list {
 sub in_channel {
 	my ($self, $channel) = @_;
 
+	$channel = lc($channel);
 	return(defined($self->{ $channel }));
 }
 
 sub get_options {
 	my ($self, $channel, $def) = @_;
 
+	$channel = lc($channel);
 	return($def) unless (defined($self->{ $channel }));
 	return($self->{ $channel }->{'options'});
 }

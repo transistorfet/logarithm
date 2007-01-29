@@ -11,7 +11,7 @@ use csv;
 use misc;
 
 my $config_dir = "../etc";
-my $passwd_file = csv->open_file("$config_dir/passwd");
+my $passwd_file = csv->open_file("$config_dir/passwd", ':', 1);
 
 sub new {
 	my ($this, $file) = @_;
@@ -24,6 +24,8 @@ sub new {
 sub join_channel {
 	my ($self, $channel, $nick, $mask) = @_;
 
+	$nick = lc($nick);
+	$channel = lc($channel);
 	if (defined($self->{ $nick })) {
 		foreach my $user_channel (@{ $self->{ $nick }->{'channels'} }) {
 			return if ($user_channel eq $channel);
@@ -42,6 +44,8 @@ sub join_channel {
 sub leave_channel {
 	my ($self, $channel, $nick) = @_;
 
+	$nick = lc($nick);
+	$channel = lc($channel);
 	if (defined($self->{ $nick })) {
 		for my $i (0..scalar(@{ $self->{ $nick }->{'channels'} })) {
 			if ($self->{ $nick }->{'channels'}->[$i] eq $channel) {
@@ -56,6 +60,7 @@ sub leave_channel {
 sub quit {
 	my ($self, $nick) = @_;
 
+	$nick = lc($nick);
 	if (defined($self->{ $nick })) {
 		my @channels = @{ $self->{ $nick }->{'channels'} };
 		delete($self->{ $nick });
@@ -67,6 +72,8 @@ sub quit {
 sub change_nick {
 	my ($self, $oldnick, $newnick) = @_;
 
+	$oldnick = lc($oldnick);
+	$newnick = lc($newnick);
 	if (defined($self->{ $oldnick })) {
 		my @channels = @{ $self->{ $oldnick }->{'channels'} };
 		$self->{ $newnick } = $self->{ $oldnick };
@@ -79,6 +86,7 @@ sub change_nick {
 sub purge_channel {
 	my ($self, $channel) = @_;
 
+	$channel = lc($channel);
 	foreach my $nick (keys(%{ $self })) {
 		$self->leave_channel($channel, $nick);
 	}
@@ -89,6 +97,7 @@ sub purge_channel {
 sub register {
 	my ($self, $nick, $password) = @_;
 
+	$nick = lc($nick);
 	$password = crypt($password, $nick);
 	return(-1) if ($passwd_file->find_entry($nick));
 	$passwd_file->add_entry($nick, $password, "");
@@ -104,6 +113,7 @@ sub unregister {
 sub change_password {
 	my ($self, $nick, $password) = @_;
 
+	$nick = lc($nick);
 	return(-1) unless (defined($self->{ $nick }) and $self->{ $nick }->{'authorized'});
 	$password = crypt($password, $nick);
 	my @entry = $passwd_file->find_entry($nick);
@@ -114,6 +124,7 @@ sub change_password {
 sub change_hostmask {
 	my ($self, $nick, $mask) = @_;
 
+	$nick = lc($nick);
 	return(-1) unless (defined($self->{ $nick }) and $self->{ $nick }->{'authorized'});
 	my @entry = $passwd_file->find_entry($nick);
 	return(-1) unless ($entry[0] eq $nick);
@@ -123,6 +134,7 @@ sub change_hostmask {
 sub login {
 	my ($self, $nick, $password) = @_;
 
+	$nick = lc($nick);
 	return(-1) unless (defined($self->{ $nick }));
 	$password = crypt($password, $nick);
 	my @entry = $passwd_file->find_entry($nick);
@@ -134,6 +146,7 @@ sub login {
 sub is_authorized {
 	my ($self, $nick) = @_;
 
+	$nick = lc($nick);
 	return(0) unless (defined($self->{ $nick }));
 	return($self->{ $nick }->{'authorized'});
 }
@@ -141,6 +154,7 @@ sub is_authorized {
 sub check_hostmask {
 	my ($self, $nick, $mask) = @_;
 
+	$nick = lc($nick);
 	return(-1) unless (defined($self->{ $nick }));
 	my @entry = $passwd_file->find_entry($nick);
 	my $regex = encode_regex($entry[2]);
@@ -153,12 +167,14 @@ sub check_hostmask {
 sub get_access {
 	my ($self, $channel, $nick) = @_;
 
+	$nick = lc($nick);
+	$channel = lc($channel);
 	$channel =~ s/^#+//;
 	return(0) unless (defined($self->{ $nick }) and $self->{ $nick }->{'authorized'});
-	my $access_file = csv->open_file("$config_dir/access");
+	my $access_file = csv->open_file("$config_dir/access", ':', 1);
 	my @entry = $access_file->find_entry($nick);
 	unless ($entry[0]) {
-		$access_file = csv->open_file("$config_dir/$channel/access");
+		$access_file = csv->open_file("$config_dir/$channel/access", ':', 1);
 		@entry = $access_file->find_entry($nick);
 	}
 	return(1) unless ($entry[0] eq $nick);
@@ -168,9 +184,11 @@ sub get_access {
 sub add_access {
 	my ($self, $channel, $nick, $privs) = @_;
 
+	$nick = lc($nick);
+	$channel = lc($channel);
 	$channel =~ s/^#+//;
 	return if ($privs == 0);
-	my $access_file = csv->open_file("$config_dir/$channel/access");
+	my $access_file = csv->open_file("$config_dir/$channel/access", ':', 1);
 	my @entry = $access_file->find_entry($nick);
 	return(-1) if ($entry[0] eq $nick);
 	$access_file->add_entry($nick, $privs);
@@ -179,17 +197,21 @@ sub add_access {
 sub remove_access {
 	my ($self, $channel, $nick) = @_;
 
+	$nick = lc($nick);
+	$channel = lc($channel);
 	$channel =~ s/^#+//;
-	my $access_file = csv->open_file("$config_dir/$channel/access");
+	my $access_file = csv->open_file("$config_dir/$channel/access", ':', 1);
 	$access_file->remove_entry($nick);
 }
 
 sub modify_access {
 	my ($self, $channel, $nick, $privs) = @_;
 
+	$nick = lc($nick);
+	$channel = lc($channel);
 	$channel =~ s/^#+//;
 	return if ($privs == 0);
-	my $access_file = csv->open_file("$config_dir/$channel/access");
+	my $access_file = csv->open_file("$config_dir/$channel/access", ':', 1);
 	my @entry = $access_file->find_entry($nick);
 	return(-1) unless ($entry[0] eq $nick);
 	$access_file->replace_entry($nick, $privs);
