@@ -17,7 +17,7 @@ sub do_command {
 	return(-10) if ($privs < $irc->{'options'}->get_scalar_value("define_privs", 50));
 	return(-20) if (scalar(@{ $msg->{'args'} }) < 2);
 
-	$msg->{'phrase'} =~ /^\s*(.+)\s*$/;
+	$msg->{'phrase'} =~ /^\s*(.+?)\s*$/;
 	my $word = lc($1);
 
 	return(0) unless ($msg->{'respond'} =~ /^\#/);

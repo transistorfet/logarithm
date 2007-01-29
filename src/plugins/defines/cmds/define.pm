@@ -15,7 +15,7 @@ sub do_command {
 	my ($defines, $irc, $msg, $privs) = @_;
 
 	return(-20) if (scalar(@{ $msg->{'args'} }) < 2);
-	$msg->{'phrase'} =~ /^\s*(.+)\s*$/;
+	$msg->{'phrase'} =~ /^\s*(.+?)\s*$/;
 	my $word = $1;
 
 	my $channel = ($msg->{'respond'} =~ /^\#/) ? $msg->{'respond'} : "global";
