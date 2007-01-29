@@ -3,6 +3,8 @@
 # Description:	Changes the topic of the channel once a week to a random topic from a list
 #
 
+use misc;
+
 my $config_dir = "../etc";
 
 my $install_dir;
