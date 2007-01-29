@@ -1,5 +1,9 @@
 
 current
+	* Completely rewrote all modules, commands, and plugins
+	* Made loaded modules occupy their own namespace
+	* Replaced the log.conf file with the global options.conf file
+	* Factored irc logging into a plugin instead of part of the irc module
 	* Added wordtest game
 
 v0.7

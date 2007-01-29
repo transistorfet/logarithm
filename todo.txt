@@ -1,14 +1,19 @@
 
+	* rewrite topicifier
+
+	* make help command (needs module.pm support)
+	* add a license and copyright file before the next release
+	* Add Line Length Limiter to break up lines longer than the max
+
 	* make wordtest print the correct answer
 	* add a !scores command thing to wordtest to print the partial scores (?)
 	* make it go both directions (with the same file) and select between the two directions (?)
 
+	* should the module->release_plugin call check for a non-zero return from the plugin's release
+	  function and not release the module if that is the case?
 	* possibly add threading for commands or plugins so that you don't have to worry about
 	  making evreything event driven?
-	* when logarithm doesn't come back after a disconnect it is because it is trying to reconnect
-	  but hangs for some reason so find the reason and fix it!
 	* when you /msg logarithm topics it says command failed (because topics are channel specific)
-	* if logs= (in log.conf) is not specified, / will be used
 
 	* a command that randomly prints something from one of the site blogs?
 	* french plugin for #french that greets and chats with people in french (possibly french trivia/word
@@ -20,16 +25,11 @@
 	* Quote feature
 	* Signifigant events list (?)
 
-	* Check to see if the channel allow/deny thing is slowing down command execution.
 	* Fix topic number thing
-	* improve module interface
-	* add autodoc tags?
 	* finish implementing timer.lm
 	* Add date specifier to search page to limit the range of the search
 	* Make the php search page nicer/quicker/etc
-	* Add Line Length Limiter to break up lines longer than the max
 	* Add support for Multiple Hostmasks
 	* Multiserver??
-	* Make audio.lm more general in its search thingy
 
 
