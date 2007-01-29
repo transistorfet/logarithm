@@ -77,6 +77,10 @@ sub get_info {
 	return(eval "${package}::module_info;");
 }
 
+sub get_module_list {
+	return(keys(%{ $modules }));
+}
+
 ### Plugin Functions ###
 
 sub load_plugin {
@@ -90,7 +94,7 @@ sub load_plugin {
 	return(0);
 }
 
-sub release_plugin {
+sub unload_plugin {
 	my ($class, $file, @params) = @_;
 
 	my $package = get_package_name(undef, "plugin", $file);
