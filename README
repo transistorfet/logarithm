@@ -117,6 +117,14 @@ Commands:
 		change the hostmask to use for automatic identification.
 
 Global Options:
+	nick:
+		The nick used by the bot.  This value is only read on startup.
+
+	password:
+		The nicksev password of the bot.  This value is only read on
+		startup and is used to identify with nickserv after connecting
+		and when a "please identify" type message is sent by nickserv.
+
 	channels:
 		A list of channels that are joined when logarithm starts.
 
