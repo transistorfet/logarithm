@@ -108,6 +108,7 @@ sub register {
 sub unregister {
 	my ($self, $nick) = @_;
 
+	$nick = lc($nick);
 	$passwd_file->remove_entry($nick);
 }
 
@@ -118,7 +119,7 @@ sub change_password {
 	return(-1) unless (defined($self->{ $nick }) and $self->{ $nick }->{'authorized'});
 	$password = crypt($password, $nick);
 	my @entry = $passwd_file->find_entry($nick);
-	return(-1) unless ($entry[0] eq $nick);
+	return(-1) unless (lc($entry[0]) eq $nick);
 	$passwd_file->replace_entry($nick, $password, $entry[2]);
 }
 
@@ -128,7 +129,7 @@ sub change_hostmask {
 	$nick = lc($nick);
 	return(-1) unless (defined($self->{ $nick }) and $self->{ $nick }->{'authorized'});
 	my @entry = $passwd_file->find_entry($nick);
-	return(-1) unless ($entry[0] eq $nick);
+	return(-1) unless (lc($entry[0]) eq $nick);
 	$passwd_file->replace_entry($nick, $entry[1], $mask);
 }
 
@@ -139,7 +140,7 @@ sub login {
 	return(-1) unless (defined($self->{ $nick }));
 	$password = crypt($password, $nick);
 	my @entry = $passwd_file->find_entry($nick);
-	return(-1) unless (($entry[0] eq $nick) and ($entry[1] eq $password));
+	return(-1) unless ((lc($entry[0]) eq $nick) and ($entry[1] eq $password));
 	$self->{ $nick }->{'authorized'} = 1;
 	return(0);
 }
@@ -159,7 +160,7 @@ sub check_hostmask {
 	return(-1) unless (defined($self->{ $nick }));
 	my @entry = $passwd_file->find_entry($nick);
 	my $regex = encode_regex($entry[2]);
-	return(-1) unless (($entry[0] eq $nick) and ($mask =~ /$regex/));
+	return(-1) unless ((lc($entry[0]) eq $nick) and ($mask =~ /$regex/));
 	$self->{ $nick }->{'authorized'} = 1;
 	return(0);
 }
@@ -178,7 +179,7 @@ sub get_access {
 		$access_file = csv->open_file("$config_dir/$channel/access", ':', 1);
 		@entry = $access_file->find_entry($nick);
 	}
-	return(1) unless ($entry[0] eq $nick);
+	return(1) unless (lc($entry[0]) eq $nick);
 	return($entry[1]);
 }
 
@@ -191,7 +192,7 @@ sub add_access {
 	return if ($privs == 0);
 	my $access_file = csv->open_file("$config_dir/$channel/access", ':', 1);
 	my @entry = $access_file->find_entry($nick);
-	return(-1) if ($entry[0] eq $nick);
+	return(-1) if (lc($entry[0]) eq $nick);
 	$access_file->add_entry($nick, $privs);
 }
 
@@ -214,7 +215,7 @@ sub modify_access {
 	return if ($privs == 0);
 	my $access_file = csv->open_file("$config_dir/$channel/access", ':', 1);
 	my @entry = $access_file->find_entry($nick);
-	return(-1) unless ($entry[0] eq $nick);
+	return(-1) unless (lc($entry[0]) eq $nick);
 	$access_file->replace_entry($nick, $privs);
 }
 
