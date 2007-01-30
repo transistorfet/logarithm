@@ -25,8 +25,7 @@ sub join_channel {
 
 	$channel = lc($channel);
 	return(-1) if (defined($self->{ $channel }));
-	my $name = $channel;
-	$name =~ s/^#+//;
+	(my $name = $channel) =~ s/^#+//;
 	$self->{ $channel } = {
 		'name' => $channel,
 		'options' => config->new("$options_dir/$name/options.conf")
