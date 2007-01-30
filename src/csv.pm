@@ -100,6 +100,21 @@ sub find_all_entries {
 	return(@entries);
 }
 
+sub get_size {
+	my ($self) = @_;
+
+	$self->check_age();
+	return(scalar(@{ $self->{'entries'} }));
+}
+
+sub get_entry {
+	my ($self, $number) = @_;
+
+	$self->check_age();
+	return(undef) if ($number > $#{ $self->{'entries'} });
+	return(@{ $self->{'entries'}->[$number] });
+}
+
 ### Local Functions ###
 
 sub check_age {
@@ -119,7 +134,7 @@ sub load_file {
 	open(FILE, $self->{'file'}) or return;
 	while (my $line = <FILE>) {
 		$line = strip_return($line);
-		push(@{ $self->{'entries'} }, [ split($self->{'delim'}, $line) ]);
+		push(@{ $self->{'entries'} }, [ split($self->{'delim'}, $line) ]) if ($line);
 	}
 	close(FILE);
 }
