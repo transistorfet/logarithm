@@ -5,6 +5,9 @@
 
 use misc;
 
+my $change_day = 5;
+my $change_hour = 16;
+
 my $config_dir = "../etc";
 
 my $install_dir;
@@ -27,9 +30,9 @@ sub check_time {
 	my ($irc) = @_;
 
 	my $time = get_time();
-	if (!$info->{'changed'} and ($time->{'wday'} == 5) and ($time->{'hour'} == 16)) {
+	if (($time->{'wday'} == $change_day) and ($time->{'hour'} == $change_hour)) {
+		change_topic($irc) unless ($info->{'changed'});
 		$info->{'changed'} = 1;
-		change_topic($irc);
 	}
 	else {
 		$info->{'changed'} = 0;
@@ -39,11 +42,15 @@ sub check_time {
 sub change_topic {
 	my ($irc) = @_;
 
+	status_log("Topicifier changing topics");
 	$irc->identify();
 	foreach my $channel ($irc->{'channels'}->get_channel_list()) {
-		load_topics($channel) unless (scalar(@{ $info->{'channels'}->{ $channel } }));
+		my $options = $irc->{'channels'}->get_options($channel);
+		next unless ($options);
+		next unless ($options->get_scalar_value("enable_topicifier"));
+		load_topics($channel) unless (defined($info->{'channels'}->{ $channel }) and scalar(@{ $info->{'channels'}->{ $channel } }));
 		my $topic = shift(@{ $info->{'channels'}->{ $channel } });	
-		$irc->private_msg("chanserv", "topic $channel $topic");
+		$irc->private_msg("chanserv", "topic $channel $topic") if ($topic);
 	}
 }
 
