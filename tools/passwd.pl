@@ -10,7 +10,7 @@ use csv;
 
 my $config_dir = "../etc";
 
-if ((scalar(@ARGV) < 3) or (scalar(@ARGV) > 4)) {
+if ((scalar(@ARGV) < 2) or (scalar(@ARGV) > 3)) {
 	print "Usage: passwd.pl <nick> <password> [<hostmask>]\n";
 }
 else {
@@ -18,6 +18,7 @@ else {
 	my ($nick, $password, $hostmask) = @ARGV;
 	my $passwd_file = csv->open_file("$config_dir/passwd");
 
+	$nick = lc($nick);
 	$password = crypt($password, $nick);
 	my @entry = $passwd_file->find_entry($nick);
 	if ($entry[0]) {
