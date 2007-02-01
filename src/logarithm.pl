@@ -85,7 +85,6 @@ sub parse_cmd {
 	$lead = $irc->{'options'}->get_scalar_value("command_designator", "!") unless ($lead);
 	return(0) unless (($msg->{'text'} =~ /^\Q$lead\E/) or $allow_bare_commands);
 	$msg->{'text'} =~ s/^\Q$lead\E//;
-	$irc->{'users'}->check_hostmask($msg->{'nick'}, $msg->{'host'}) unless ($irc->{'users'}->is_authorized($msg->{'nick'}));
 
 	$msg->{'args'} = [ split(" ", $msg->{'text'}) ];
 	my $command = lc(shift(@{ $msg->{'args'} }));
@@ -94,10 +93,7 @@ sub parse_cmd {
 	$msg->{'phrase'} =~ s/^\Q$command\E\s*//;
 	unshift(@{ $msg->{'args'} }, $msg->{'respond'}) unless ($msg->{'args'}->[0] =~ /^\#/);
 
-	return(0) unless (command_enabled($irc, $msg->{'respond'}, $command));
-	my $privs = $irc->{'users'}->get_access($msg->{'args'}->[0], $msg->{'nick'});
-
-	my $ret = module->evaluate_command($command, $irc, $msg, $privs);
+	my $ret = evaluate_command($irc, $msg);
 	if ($ret == -1) {
 		$irc->notice($msg->{'nick'}, "Sorry, Command Failed");
 	}
@@ -108,6 +104,22 @@ sub parse_cmd {
 		$irc->notice($msg->{'nick'}, "Sorry, Invalid Syntax");
 	}
 	return(0);
+}
+
+sub evaluate_command {
+	my ($irc, $msg) = @_;
+
+	my $command = $msg->{'command'};
+	$irc->{'users'}->check_hostmask($msg->{'nick'}, $msg->{'host'}) unless ($irc->{'users'}->is_authorized($msg->{'nick'}));
+	return(0) unless (command_enabled($irc, $msg->{'respond'}, $command));
+	my $info = module->get_info(module->get_command_package($command));
+	my $options = $irc->{'channels'}->get_options($msg->{'respond'});
+	my $channel_access = $options ? $options->get_scalar_value("${command}_access") : 0;
+	my $access = $irc->{'options'}->get_scalar_value("${command}_access", $info ? $info->{'access'} : 0);
+	$access = $channel_access if ($channel_access > $access);
+	my $privs = $irc->{'users'}->get_access($msg->{'args'}->[0], $msg->{'nick'});
+	return(-10) if ($privs < $access);
+	return(module->evaluate_command($command, $irc, $msg, $privs));
 }
 
 sub check_ping_timeout {
