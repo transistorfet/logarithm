@@ -2,19 +2,19 @@
 # Command Name:	addtopic.pm
 #
 
-my $module_info = {
+sub get_info {{
+	'access' => 50,
 	'help' => [
 		"Usage: addtopic [<category>:]<topic>",
 		"Description: Adds the topic to the topics list for the current channel under the category if specified"
 	]
-};
+}}
 
 my $config_dir = "../etc/";
 
 sub do_command {
 	my ($irc, $msg, $privs) = @_;
 
-	return(-10) if ($privs < $irc->{'options'}->get_scalar_value("addtopic_privs", 50));
 	return(-20) if (scalar(@{ $msg->{'args'} }) < 2);
 
 	return(0) unless ($msg->{'args'}->[0] =~ /^#/);

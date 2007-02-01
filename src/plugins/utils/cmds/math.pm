@@ -2,12 +2,13 @@
 # Command Name:	math.pm
 #
 
-my $module_info = {
+sub get_info {{
+	'access' => 0,
 	'help' => [
 		"Usage: math <math expression>",
 		"Description: Calculates the answer to simple math equations containing the operations +, -, *, /, cos, sin, abs, sqrt, exp, log, hex, oct, and int. The variables \$pi and \$ans can also be used."
 	]
-};
+}}
 
 my $ans = 0;
 

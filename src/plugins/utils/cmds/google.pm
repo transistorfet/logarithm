@@ -2,12 +2,13 @@
 # Command Name:	google.pm
 #
 
-my $module_info = {
+sub get_info {{
+	'access' => 0,
 	'help' => [
 		"Usage: google <phrase>",
 		"Description: Displays the website link for a google search for phrase"
 	]
-};
+}}
 
 sub do_command {
 	my ($irc, $msg, $privs) = @_;

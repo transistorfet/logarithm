@@ -2,12 +2,13 @@
 # Command Name:	date.pm
 #
 
-my $module_info = {
+sub get_info {{
+	'access' => 0,
 	'help' => [
 		"Usage: date",
 		"Description: Displays the current date"
 	]
-};
+}}
 
 sub do_command {
 	my ($irc, $msg, $privs) = @_;

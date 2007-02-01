@@ -2,12 +2,13 @@
 # Command Name:	options.pm
 #
 
-my $module_info = {
+sub get_info {{
+	'access' => 300,
 	'help' => [
 		"Usage: options [<channel>] set|get|add|remove|erase <option> [<value>]",
 		"Description: Sets, Displays, Adds to, Removes from, or Erases the specified option (using value if needed) for channel (current if unspecified)"
 	]
-};
+}}
 
 sub do_command {
 	my ($irc, $msg, $privs) = @_;
@@ -15,7 +16,6 @@ sub do_command {
 	return(-20) if (scalar(@{ $msg->{'args'} }) < 3);
 	my ($channel, $cmd, $option) = @{ $msg->{'args'} };
 	$cmd = lc($cmd);
-	return(-10) if ($privs < $irc->{'options'}->get_scalar_value("options_privs", 300));
 
 	my $options;
 	if ($channel =~ /^#/) {

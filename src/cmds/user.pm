@@ -2,12 +2,13 @@
 # Command Name:	user.pm
 #
 
-my $module_info = {
+sub get_info {{
+	'access' => 0,
 	'help' => [
 		"Usage: user <password|hostmask> <value>",
 		"Description: Changes your password of hostmask"
 	]
-};
+}}
 
 sub do_command {
 	my ($irc, $msg, $privs) = @_;

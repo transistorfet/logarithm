@@ -2,12 +2,13 @@
 # Command Name:	access.pm
 #
 
-my $module_info = {
+sub get_info {{
+	'access' => 0,
 	'help' => [
 		"Usage: access [[<channel>] <nick>]",
 		"Description: Returns the access level of nick (you if unspecified) in channel (current if unspecified)"
 	]
-};
+}}
 
 sub do_command {
 	my ($irc, $msg, $privs) = @_;

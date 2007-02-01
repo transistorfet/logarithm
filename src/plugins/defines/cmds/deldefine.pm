@@ -2,19 +2,19 @@
 # Command Name:	deldefine.pm
 #
 
-my $module_info = {
+sub get_info {{
+	'access' => 50,
 	'help' => [
 		"Usage: deldefine <phrase>",
 		"Description: Deletes all definition of phrase in the current channel's definitions list"
 	]
-};
+}}
 
 my $config_dir = "../etc";
 
 sub do_command {
 	my ($defines, $irc, $msg, $privs) = @_;
 
-	return(-10) if ($privs < $irc->{'options'}->get_scalar_value("define_privs", 50));
 	return(-20) if (scalar(@{ $msg->{'args'} }) < 2);
 
 	$msg->{'phrase'} =~ /^\s*(.+?)\s*$/;

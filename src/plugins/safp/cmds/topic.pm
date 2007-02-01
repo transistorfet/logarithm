@@ -4,12 +4,13 @@
 
 use csv;
 
-my $module_info = {
+sub get_info {{
+	'access' => 0,
 	'help' => [
 		"Usage: topic [<category>]",
 		"Description: Displays a random topic (from category if specified)"
 	]
-};
+}}
 
 my $config_dir = "../etc";
 my $topics = { };

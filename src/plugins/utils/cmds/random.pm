@@ -2,12 +2,13 @@
 # Command Name:	random.pm
 #
 
-my $module_info = {
+sub get_info {{
+	'access' => 0,
 	'help' => [
 		"Usage: random [<number>]",
 		"Description: Displays a random number between 0 and number (100 if unspecified)"
 	]
-};
+}}
 
 sub do_command {
 	my ($irc, $msg, $privs) = @_;

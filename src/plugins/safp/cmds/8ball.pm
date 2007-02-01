@@ -3,12 +3,13 @@
 # Author:	kaos havoc
 #
 
-my $module_info = {	
+sub get_info {{	
+	'access' => 1,
 	'help' => [
 		"Ask me any question and the answer is yours.",
 		"Just type !8ball <Your question here>"
 	]
-};
+}}
 
 my @answers = (
 	"Signs point to yes.",
@@ -36,7 +37,6 @@ my @answers = (
 sub do_command {
 	my ($irc, $msg, $privs) = @_;
 
-	return(-10) if ($privs < $irc->{'options'}->get_scalar_value("8ball_privs", 1));
 	if($msg->{'args'}->[1]) {
         	my $ln = int(rand(scalar(@answers)));
         	my $answer = $answers[$ln];

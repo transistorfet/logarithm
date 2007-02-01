@@ -2,12 +2,13 @@
 # Command Name:	bye.pm
 #
 
-my $module_info = {
+sub get_info {{
+	'access' => 500,
 	'help' => [
 		"bye",
 		"Causes logarithm to exit"
 	]
-};
+}}
 
 sub do_command {
 	my ($irc, $msg, $privs) = @_;

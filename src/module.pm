@@ -37,6 +37,7 @@ sub load {
 
 	my $program = join("\n",
 		"package $package;",
+		'sub get_info { return(undef); }',
 		$module,
 		"1;"
 	);
@@ -74,7 +75,7 @@ sub get_info {
 	my ($class, $package) = @_;
 
 	return(0) unless (defined($modules->{ $package }));
-	return(eval "${package}::module_info;");
+	return(module->call_function($package, "get_info"));
 }
 
 sub get_module_list {
@@ -99,7 +100,8 @@ sub unload_plugin {
 
 	my $package = get_package_name(undef, "plugin", $file);
 	return(-1) unless (defined($modules->{ $package }));
-	module->call_function($package, "release_plugin", @params);
+	my $ret = module->call_function($package, "release_plugin", @params);
+	return($ret) if ($ret);
 	module->release($package);
 	return(0);
 }
@@ -215,6 +217,17 @@ sub evaluate_command {
 	return(-1) unless (defined($commands->{ $command }));
 	my $entry = $commands->{ $command };
 	module->call_function($entry->{'package'}, $entry->{'function'}, ( @{ $entry->{'params'} }, @params ));
+}
+
+sub get_command_package {
+	my ($class, $command) = @_;
+
+	return(undef) unless (defined($commands->{ $command }));
+	return($commands->{ $command }->{'package'});
+}
+
+sub get_command_list {
+	return(keys(%{ $commands }));
 }
 
 ### Timer Functions ##

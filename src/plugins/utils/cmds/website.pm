@@ -2,12 +2,13 @@
 # Command Name:	website.pm
 #
 
-my $module_info = {
+sub get_info {{
+	'access' => 0,
 	'help' => [
 		"Usage: website [<channel>]",
 		"Description: Displays the website for channel (current if unspecified)"
 	]
-};
+}}
 
 sub do_command {
 	my ($irc, $msg, $privs) = @_;

@@ -2,18 +2,18 @@
 # Command Name:	command.pm
 #
 
-my $module_info = {
+sub get_info {{
+	'access' => 450,
 	'help' => [
 		"Usage: command enable|disable <name>",
 		"Description: Enables or disables the named command"
 	]
-};
+}}
 
 sub do_command {
 	my ($irc, $msg, $privs) = @_;
 
 	return(-20) if (scalar(@{ $msg->{'args'} }) != 3);
-	return(-10) if ($privs < $irc->{'options'}->get_scalar_value("command_privs", 450));
 	my ($channel, $cmd, $name) = @{ $msg->{'args'} };
 
 	my $command = "cmds/$name.pm";

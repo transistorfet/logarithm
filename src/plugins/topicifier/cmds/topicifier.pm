@@ -2,19 +2,19 @@
 # Command Name:	topicifier.pm
 #
 
-my $module_info = {
+sub get_info {{
+	'access' => 50,
 	'help' => [
 		"Usage: topicifier <topic>",
 		"Description: Adds the topic to the channel topics list for the current channel's auto topic setter"
 	]
-};
+}}
 
 my $config_dir = "../etc";
 
 sub do_command {
 	my ($irc, $msg, $privs) = @_;
 
-	return(-10) if ($privs < $irc->{'options'}->get_scalar_value("topicifier_privs", 50));
 	return(-20) if (scalar(@{ $msg->{'args'} }) < 2);
 
 	my $channel = $msg->{'args'}->[0];

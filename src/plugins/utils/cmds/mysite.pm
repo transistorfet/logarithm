@@ -2,12 +2,13 @@
 # Command Name:	mysite.pm
 #
 
-my $module_info = {
+sub get_info {{
+	'access' => 0,
 	'help' => [
 		"Usage: mysite [<name>]",
 		"Description: Displays the website for the nick (current if unspecified)"
 	]
-};
+}}
 
 sub do_command {
 	my ($irc, $msg, $privs) = @_;

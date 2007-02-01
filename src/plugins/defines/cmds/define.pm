@@ -2,12 +2,13 @@
 # Command Name:	define.pm
 #
 
-my $module_info = {
+sub get_info {{
+	'access' => 0,
 	'help' => [
 		"Usage: define <phrase>",
 		"Description: Displays the definition for the phrase"
 	]
-};
+}}
 
 my $config_dir = "../etc";
 

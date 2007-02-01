@@ -2,12 +2,13 @@
 # Command Name:	register.pm
 #
 
-my $module_info = {
+sub get_info {{
+	'access' => 0,
 	'help' => [
 		"Usage: register <password>",
 		"Description: Registers your nick using password"
 	]
-};
+}}
 
 sub do_command {
 	my ($irc, $msg, $privs) = @_;

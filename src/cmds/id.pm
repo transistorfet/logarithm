@@ -2,12 +2,13 @@
 # Command Name:	id.pm
 #
 
-my $module_info = {
+sub get_info {{
+	'access' => 0,
 	'help' => [
 		"Usage: id <password>",
 		"Description: Identifies yourself using the given password"
 	]
-};
+}}
 
 sub do_command {
 	my ($irc, $msg, $privs) = @_;
