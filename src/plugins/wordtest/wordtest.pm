@@ -171,8 +171,7 @@ sub load_questions {
 sub add_score {
 	my ($channel, $nick) = @_;
 
-	$wordtest->{ $channel }->{'scores'}->{ $nick }++;
-	return(1);
+	return(++$wordtest->{ $channel }->{'scores'}->{ $nick });
 }
 
 sub get_high_scores {
