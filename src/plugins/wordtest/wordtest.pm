@@ -109,7 +109,8 @@ sub hook_msg_dispatch {
 sub wordtest_timer {
 	my ($irc, $channel) = @_;
 
-	$irc->private_msg($channel, "Time's Up");
+	my $answer = $wordtest->{ $channel }->{'answers'}->[0];
+	$irc->private_msg($channel, "Time's Up!  The correct answer was $answer");
 	sleep 1;
 	next_question($irc, $channel);
 }
