@@ -155,9 +155,7 @@ sub end_logs {
 sub open_logs {
 	my ($irc, $channel, $time) = @_;
 
-	# TODO add the ability to turn off logging on a channel by channel basis with a default logging
-	# enabled read from the global config
-	#(channel_get_option($irc->{'channels'}, $channel, "log_enable", $irc->{'logging'}->{'log_enable'}))[0]) {
+	return(1) unless (is_enabled($irc, $channel));
 	if ($irc->{'connected'}) {
 		$channel =~ s/^#+//;
 		mkdir "$irc->{'logging'}->{'logdir'}/$channel" if (!(-e "$irc->{'logging'}->{'logdir'}/$channel"));
@@ -179,6 +177,16 @@ sub strip_colour {
 	$msg =~ s/(\x03)*//g;
 	$msg =~ s/(\x02|\x06|\x07|\x16)//g;
 	return($msg);
+}
+
+sub is_enabled {
+	my ($irc, $channel) = @_;
+
+	my $default = $irc->{'options'}->get_scalar_value("enable_logging");
+	my $options = $irc->{'channels'}->get_options($channel);
+	return($default) unless ($options);
+	my $enabled = $options->get_scalar_value("enable_logging");
+	return(defined($enabled) ? $enabled : $default);
 }
 
 1;
