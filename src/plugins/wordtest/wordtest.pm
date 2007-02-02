@@ -37,7 +37,9 @@ sub wordtest_command {
 			$irc->notice($msg->{'nick'}, "A game is already started.");
 		}
 		else {
-			wordtest_on($irc, $msg->{'respond'}, $msg->{'args'}->[2], $default_game_length);
+			my ($name, $reverse) = ($msg->{'args'}->[2], 0);
+			($name, $reverse) = ($msg->{'args'}->[3], 1) if (lc($name) eq "reverse");
+			wordtest_on($irc, $msg->{'respond'}, $name, $reverse, $default_game_length);
 		}
 	}
 	elsif ($msg->{'args'}->[1] eq "off") {
@@ -55,12 +57,10 @@ sub wordtest_command {
 }
 
 sub wordtest_on {
-	my ($irc, $channel, $file, $max) = @_;
+	my ($irc, $channel, $name, $reverse, $max) = @_;
 
-	if (!load_questions($channel, $file, $max)) {
+	if (!load_questions($channel, $name, $reverse, $max)) {
 		module->register_timer($channel, $wordtest->{ $channel }->{'time'}, 1, "wordtest_timer", $irc, $channel);
-		$wordtest->{ $channel }->{'scores'} = { };
-		$wordtest->{ $channel }->{'count'} = 0;
 		next_question($irc, $channel);
 	}
 	else {
@@ -93,7 +93,7 @@ sub hook_msg_dispatch {
 	my ($irc, $msg) = @_;
 
 	return(0) unless ($msg->{'cmd'} eq "PRIVMSG");
-	return(0) unless (defined($wordtest->{ $msg->{'respond'} }) or ($msg->{'nick'} eq $irc->{'nick'}));
+	return(0) unless (defined($wordtest->{ $msg->{'respond'} }) and ($msg->{'nick'} ne $irc->{'nick'}));
 	foreach my $answer (@{ $wordtest->{ $msg->{'respond'} }->{'answers'} }) {
 		if ($msg->{'text'} =~ /^\Q$answer\E$/i) {
 			my $score = add_score($msg->{'respond'}, $msg->{'nick'});
@@ -118,7 +118,7 @@ sub wordtest_timer {
 sub next_question {
 	my ($irc, $channel) = @_;
 
-	my ($ln, $question, $answers);
+	my ($ln, $question, $answer);
 	$wordtest->{ $channel }->{'count'}++;
 	if ($wordtest->{ $channel }->{'max'} and ($wordtest->{ $channel }->{'count'} > $wordtest->{ $channel }->{'max'})) {
 		wordtest_off($irc, $channel);
@@ -130,18 +130,20 @@ sub next_question {
 	else {
 		$ln = rand(scalar(@{ $wordtest->{ $channel }->{'words'} }));
 		$question = splice(@{ $wordtest->{ $channel }->{'words'} }, $ln, 1);
-		($question, $answers) = split(/\s*\*\s*/, $question);
-		$wordtest->{ $channel }->{'answers'} = [ split(/\s*,\s*/, $answers) ];
-		$irc->private_msg($channel, $question);
+		($question, $answer) = split(/\s*\*\s*/, $question);
+		($question, $answer) = ($answer, $question) if ($wordtest->{ $channel }->{'reverse'});
+		my @questions = split(/\s*,\s*/, $question);
+		$wordtest->{ $channel }->{'answers'} = [ split(/\s*,\s*/, $answer) ];
+		$irc->private_msg($channel, @questions[0]);
 	}
 	return(0);
 }
 
 sub load_questions {
-	my ($channel, $file, $max) = @_;
+	my ($channel, $name, $reverse, $max) = @_;
 
-	if ($file =~ /^(\w+)$/) {
-		$file = "plugins/wordtest/lists/$file.lst";
+	if ($name =~ /^(\w+)$/) {
+		$file = "plugins/wordtest/lists/$name.lst";
 	}
 	else {
 		$file = "plugins/wordtest/lists/wordtest.lst";
@@ -151,6 +153,7 @@ sub load_questions {
 		'words' => [ ],
 		'scores' => { },
 		'answers' => "",
+		'reverse' => $reverse,
 		'time' => $default_time,
 		'count' => 0,
 		'max' => $max
