@@ -43,9 +43,6 @@ sub hook_connect {
 	}
 
 	status_log("Starting Logs...");
-	foreach my $channel ($irc->{'channels'}->get_channel_list()) {
-		start_logs($irc, $channel);
-	}
 	$last_time = get_time();
 }
 
