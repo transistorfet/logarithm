@@ -1,16 +1,16 @@
 
-	* make a link command that stores a list of links for each channel (using config where the first
-	  value is always the link and the second is an optional description).  The file could be displayed
-	  on the website as well but is used for named links???
+	* there is a problem where if a module is reloaded, any variable values are erased which causes
+	  problems with plugins (install_dir for example is cleared).  should init_plugin be called every
+	  time after a module is loaded?
 
 	* add a license and copyright file before the next release
 	* Add Line Length Limiter to break up lines longer than the max
 	* should the default access level be really high instead of 0 (in case an error causes the
 	  module_info to not be defined or set to 0?)
 
-	* there is a problem where if a module is reloaded, any variable values are erased which causes
-	  problems with plugins (install_dir for example is cleared).  should init_plugin be called every
-	  time after a module is loaded?
+	* make a link command that stores a list of links for each channel (using config where the first
+	  value is always the link and the second is an optional description).  The file could be displayed
+	  on the website as well but is used for named links???
 
 	* an fserve/dcc plugin maybe that allows people to upload files and then download them with a 
 	  system of quotas for uploaders and stuff.  There could be a dcc plugin seperately that uses
