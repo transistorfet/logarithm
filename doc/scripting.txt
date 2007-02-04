@@ -1,10 +1,62 @@
 
-Logarithm Command Scripting
-for Version 0.6+
-09/10/2005
+Logarithm Scripting
+for Version 0.8
+
+Logarithm has two methods of adding functionality: commands and plugins.  Commands provide a simple function while plugins are more complex often having commands of their own.  Each module should have a subroutine called get_info that returns a hash table with information for that module.  A complete list of entries for the info hash is given in the module info section.  All modules must have the extension .pm.
+
+Commands:
+
+Commands are modules that appear in the cmds/ directory.  When logarithm starts, all the .pm files in cmds/ are loaded and registered as commands with the file name (without the .pm extension) used as the command name.  Command modules can also be loaded individually using the module->register_command_module() function or a whole directory of command modules can be loaded using the module->register_command_directory() function.  Functions can also be registered as commands using the module->register_command() function.
+
+Each command module must have a subroutine called do_command() in it.  The arguments passed to this function are all of the arguments passed to the register function followed by all of the arguments passed during the command invokation call.  For commands that are loaded in cmds/, no parameters are passed during registration.
+
+If the command subroutine returns 0, the command is considered successfully completed.  If -1 is returned, the general error message "Command Failed" is sent to the user who invoked the command.  If -10 is returned, the error "Invalid Syntax" is sent.  If -20 is returned, the error "Permissions Denied" is returned.
 
 
-Logarithm implements commands as external perl scripts which it loads and executes when needed.  These scripts are placed in the cmd directory and must be name the command name followed by ".lm".   For example, the access command would be in a file called access.lm.  Each script must contain a sub routine called "do_<name>" where name is the name of the command (which must be the same as the file name of the script).  This sub routine is passed 3 parameters: $irc, $msg, and $privs.  The script may also contain other sub routines which are called/activated by the main sub routine.
+Plugins:
 
-The $irc paramater is the irc connection handle which is passed to irc functions.  The irc functions all have a name which starts with "irc_" and take $irc as their first argument.  The $msg parameter is built by irc_get_msg with a few fields added to make commands simpler.  The 'respond' field contains the channel that the command should respond to.  If a user sent a private message then this is the user's nick.  If this was sent to a channel then this is the channel name.  The 'params' field is an array reference of the text line that was sent broken up at the spaces.  The 'phrase' field is all of the text sent from after the command name up to the end of the line.  The $privs parameter is the privilage level of the user who initiated the command so that permissions can be easily checked.  It is the responsiblity of the command to make sure that the user has the required privilage level to execute the command.
+Plugins are directories of files that appear in the plugins/ directory.  They are loaded on startup by using the "plugins" option stored in the global config file.  The "plugin" command can be used when logarithm is already running to load plugins (which also adds the plugin to the global config file for future starts).
+
+When a plugin is loaded, a file in the plugin directory called <plugin-name>.pm is loaded (where plugin-name is the same name as the plugin directory) and the subroutine init_plugin() is called.  The directory of the plugin (plugin/<plugin-name>/) is passed as the argument.  This subroutine should initialize itself as needed and return 0 when done.
+
+Plugins can also be disabled through the plugin command in which case the subroutine release_plugin() is called.  If this subroutine returns anything but 0, the plugin's resources will not be destroyed.  If 0 is returned then all commands, timers, hooks, and modules loaded by the plugin are released.  It is not necessary to manually unregister all resources used by the plugin in the release_plugin() subroutine.
+
+
+Module Info:
+
+access:	A number from 0 to 500 of the default access required by the user who invokes the command.  This is checked before the command is invoked using the the channel that is stored as the first element in the args array for looking up the access of the user.
+
+help:	An array reference of lines of text to be printed when the help of that command is requested using the help command.
+
+
+IRC Messages:
+
+The following fields are present in all IRC messages:
+
+cmd:		The IRC command of the message (in uppercase for named commands).
+
+outbound:	A number that is 1 when the message was sent from logarithm to the irc server.
+
+nick:		The nick of the sender of the message.
+
+host:		The host of the sender of the message.
+
+channel:	The 'channel' targetted by the message (if applicable, otherwise nil).  This can also be a nick if the message was sent directly to a user such as a private message.
+
+respond:	The channel to respond to.  If channel is the bot's name (private message to us) then this is the sender's nick; otherwise it is the same as channel.
+
+params:		An array reference of all the space delimited parameters of the message.  If the message use the ':' escape, then the last element in the array will be the full text parameter with spaces.
+
+text:		Always set to the same value as the last element in params for easy access.
+
+For messages that are interpreted as commands, the text field has the command designator removed if it was present and the following additional fields are added to the message:
+
+command:	The command being requested.
+
+phrase:		The contents of text without the command designator and without the command.
+
+args:		An array reference containing the phrase split up by whitespace.
+
+
+
 
