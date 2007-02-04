@@ -171,4 +171,7 @@ Global or Per-Channel Options:
 		specific channel.  IF commands are run by sending a message
 		directly to logarithm then only the global list is used.
 
+	<command>_access:
+		For each command, an option named after the command can be set
+		to change the access level require to execute that command.
 
