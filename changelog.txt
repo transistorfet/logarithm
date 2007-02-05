@@ -1,5 +1,5 @@
 
-current
+0.8:
 	* Completely rewrote all modules, commands, and plugins
 	* Made loaded modules occupy their own namespace
 	* Replaced the log.conf file with the global options.conf file
