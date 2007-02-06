@@ -13,15 +13,12 @@ sub get_info {{
 my $default_time = 60;
 my $default_game_length = 20;
 
-my $install_dir;
-my $wordtest = { };
-
 sub init_plugin {
 	my ($dir) = @_;
 
-	$install_dir = $dir;
-	module->register_hook("wordtest", "irc_dispatch_msg", "hook_msg_dispatch");
-	module->register_command("wordtest", "wordtest_command");
+	my $wordtest = { 'install_dir' => $dir };
+	module->register_hook("wordtest", "irc_dispatch_msg", "hook_msg_dispatch", $wordtest);
+	module->register_command("wordtest", "wordtest_command", $wordtest);
 	return(0);
 }
 
@@ -30,7 +27,7 @@ sub release_plugin {
 }
 
 sub wordtest_command {
-	my ($irc, $msg, $privs) = @_;
+	my ($wordtest, $irc, $msg, $privs) = @_;
 
 	if ($msg->{'args'}->[1] eq "on") {
 		if (defined($wordtest->{ $msg->{'respond'} })) {
@@ -39,12 +36,12 @@ sub wordtest_command {
 		else {
 			my ($name, $reverse) = ($msg->{'args'}->[2], 0);
 			($name, $reverse) = ($msg->{'args'}->[3], 1) if (lc($name) eq "reverse");
-			wordtest_on($irc, $msg->{'respond'}, $name, $reverse, $default_game_length);
+			wordtest_on($wordtest, $irc, $msg->{'respond'}, $name, $reverse, $default_game_length);
 		}
 	}
 	elsif ($msg->{'args'}->[1] eq "off") {
 		if (defined($wordtest->{ $msg->{'respond'} })) {
-			wordtest_off($irc, $msg->{'respond'});
+			wordtest_off($wordtest, $irc, $msg->{'respond'});
 		}
 		else {
 			$irc->notice($msg->{'nick'}, "No game is currently running.");
@@ -57,11 +54,13 @@ sub wordtest_command {
 }
 
 sub wordtest_on {
-	my ($irc, $channel, $name, $reverse, $max) = @_;
+	my ($wordtest, $irc, $channel, $name, $reverse, $max) = @_;
 
-	if (!load_questions($channel, $name, $reverse, $max)) {
-		module->register_timer($channel, $wordtest->{ $channel }->{'time'}, 1, "wordtest_timer", $irc, $channel);
-		next_question($irc, $channel);
+	my $test = load_questions("$wordtest->{'install_dir'}/lists", $name, $reverse, $max);
+	if (defined($test)) {
+		$wordtest->{ $channel } = $test;
+		module->register_timer($channel, $test->{'time'}, 1, "wordtest_timer", $wordtest, $irc, $channel);
+		next_question($wordtest, $irc, $channel);
 	}
 	else {
 		$irc->private_msg($channel, "I Can't Find The Questions! =(");
@@ -69,9 +68,9 @@ sub wordtest_on {
 }
 
 sub wordtest_off {
-	my ($irc, $channel) = @_;
+	my ($wordtest, $irc, $channel) = @_;
 
-	if (my @scores = get_high_scores($channel)) {
+	if (my @scores = get_high_scores($wordtest->{ $channel }->{'scores'})) {
 		if (scalar(@scores) == 1) {
 			$irc->private_msg($channel, "$scores[0]->{'nick'} Is The Winner With $scores[0]->{'score'}!");
 		}
@@ -90,42 +89,43 @@ sub wordtest_off {
 }
 
 sub hook_msg_dispatch {
-	my ($irc, $msg) = @_;
+	my ($wordtest, $irc, $msg) = @_;
 
+	my $channel = $msg->{'respond'};
 	return(0) unless ($msg->{'cmd'} eq "PRIVMSG");
-	return(0) unless (defined($wordtest->{ $msg->{'respond'} }) and ($msg->{'nick'} ne $irc->{'nick'}));
-	foreach my $answer (@{ $wordtest->{ $msg->{'respond'} }->{'answers'} }) {
+	return(0) unless (defined($wordtest->{ $channel }) and ($msg->{'nick'} ne $irc->{'nick'}));
+	foreach my $answer (@{ $wordtest->{ $channel }->{'answers'} }) {
 		if ($msg->{'text'} =~ /^\Q$answer\E$/i) {
-			my $score = add_score($msg->{'respond'}, $msg->{'nick'});
-			$irc->private_msg($msg->{'respond'}, "Correct $msg->{'nick'}!  Your Score Is Now $score");
-			module->reset_timer($msg->{'respond'});
+			my $score = add_score($wordtest->{ $channel }->{'scores'}, $msg->{'nick'});
+			$irc->private_msg($channel, "Correct $msg->{'nick'}!  Your Score Is Now $score");
+			module->reset_timer($channel);
 			sleep 1;
-			next_question($irc, $msg->{'respond'});
+			next_question($wordtest, $irc, $channel);
 			last;
 		}
 	}
 }
 
 sub wordtest_timer {
-	my ($irc, $channel) = @_;
+	my ($wordtest, $irc, $channel) = @_;
 
 	my $answer = $wordtest->{ $channel }->{'answers'}->[0];
 	$irc->private_msg($channel, "Time's Up!  The correct answer was $answer");
 	sleep 1;
-	next_question($irc, $channel);
+	next_question($wordtest, $irc, $channel);
 }
 
 sub next_question {
-	my ($irc, $channel) = @_;
+	my ($wordtest, $irc, $channel) = @_;
 
 	my ($ln, $question, $answer);
 	$wordtest->{ $channel }->{'count'}++;
 	if ($wordtest->{ $channel }->{'max'} and ($wordtest->{ $channel }->{'count'} > $wordtest->{ $channel }->{'max'})) {
-		wordtest_off($irc, $channel);
+		wordtest_off($wordtest, $irc, $channel);
 	}
 	elsif (scalar(@{ $wordtest->{ $channel }->{'words'} }) == 0) {
 		$irc->private_msg($channel, "No More Questions Left");
-		wordtest_off($irc, $channel);
+		wordtest_off($wordtest, $irc, $channel);
 	}
 	else {
 		$ln = rand(scalar(@{ $wordtest->{ $channel }->{'words'} }));
@@ -140,16 +140,16 @@ sub next_question {
 }
 
 sub load_questions {
-	my ($channel, $name, $reverse, $max) = @_;
+	my ($dir, $name, $reverse, $max) = @_;
 
 	if ($name =~ /^(\w+)$/) {
-		$file = "plugins/wordtest/lists/$name.lst";
+		$file = "$dir/$name.lst";
 	}
 	else {
-		$file = "plugins/wordtest/lists/wordtest.lst";
+		$file = "$dir/wordtest.lst";
 	}
 
-	$wordtest->{ $channel } = {
+	my $test = {
 		'words' => [ ],
 		'scores' => { },
 		'answers' => "",
@@ -159,29 +159,28 @@ sub load_questions {
 		'max' => $max
 	};
 
-	open(FILE, $file) or return(-1);
+	open(FILE, $file) or return(undef);
 	while (<FILE>) {
 		if (/\*/) {
 			s/(\r|)\n$//;
 			s/^\s*//;
-			push(@{ $wordtest->{ $channel }->{'words'} }, $_);
+			push(@{ $test->{'words'} }, $_);
 		}
 	}
 	close(FILE);
-	return(0);
+	return($test);
 }
 
 sub add_score {
-	my ($channel, $nick) = @_;
+	my ($scores, $nick) = @_;
 
-	return(++$wordtest->{ $channel }->{'scores'}->{ $nick });
+	return(++$scores->{ $nick });
 }
 
 sub get_high_scores {
-	my ($channel) = @_;
+	my ($list) = @_;
 
 	my @scores = ();
-	my $list = $wordtest->{ $channel }->{'scores'};
 	foreach my $nick (keys(%{ $list })) {
 		if ($list->{ $nick } > $scores[0]->{'score'}) {
 			@scores = ({ 'nick' => $nick, 'score' => $list->{ $nick } });
