@@ -13,13 +13,15 @@ sub get_info {{
 }}
 
 my $config_dir = "../etc";
-my $topics = { };
 
 sub do_command {
 	my ($irc, $msg, $privs) = @_;
 
 	my $channel = lc($msg->{'args'}->[0]);
 	return(0) unless ($channel =~ /^#/);
+
+	$irc->{'safp-topics'} = { } unless(defined($irc->{'safp-topics'}));
+	my $topics = $irc->{'safp-topics'};
 
 	unless (defined($topics->{ $channel })) {
 		(my $dir = $channel) =~ s/^#+//;

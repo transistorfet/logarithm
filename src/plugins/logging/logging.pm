@@ -5,22 +5,19 @@
 
 use misc;
 
-my $install_dir;
-
 my $default_logdir = "../logs";
 my $last_time = get_time();
 
 sub init_plugin {
-	my ($dir) = @_;
+	my ($plugin_dir) = @_;
 
-	$install_dir = $dir;
 	module->register_hook("log", "irc_connect", "hook_connect");
 	module->register_hook("log", "irc_disconnect", "hook_disconnect");
 	module->register_hook("log", "irc_dispatch_msg", "hook_dispatch_msg");
 	module->register_hook("log", "irc_change_nick", "hook_change_nick");
 	module->register_hook("log", "irc_quit_channel", "hook_quit_channel");
 
-	module->register_command_directory("$install_dir/cmds");
+	module->register_command_directory("$plugin_dir/cmds");
 	return(0);
 }
 

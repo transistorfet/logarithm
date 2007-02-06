@@ -6,19 +6,19 @@
 use csv;
 use misc;
 
-my $install_dir;
 my $config_dir = "../etc";
-my $defines = { };
 
 sub init_plugin {
-	my ($dir) = @_;
+	my ($plugin_dir) = @_;
 
-	$install_dir = $dir;
 	unless (-e "$config_dir/defines.lst") {
-		copy_file("$install_dir/defaults/defines.lst", "$config_dir/defines.lst");
+		copy_file("$plugin_dir/defaults/defines.lst", "$config_dir/defines.lst");
 	}
-	$defines->{'global'} = csv->open_file("$config_dir/defines.lst", "\t", 1);
-	module->register_command_directory("$install_dir/cmds", $defines);
+
+	my $defines = {
+		'global' => csv->open_file("$config_dir/defines.lst", "\t", 1)
+	};
+	module->register_command_directory("$plugin_dir/cmds", $defines);
 	return(0);
 }
 

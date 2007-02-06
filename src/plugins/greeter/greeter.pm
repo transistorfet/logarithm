@@ -3,14 +3,11 @@
 # Description:	IRC Greeter
 #
 
-my $install_dir;
-
 sub init_plugin {
-	my ($dir) = @_;
+	my ($plugin_dir) = @_;
 
-	$install_dir = $dir;
 	module->register_hook("greet", "irc_dispatch_msg", "hook_dispatch_msg");
-	module->register_command_directory("$install_dir/cmds");
+	module->register_command_directory("$plugin_dir/cmds");
 	return(0);
 }
 

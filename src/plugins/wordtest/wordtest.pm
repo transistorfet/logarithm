@@ -14,9 +14,9 @@ my $default_time = 60;
 my $default_game_length = 20;
 
 sub init_plugin {
-	my ($dir) = @_;
+	my ($plugin_dir) = @_;
 
-	my $wordtest = { 'install_dir' => $dir };
+	my $wordtest = { 'plugin_dir' => $plugin_dir };
 	module->register_hook("wordtest", "irc_dispatch_msg", "hook_msg_dispatch", $wordtest);
 	module->register_command("wordtest", "wordtest_command", $wordtest);
 	return(0);
@@ -56,7 +56,7 @@ sub wordtest_command {
 sub wordtest_on {
 	my ($wordtest, $irc, $channel, $name, $reverse, $max) = @_;
 
-	my $test = load_questions("$wordtest->{'install_dir'}/lists", $name, $reverse, $max);
+	my $test = load_questions("$wordtest->{'plugin_dir'}/lists", $name, $reverse, $max);
 	if (defined($test)) {
 		$wordtest->{ $channel } = $test;
 		module->register_timer($channel, $test->{'time'}, 1, "wordtest_timer", $wordtest, $irc, $channel);
