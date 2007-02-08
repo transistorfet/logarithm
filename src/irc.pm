@@ -29,6 +29,12 @@ my $irc_reconnect_delay = 60;
 
 my $irc_time = get_time();
 
+my @connections = ();
+
+sub get_connections {
+	return([ @connections ]);
+}
+
 sub new {
 	my ($this, $file, $delim) = @_;
 	my $class = ref($this) || $this;
@@ -36,8 +42,6 @@ sub new {
 	bless($self, $class);
 	$self->{'options'} = config->new("$options_dir/options.conf");
 	$self->{'nick'} = $self->{'options'}->get_scalar_value("nick", $default_nick);
-	$self->{'password'} = $self->{'options'}->get_scalar_value("password", $default_password);
-	$self->{'servers'} = [ $self->{'options'}->get_value("servers") ];
 	$self->{'channels'} = channels->new();
 	$self->{'users'} = users->new();
 	$self->{'sock'} = 0;
@@ -49,7 +53,20 @@ sub new {
 	$self->{'send_queue'} = [ ];
 	$self->{'last_flush'} = 0;
 	$self->{'flush_count'} = 0;
+	push(@connections, $self);
 	return($self);
+}
+
+sub delete {
+	my ($self) = @_;
+
+	for my $i (0..$#connections) {
+		if ($self == $connections[$i]) {
+			splice(@connections, $i, 1);
+			return(0);
+		}
+	}
+	return(-1);
 }
 
 sub connect {
@@ -97,39 +114,10 @@ sub send_msg {
 	push(@{ $self->{'recv_queue'} }, $msg);
 }
 
-sub add_server {
-	my ($self, $server) = @_;
-
-	foreach (@{ $self->{'servers'} }) {
-		return(1) if ($server eq $_);
-	}
-	push(@{ $self->{'servers'} }, $server);
-	return(0);
-}
-
-sub remove_server {
-	my ($self, $server) = @_;
-
-	foreach my $i (0..$#{ $self->{'servers'} }) {
-		if ($self->{'servers'}->[$i] eq $server) {
-			splice(@{ $self->{'servers'} }, $i, 1);
-			return(0);
-		}
-	}
-	return(1);
-}
-
 sub change_nick {
 	my ($self, $nick) = @_;
 
 	$self->send_msg($self, "NICK $nick\n");
-}
-
-sub set_password {
-	my ($self, $password) = @_;
-
-	$self->{'password'} = $password;
-	$self->identify();
 }
 
 sub join_channel {
@@ -173,7 +161,9 @@ sub notice {
 
 sub identify {
 	my ($self) = @_;
-	$self->send_msg("NICKSERV :identify $self->{'password'}\n") if ($self->{'password'});
+
+	my $password = $self->{'options'}->get_scalar_value("password", $default_password);
+	$self->send_msg("NICKSERV :identify $password\n") if ($password);
 }
 
 sub set_tick {
@@ -210,11 +200,12 @@ sub server_connect {
 	my ($self) = @_;
 
 	my $sock;
+	my @servers = $self->{'options'}->get_value("servers");
 	while (1) {
-		for my $i (0..$#{ $self->{'servers'} }) {
-			status_log("Connecting to $self->{'servers'}->[$i]...");
+		for my $i (0..$#servers) {
+			status_log("Connecting to $servers[$i]...");
 			for (1..$irc_trys) {
-				$self->{'servers'}->[$i] =~ /^(.*)(|:(.*))$/;
+				$servers[$i] =~ /^(.*)(|:(.*))$/;
 				my ($server, $port) = ($1, $3);
 				$port = 6667 unless ($port);
 				if ($sock = IO::Socket::INET->new(PeerAddr => $server, PeerPort => $port, Proto => 'tcp', Timeout => 30)) {
