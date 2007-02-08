@@ -19,7 +19,7 @@ exit(0);
 sub main {
 	my $irc = irc->new();
 	foreach my $plugin ($irc->{'options'}->get_value("plugins")) {
-		module->load_plugin("plugins/$plugin/$plugin.pm", $irc);
+		module->load_plugin("plugins/$plugin/$plugin.pm");
 	}
 	foreach my $dir ($irc->{'options'}->get_value("command_path")) {
 		module->register_command_directory($dir);
