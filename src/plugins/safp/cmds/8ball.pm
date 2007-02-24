@@ -4,7 +4,7 @@
 #
 
 sub get_info {{	
-	'access' => 1,
+	'access' => 0,
 	'help' => [
 		"Ask me any question and the answer is yours.",
 		"Just type !8ball <Your question here>"
