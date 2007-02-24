@@ -214,7 +214,7 @@ sub unregister_command {
 sub evaluate_command {
 	my ($class, $command, @params) = @_;
 
-	return(-1) unless (defined($commands->{ $command }));
+	return(0) unless (defined($commands->{ $command }));
 	my $entry = $commands->{ $command };
 	module->call_function($entry->{'package'}, $entry->{'function'}, ( @{ $entry->{'params'} }, @params ));
 }
