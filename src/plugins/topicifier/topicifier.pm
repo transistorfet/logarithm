@@ -16,6 +16,7 @@ sub init_plugin {
 
 	my $info = { 'changed' => 0, 'channels' => { } };
 	module->register_timer("topic", 1800, 1, "check_time", $info);
+	module->register_command("changetopic", "changetopic_command", $info);
 	module->register_command_directory("$plugin_dir/cmds");
 	return(0);
 }
@@ -24,12 +25,20 @@ sub release_plugin {
 	return(0);
 }
 
+sub changetopic_command {
+	my ($info, $irc, $msg, $privs) = @_;
+
+	return(-10) if ($privs < 100);
+	change_topic($info, $irc, $msg->{'channel'});
+	return(0);
+}
+
 sub check_time {
 	my ($info) = @_;
 
 	my $time = get_time();
 	if (($time->{'wday'} == $change_day) and ($time->{'hour'} == $change_hour)) {
-		change_topic($info) unless ($info->{'changed'});
+		change_all_topics($info) unless ($info->{'changed'});
 		$info->{'changed'} = 1;
 	}
 	else {
@@ -37,7 +46,7 @@ sub check_time {
 	}
 }
 
-sub change_topic {
+sub change_all_topics {
 	my ($info) = @_;
 
 	status_log("Topicifier changing topics");
@@ -45,14 +54,21 @@ sub change_topic {
 	foreach my $irc (@{ $connections }) {
 		$irc->identify();
 		foreach my $channel ($irc->{'channels'}->get_channel_list()) {
-			my $options = $irc->{'channels'}->get_options($channel);
-			next unless ($options);
-			next unless ($options->get_scalar_value("enable_topicifier"));
-			load_topics($info, $channel) unless (defined($info->{'channels'}->{ $channel }) and scalar(@{ $info->{'channels'}->{ $channel } }));
-			my $topic = shift(@{ $info->{'channels'}->{ $channel } });	
-			$irc->private_msg("chanserv", "topic $channel $topic") if ($topic);
+			change_topic($info, $irc, $channel);
 		}
 	}
+}
+
+sub change_topic {
+	my ($info, $irc, $channel) = @_;
+
+	my $options = $irc->{'channels'}->get_options($channel);
+	next unless ($options);
+	next unless ($options->get_scalar_value("enable_topicifier"));
+	load_topics($info, $channel) unless (defined($info->{'channels'}->{ $channel }) and scalar(@{ $info->{'channels'}->{ $channel } }));
+	my $topic = shift(@{ $info->{'channels'}->{ $channel } });	
+	$irc->private_msg("chanserv", "topic $channel $topic") if ($topic);
+	return(0);
 }
 
 sub load_topics {
