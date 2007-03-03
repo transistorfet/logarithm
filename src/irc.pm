@@ -387,10 +387,11 @@ sub dispatch_msg {
 		$self->{'users'}->join_channel($msg->{'channel'}, $msg->{'nick'}, $msg->{'host'});
 		module->evaluate_hooks("irc_dispatch_msg", $self, $msg) unless ($msg->{'outbound'});
 	}
-	elsif ($msg->{'cmd'} eq "PART") {
+	elsif (($msg->{'cmd'} eq "PART") or ($msg->{'cmd'} eq "KICK")) {
 		module->evaluate_hooks("irc_dispatch_msg", $self, $msg) unless ($msg->{'outbound'});
-		$self->{'users'}->leave_channel($msg->{'channel'}, $msg->{'nick'});
-		if (($msg->{'nick'} eq $self->{'nick'}) and !$msg->{'outbound'}) {
+		my $nick = ($msg->{'cmd'} eq "KICK") ? $msg->{'params'}->[1] : $msg->{'nick'};
+		$self->{'users'}->leave_channel($msg->{'channel'}, $nick);
+		if (($nick eq $self->{'nick'}) and !$msg->{'outbound'}) {
 			$self->{'users'}->purge_channel($msg->{'channel'});
 			$self->{'channels'}->leave_channel($msg->{'channel'});
 		}
