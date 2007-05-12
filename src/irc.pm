@@ -107,6 +107,7 @@ sub receive_msg {
 sub send_msg {
 	my ($self, $msgtext) = @_;
 
+	$msgtext =~ s/(\r|)\n/\r\n/;
 	push(@{ $self->{'send_queue'} }, $msgtext);
 	$self->flush_queue();
 	my $msg = $self->parse_msg($msgtext);
