@@ -10,8 +10,8 @@ use irc;
 use misc;
 use module;
 
-my $ping_timeout = 300;
 my $time_last_msg = time();
+my $time_last_ping = time();
 
 main();
 exit(0);
@@ -33,7 +33,13 @@ sub main_loop {
 
 	while (1) {
 		my $msg = $irc->receive_msg();
-		$time_last_msg = time() if ($msg->{'cmd'} ne "TICK");
+		$time_last_msg = time() if ($msg->{'cmd'} ne "TICK" and (!$msg->{'outbound'} or ($msg->{'cmd'} ne "PING")));
+
+		my $ping_interval = $irc->{'options'}->get_scalar_value("ping_interval");
+		if ($ping_interval and ((time() - $time_last_ping) > $ping_interval)) {
+			$irc->send_msg("PING $irc->{'server'}\n");
+			$time_last_ping = time();
+		}
 
 		if ($msg->{'cmd'} eq "ERROR") {
 			status_log("ERROR! Restarting...");
@@ -125,7 +131,8 @@ sub evaluate_command {
 sub check_ping_timeout {
 	my ($irc) = @_;
 
-	if ((time() - $time_last_msg) >= $ping_timeout) {
+	my $ping_timeout = $irc->{'options'}->get_scalar_value("ping_timeout");
+	if ($ping_timeout and ((time() - $time_last_msg) >= $ping_timeout)) {
 		status_log("Ping Timeout, Restarting...");
 		$time_last_msg = time();
 		$irc->disconnect();
