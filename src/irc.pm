@@ -45,6 +45,7 @@ sub new {
 	$self->{'channels'} = channels->new();
 	$self->{'users'} = users->new();
 	$self->{'sock'} = 0;
+	$self->{'server'} = "";
 	$self->{'connected'} = 0;
 	$self->{'tick'} = $default_max_tick;
 	$self->{'min_tick'} = $default_min_tick;
@@ -210,6 +211,7 @@ sub server_connect {
 				$port = 6667 unless ($port);
 				if ($sock = IO::Socket::INET->new(PeerAddr => $server, PeerPort => $port, Proto => 'tcp', Timeout => 30)) {
 					$self->{'sock'} = $sock;
+					$self->{'server'} = $server;
 					print $sock "NICK $self->{'nick'}\n";
 					print $sock "USER $self->{'nick'} 0 0 :The Bot\n";
 					status_log("Connected...");
