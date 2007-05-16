@@ -33,7 +33,7 @@ sub main_loop {
 
 	while (1) {
 		my $msg = $irc->receive_msg();
-		$time_last_msg = time() unless ($msg->{'cmd'} eq "TICK" or ($msg->{'outbound'} and ($msg->{'cmd'} eq "PING")));
+		$time_last_msg = time() unless (($msg->{'cmd'} eq "TICK") or (($msg->{'outbound'} == 1) and ($msg->{'cmd'} eq "PING")));
 
 		my $ping_interval = $irc->{'options'}->get_scalar_value("ping_interval");
 		if ($ping_interval and ((time() - $time_last_ping) > $ping_interval)) {
