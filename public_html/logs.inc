@@ -10,7 +10,7 @@ function print_channels ($logs) {
 	if (is_dir($logs) && ($dir = opendir($logs))) {
 		echo("<ul>\n");
 		while ($channel = readdir($dir)) {
-			if ($channel != "." && $channel != "..") {
+			if ($channel != "." && $channel != ".." && is_dir("$logs/$channel")) {
 				echo("<li><a href=\"$_SERVER[PHP_SELF]?channel=$channel\">#$channel</a></li>\n");
 			}
 		}
