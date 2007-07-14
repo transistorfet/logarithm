@@ -243,6 +243,7 @@ sub register_timer {
 		'seconds' => $seconds,
 		'autoreset' => $autoreset,
 		'start' => time(),
+		'enabled' => 1,
 		'function' => $function,
 		'params' => [ @params ]
 	};
@@ -264,6 +265,7 @@ sub reset_timer {
 	my $package = caller();
 	return(0) unless (defined($modules->{ $package }));
 	$modules->{ $package }->{'timers'}->{ $id }->{'start'} = time();
+	$modules->{ $package }->{'timers'}->{ $id }->{'enabled'} = 1;
 	$modules->{ $package }->{'timers'}->{ $id }->{'seconds'} = $seconds if ($seconds);
 	return(0);
 }
@@ -274,9 +276,14 @@ sub check_timers {
 	foreach my $package (keys(%{ $modules })) {
 		foreach my $id (keys(%{ $modules->{ $package }->{'timers'} })) {
 			my $timer = $modules->{ $package }->{'timers'}->{ $id };
-			if ((time() - $timer->{'start'}) >= $timer->{'seconds'}) {
+			if ($timer->{'enabled'} and (time() - $timer->{'start'}) >= $timer->{'seconds'}) {
 				module->call_function($package, $timer->{'function'}, @{ $timer->{'params'} });
-				$timer->{'start'} = time() if ($timer->{'autoreset'});
+				if ($timer->{'autoresest'}) {
+					$timer->{'start'} = time();
+				}
+				else {
+					$timer->{'enabled'} = 0;
+				}
 			}
 		}
 	}
