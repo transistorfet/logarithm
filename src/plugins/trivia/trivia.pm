@@ -11,6 +11,7 @@ sub get_info {{
 }}
 
 my $default_time = 60;
+my $default_next_time = 5;
 my $default_game_length = 20;
 
 sub init_plugin {
@@ -59,8 +60,9 @@ sub trivia_on {
 	my $test = load_questions("$trivia->{'plugin_dir'}/lists", $name, $reverse, $max);
 	if (defined($test)) {
 		$trivia->{ $channel } = $test;
-		module->register_timer($channel, $test->{'time'}, 1, "trivia_timer", $trivia, $irc, $channel);
-		next_question($trivia, $irc, $channel);
+		module->register_timer("$channel#answer", $test->{'time'}, 0, "trivia_timer", $trivia, $irc, $channel);
+		module->register_timer("$channel#next", $default_next_time, 0, "next_question", $trivia, $irc, $channel);
+		$irc->private_msg($channel, "Get ready to play trivia!");
 	}
 	else {
 		$irc->private_msg($channel, "I Can't Find The Questions! =(");
@@ -83,7 +85,8 @@ sub trivia_off {
 		}
 	}
 	delete($trivia->{ $channel });
-	module->unregister_timer($channel);
+	module->unregister_timer("$channel#answer");
+	module->unregister_timer("$channel#next");
 	$irc->private_msg($channel, "K Bye!");
 	return(0);
 }
@@ -98,9 +101,7 @@ sub hook_msg_dispatch {
 		if ($msg->{'text'} =~ /^\Q$answer\E$/i) {
 			my $score = add_score($trivia->{ $channel }->{'scores'}, $msg->{'nick'});
 			$irc->private_msg($channel, "Correct $msg->{'nick'}!  Your Score Is Now $score");
-			module->reset_timer($channel);
-			sleep 1;
-			next_question($trivia, $irc, $channel);
+			module->reset_timer("$channel#next");
 			last;
 		}
 	}
@@ -111,8 +112,7 @@ sub trivia_timer {
 
 	my $answer = $trivia->{ $channel }->{'answers'}->[0];
 	$irc->private_msg($channel, "Time's Up!  The correct answer was $answer");
-	sleep 1;
-	next_question($trivia, $irc, $channel);
+	module->reset_timer("$channel#next");
 }
 
 sub next_question {
@@ -135,6 +135,7 @@ sub next_question {
 		my @questions = split(/\s*,\s*/, $question);
 		$trivia->{ $channel }->{'answers'} = [ split(/\s*,\s*/, $answer) ];
 		$irc->private_msg($channel, @questions[0]);
+		module->reset_timer("$channel#answer");
 	}
 	return(0);
 }
