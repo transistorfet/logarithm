@@ -35,8 +35,8 @@ sub trivia_command {
 			$irc->notice($msg->{'nick'}, "A game is already started.");
 		}
 		else {
-			my ($name, $reverse) = ($msg->{'args'}->[2], 0);
-			($name, $reverse) = ($msg->{'args'}->[3], 1) if (lc($name) eq "reverse");
+			my ($name, $reverse) = (lc($msg->{'args'}->[2]), 0);
+			($name, $reverse) = (lc($msg->{'args'}->[3]), 1) if ($name eq "reverse");
 			trivia_on($trivia, $irc, $msg->{'respond'}, $name, $reverse, $default_game_length);
 		}
 	}
@@ -101,6 +101,7 @@ sub hook_msg_dispatch {
 		if ($msg->{'text'} =~ /^\Q$answer\E$/i) {
 			my $score = add_score($trivia->{ $channel }->{'scores'}, $msg->{'nick'});
 			$irc->private_msg($channel, "Correct $msg->{'nick'}!  Your Score Is Now $score");
+			$trivia->{ $channel }->{'answers'} = "";
 			module->reset_timer("$channel#next");
 			last;
 		}
