@@ -43,8 +43,8 @@ sub do_command {
 	$irc->private_msg($msg->{'respond'}, "Total votes: $total");
 	foreach my $i (0..$#options) {
 		my $num = $i + 1;
-		my $percent = scalar(@{ $results[$i] }) / $total;
-		$irc->private_msg($msg->{'respond'}, "    $num) $options[$i]: $percent (@{ $results[$i] })");
+		my $percent = sprintf("%.1d", (scalar(@{ $results[$i] }) / $total) * 100);
+		$irc->private_msg($msg->{'respond'}, "    $num) $options[$i]: $percent% (@{ $results[$i] })");
 	}
 	my $results = $polls->{ $channel }->get_scalar_value("${poll}_results");
 	$irc->private_msg($msg->{'respond'}, "Additional Results: $results") if ($results);
