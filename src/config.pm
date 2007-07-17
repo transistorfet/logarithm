@@ -54,6 +54,7 @@ sub remove_value {
 
 	$config = lc($config);
 	$self->check_age();
+	return(0) unless (defined($self->{'values'}->{ $config }));
 	foreach my $value (@values) {
 		for my $i (0..scalar(@{ $self->{'values'}->{ $config } })) {
 			if ($self->{'values'}->{ $config }->[$i] eq $value) {
