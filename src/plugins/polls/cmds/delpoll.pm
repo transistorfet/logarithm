@@ -28,7 +28,8 @@ sub do_command {
 	my ($owner, $question, @options) = $polls->{ $channel }->get_value("${poll}_poll");
 	return(-10) unless (($owner eq $msg->{'nick'}) or ($privs >= 300));
 	for my $i (1..scalar(@options)) {
-		$polls->{ $channel }->delete_value("${poll}_option$i");
+		$polls->{ $channel }->delete_value("${poll}_vote$i");
+		$polls->{ $channel }->delete_value("${poll}_predict$i");
 	}
 	$polls->{ $channel }->delete_value("${poll}_poll");
 	$polls->{ $channel }->delete_value("${poll}_results");

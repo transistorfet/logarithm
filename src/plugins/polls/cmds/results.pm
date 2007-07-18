@@ -5,8 +5,8 @@
 sub get_info {{
 	'access' => 0,
 	'help' => [
-		"Usage: results [<poll-name|poll-num>]",
-		"Description: Displays the results for the specified poll."
+		"Usage: (results|predictions) [<poll-name|poll-num>]",
+		"Description: Displays the results or predictions for the specified poll."
 	]
 }}
 
@@ -14,6 +14,17 @@ my $config_dir = "../etc";
 
 sub do_command {
 	my ($polls, $irc, $msg, $privs) = @_;
+
+	my $type;
+	if ($msg->{'command'} eq "results") {
+		$type = "vote";
+	}
+	elsif ($msg->{'command'} eq "predictions") {
+		$type = "predict";
+	}
+	else {
+		return(-1);
+	}
 
 	return(-20) if (scalar(@{ $msg->{'args'} }) != 2);
 	my $poll = lc($msg->{'args'}->[1]);
@@ -34,17 +45,19 @@ sub do_command {
 	my $total = 0;
 	my @results = ();
 	for my $i (1..scalar(@options)) {
-		my @votes = $polls->{ $channel }->get_value("${poll}_option$i");
+		my @votes = $polls->{ $channel }->get_value("${poll}_$type$i");
 		$total += scalar(@votes);
 		push(@results, [ @votes ]);
 	}
 
-	$irc->notice($msg->{'nick'}, "Results for: $question");
+	$irc->notice($msg->{'nick'}, ucfirst(lc($msg->{'command'})) . " for: $question");
 	$irc->notice($msg->{'nick'}, "Total votes: $total");
-	foreach my $i (0..$#options) {
-		my $num = $i + 1;
-		my $percent = sprintf("%.1d", (scalar(@{ $results[$i] }) / $total) * 100);
-		$irc->notice($msg->{'nick'}, "    $num) $options[$i]: $percent% (@{ $results[$i] })");
+	if ($total) {
+		foreach my $i (0..$#options) {
+			my $num = $i + 1;
+			my $percent = sprintf("%.1d", (scalar(@{ $results[$i] }) / $total) * 100);
+			$irc->notice($msg->{'nick'}, "    $num) $options[$i]: $percent% (@{ $results[$i] })");
+		}
 	}
 	my $results = $polls->{ $channel }->get_scalar_value("${poll}_results");
 	$irc->notice($msg->{'nick'}, "Additional Results: $results") if ($results);
