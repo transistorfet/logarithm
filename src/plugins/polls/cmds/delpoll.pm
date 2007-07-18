@@ -18,14 +18,15 @@ sub do_command {
 	my ($polls, $irc, $msg, $privs) = @_;
 
 	return(-20) if (scalar(@{ $msg->{'args'} }) != 2);
-	my $poll = $msg->{'args'}->[1];
+	my $poll = lc($msg->{'args'}->[1]);
 
 	return(-1) unless ($msg->{'respond'} =~ /^\#/);
 	my $channel = $msg->{'respond'};
 	(my $dir = $channel) =~ s/^#+//;
 	$polls->{ $channel } = config->new("$config_dir/$dir/polls.dat") unless (defined($polls->{ $channel }));
 
-	my ($question, @options) = $polls->{ $channel }->get_value("${poll}_poll");
+	my ($owner, $question, @options) = $polls->{ $channel }->get_value("${poll}_poll");
+	return(-10) unless (($owner eq $msg->{'nick'}) or ($privs >= 300));
 	for my $i (1..scalar(@options)) {
 		$polls->{ $channel }->delete_value("${poll}_option$i");
 	}

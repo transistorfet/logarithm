@@ -16,7 +16,7 @@ sub do_command {
 	my ($polls, $irc, $msg, $privs) = @_;
 
 	return(-20) if (scalar(@{ $msg->{'args'} }) != 2);
-	my $poll = $msg->{'args'}->[1];
+	my $poll = lc($msg->{'args'}->[1]);
 
 	return(-1) unless ($msg->{'respond'} =~ /^\#/);
 	my $channel = $msg->{'respond'};
@@ -25,10 +25,10 @@ sub do_command {
 
 	if ($poll =~ /^\d$/) {
 		my @list = $polls->{ $channel }->get_value("polls");
-		($irc->notice($msg->{'nick'}, "Invalid poll number") and return(0)) if ($poll >= scalar(@list));
-		$poll = $list[$poll];
+		($irc->notice($msg->{'nick'}, "Invalid poll number") and return(0)) if (($poll < 1) or ($poll > scalar(@list)));
+		$poll = $list[$poll - 1];
 	}
-	my ($question, @options) = $polls->{ $channel }->get_value("${poll}_poll");
+	my ($owner, $question, @options) = $polls->{ $channel }->get_value("${poll}_poll");
 	($irc->notice($msg->{'nick'}, "Poll not found.") and return(0)) unless ($question);
 
 	my $total = 0;
@@ -39,15 +39,15 @@ sub do_command {
 		push(@results, [ @votes ]);
 	}
 
-	$irc->private_msg($msg->{'respond'}, "Results for: $question");
-	$irc->private_msg($msg->{'respond'}, "Total votes: $total");
+	$irc->notice($msg->{'nick'}, "Results for: $question");
+	$irc->notice($msg->{'nick'}, "Total votes: $total");
 	foreach my $i (0..$#options) {
 		my $num = $i + 1;
 		my $percent = sprintf("%.1d", (scalar(@{ $results[$i] }) / $total) * 100);
-		$irc->private_msg($msg->{'respond'}, "    $num) $options[$i]: $percent% (@{ $results[$i] })");
+		$irc->notice($msg->{'nick'}, "    $num) $options[$i]: $percent% (@{ $results[$i] })");
 	}
 	my $results = $polls->{ $channel }->get_scalar_value("${poll}_results");
-	$irc->private_msg($msg->{'respond'}, "Additional Results: $results") if ($results);
+	$irc->notice($msg->{'nick'}, "Additional Results: $results") if ($results);
 	return(0);
 }
 

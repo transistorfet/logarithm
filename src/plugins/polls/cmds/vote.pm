@@ -16,7 +16,7 @@ sub do_command {
 	my ($polls, $irc, $msg, $privs) = @_;
 
 	return(-20) if (scalar(@{ $msg->{'args'} }) != 3);
-	my $poll = $msg->{'args'}->[1];
+	my $poll = lc($msg->{'args'}->[1]);
 	my $vote = $msg->{'args'}->[2];
 
 	return(-1) unless ($msg->{'respond'} =~ /^\#/);
@@ -26,12 +26,25 @@ sub do_command {
 
 	if ($poll =~ /^\d$/) {
 		my @list = $polls->{ $channel }->get_value("polls");
-		($irc->notice($msg->{'nick'}, "Invalid poll number") and return(0)) if ($poll >= scalar(@list));
-		$poll = $list[$poll];
+		($irc->notice($msg->{'nick'}, "Invalid poll number") and return(0)) if (($poll < 1) or ($poll > scalar(@list)));
+		$poll = $list[$poll - 1];
 	}
-	my ($question, @options) = $polls->{ $channel }->get_value("${poll}_poll");
+	my ($owner, $question, @options) = $polls->{ $channel }->get_value("${poll}_poll");
 	($irc->notice($msg->{'nick'}, "Poll not found.") and return(0)) unless ($question);
-	($irc->notice($msg->{'nick'}, "Invalid vote") and return(0)) unless (($vote =~ /^\d+$/) and ($vote <= scalar(@options)));
+	if ($vote =~ /^\d+$/) {
+		($irc->notice($msg->{'nick'}, "Invalid vote") and return(0)) unless (($vote >= 1) and ($vote <= scalar(@options)));
+	}
+	else {
+		my $option = $vote;
+		$vote = 0;
+		foreach my $i (0..$#options) {
+			if ($options[$i] =~ /\Q$option\E/i) {
+				$vote = $i + 1;
+				last;
+			}
+		}
+		($irc->notice($msg->{'nick'}, "Vote option not found") and return(0)) unless ($vote);
+	}
 
 	for my $i (1..scalar(@options)) {
 		$polls->{ $channel }->remove_value("${poll}_option$i", $msg->{'nick'});

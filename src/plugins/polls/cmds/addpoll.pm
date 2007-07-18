@@ -26,12 +26,15 @@ sub do_command {
 	$rest =~ s/^\s*\"//;
 	$rest =~ s/\"\s*$//;
 	my @params = split(/\"\s+\"/, $rest);
+	unshift(@params, $msg->{'nick'});
 
 	return(-1) unless ($msg->{'respond'} =~ /^\#/);
 	my $channel = $msg->{'respond'};
 	(my $dir = $channel) =~ s/^#+//;
 	$polls->{ $channel } = config->new("$config_dir/$dir/polls.dat") unless (defined($polls->{ $channel }));
 
+	my ($owner, $question) = $polls->{ $channel }->get_value("${poll}_poll");
+	return(-10) unless (($owner eq $msg->{'nick'}) or ($privs >= 300));
 	$polls->{ $channel }->set_value("${poll}_poll", @params);
 	$polls->{ $channel }->add_value("polls", $poll);
 	$irc->notice($msg->{'nick'}, "Poll Added");

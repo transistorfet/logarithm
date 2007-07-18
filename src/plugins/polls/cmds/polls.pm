@@ -21,20 +21,20 @@ sub do_command {
 	(my $dir = $channel) =~ s/^#+//;
 	$polls->{ $channel } = config->new("$config_dir/$dir/polls.dat") unless (defined($polls->{ $channel }));
 
-	my $poll = $msg->{'args'}->[1];
+	my $poll = lc($msg->{'args'}->[1]);
 	if ($poll) {
 		if ($poll =~ /^\d$/) {
 			my @list = $polls->{ $channel }->get_value("polls");
-			($irc->notice($msg->{'nick'}, "Invalid poll number") and return(0)) if ($poll >= scalar(@list));
-			$poll = $list[$poll];
+			($irc->notice($msg->{'nick'}, "Invalid poll number") and return(0)) if (($poll < 1) or ($poll > scalar(@list)));
+			$poll = $list[$poll - 1];
 		}
-		my ($question, @options) = $polls->{ $channel }->get_value("${poll}_poll");
+		my ($owner, $question, @options) = $polls->{ $channel }->get_value("${poll}_poll");
 		($irc->notice($msg->{'nick'}, "Poll not found.") and return(0)) unless ($question);
 
-		$irc->private_msg($msg->{'respond'}, "$question");
+		$irc->notice($msg->{'nick'}, "$question");
 		my $num = 1;
 		foreach my $option (@options) {
-			$irc->private_msg($msg->{'respond'}, "    $num) $option");
+			$irc->notice($msg->{'nick'}, "    $num) $option");
 			$num++;
 		}
 	}
@@ -42,8 +42,8 @@ sub do_command {
 		my $num = 1;
 		my @list = $polls->{ $channel }->get_value("polls");
 		foreach my $poll (@list) {
-			my $question = $polls->{ $channel }->get_scalar_value("${poll}_poll");
-			$irc->private_msg($msg->{'respond'}, "$num) $question ($poll)");
+			my ($owner, $question) = $polls->{ $channel }->get_value("${poll}_poll");
+			$irc->notice($msg->{'nick'}, "$num) $question ($poll)");
 			$num++;
 		}
 	}
