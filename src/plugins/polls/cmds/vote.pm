@@ -15,9 +15,10 @@ my $config_dir = "../etc";
 sub do_command {
 	my ($polls, $irc, $msg, $privs) = @_;
 
-	return(-20) if (scalar(@{ $msg->{'args'} }) != 3);
-	my $poll = lc($msg->{'args'}->[1]);
-	my $vote = $msg->{'args'}->[2];
+	$msg->{'phrase'} =~ /\s*(.+?)\s+(.+?)\s*$/;
+	my ($poll, $vote) = ($1, $2);
+	$poll = lc($poll);
+	return(-20) unless ($poll and $vote);
 
 	return(-1) unless ($msg->{'respond'} =~ /^\#/);
 	my $channel = $msg->{'respond'};
