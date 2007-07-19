@@ -33,6 +33,7 @@ sub do_command {
 	}
 	$polls->{ $channel }->delete_value("${poll}_poll");
 	$polls->{ $channel }->delete_value("${poll}_results");
+	$polls->{ $channel }->delete_value("${poll}_disabled");
 	$polls->{ $channel }->remove_value("polls", $poll);
 	$irc->notice($msg->{'nick'}, "Poll Removed");
 	return(0);

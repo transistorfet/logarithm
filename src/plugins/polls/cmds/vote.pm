@@ -33,6 +33,9 @@ sub do_command {
 		($irc->notice($msg->{'nick'}, "Invalid poll number") and return(0)) if (($poll < 1) or ($poll > scalar(@list)));
 		$poll = $list[$poll - 1];
 	}
+
+	($irc->notice($msg->{'nick'}, "That poll has closed.") and return(0)) if ($polls->{ $channel }->get_scalar_value("${poll}_disabled"));
+
 	my ($owner, $question, @options) = $polls->{ $channel }->get_value("${poll}_poll");
 	($irc->notice($msg->{'nick'}, "Poll not found.") and return(0)) unless ($question);
 	if ($vote =~ /^\d+$/) {
