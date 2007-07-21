@@ -42,8 +42,10 @@ sub do_command {
 		my $num = 1;
 		my @list = $polls->{ $channel }->get_value("polls");
 		foreach my $poll (@list) {
+			my $disabled = $polls->{ $channel }->get_scalar_value("${poll}_disabled");
 			my ($owner, $question) = $polls->{ $channel }->get_value("${poll}_poll");
-			$irc->notice($msg->{'nick'}, "$num) $question ($poll)");
+			$disabled = $disabled ? " (disabled)" : "";
+			$irc->notice($msg->{'nick'}, "$num) $question ($poll)" . $disabled);
 			$num++;
 		}
 	}
