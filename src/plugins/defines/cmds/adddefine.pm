@@ -7,7 +7,7 @@ use csv;
 sub get_info {{
 	'access' => 50,
 	'help' => [
-		"Usage: adddefine <phrase>: <definition>]",
+		"Usage: adddefine <phrase>: <definition>",
 		"Description: Adds the definition for phrase to the list for the specified channel"
 	]
 }}
@@ -25,7 +25,7 @@ sub do_command {
 	$word = ucfirst($word);
 
 	my $channel = ($msg->{'respond'} =~ /^\#/) ? $msg->{'respond'} : "global";
-	my $file = "$channel/defines.lst";
+	my $file = "$config_dir/$channel/defines.lst";
 	$file =~ s/\/#+/\//;
 	$defines->{ $channel } = csv->open_file($file, "\t", 1) unless (defined($defines->{ $channel }));
 
