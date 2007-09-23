@@ -29,6 +29,7 @@ sub changetopic_command {
 	my ($info, $irc, $msg, $privs) = @_;
 
 	return(-10) if ($privs < 100);
+	$irc->identify();
 	change_topic($info, $irc, $msg->{'channel'});
 	return(0);
 }
@@ -49,7 +50,7 @@ sub check_time {
 sub change_all_topics {
 	my ($info) = @_;
 
-	status_log("Topicifier changing topics");
+	status_log("Topicifier: Changing topics");
 	my $connections = irc->get_connections();
 	foreach my $irc (@{ $connections }) {
 		$irc->identify();
@@ -63,8 +64,8 @@ sub change_topic {
 	my ($info, $irc, $channel) = @_;
 
 	my $options = $irc->{'channels'}->get_options($channel);
-	next unless ($options);
-	next unless ($options->get_scalar_value("enable_topicifier"));
+	return(-1) unless ($options);
+	return(-1) unless ($options->get_scalar_value("enable_topicifier"));
 	load_topics($info, $channel) unless (defined($info->{'channels'}->{ $channel }) and scalar(@{ $info->{'channels'}->{ $channel } }));
 	my $topic = shift(@{ $info->{'channels'}->{ $channel } });	
 	$irc->private_msg("chanserv", "topic $channel $topic") if ($topic);
@@ -74,6 +75,7 @@ sub change_topic {
 sub load_topics {
 	my ($info, $channel) = @_;
 
+	status_log("Topicifier: Loading topics");
 	my @topics;
 	my $dir = $channel;
 	$dir =~ s/^#+//;
