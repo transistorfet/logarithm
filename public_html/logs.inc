@@ -1,7 +1,5 @@
 <?php
 
-require_once("misc.inc");
-
 $log_dir = "../logs";
 
 function print_channels ($logs) {
@@ -107,6 +105,19 @@ function search_log_file ($filename, $phrase) {
 		return($hits);
 	}
 	return(0);
+}
+
+function build_query ($file, &$variables) {
+	if (count($variables) == 0) {
+		return($file);
+	}
+	else {
+		$link = "$file?";
+		foreach (array_keys($variables) as $var) {
+			$link .= "$var=" . $variables[$var] . "&";
+		}
+		return(rtrim($link, "&"));
+	}
 }
 
 ?>
