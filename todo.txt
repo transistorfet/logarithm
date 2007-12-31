@@ -1,13 +1,23 @@
 
-	* there is a problem where if a module is reloaded, any variable values are erased which causes
-	  problems with plugins (install_dir for example is cleared).  should init_plugin be called every
-	  time after a module is loaded?
+	* make definitions accept wildcards but you'd have to limit the number of responses
+	* fix the fucking autotopicifier
+	* fix the autoping reconnect code stuff
+
+	* should plugins that register a channel specific something (timer or hook) always also hook the
+	  irc messages and deregister when logarithm leaves a channel? (only affects wordtest)
+	* if you try to make it multiserver, there has to be a way to keep logs in network directories and
+	  probably the same for etc/ files.
 
 	* add a license and copyright file before the next release
 	* Add Line Length Limiter to break up lines longer than the max
 	* should the default access level be really high instead of 0 (in case an error causes the
 	  module_info to not be defined or set to 0?)
 
+	* make a calander feature for keeping track of events complete with reminders
+	* perhaps you could make a todo list thing with a web-based access portal as well.  How would web
+	  stuff play into plugins?  Perhaps you could have a special access page in public_html that takes
+	  a GET parameter of what plugin and page you want to access and it includes that page from the
+	  plugins/<name>/public_html/ page
 	* make a link command that stores a list of links for each channel (using config where the first
 	  value is always the link and the second is an optional description).  The file could be displayed
 	  on the website as well but is used for named links???
@@ -16,8 +26,6 @@
 	  system of quotas for uploaders and stuff.  There could be a dcc plugin seperately that uses
 	  hooks to communicate with other plugins that use the dcc features
 	* a command that randomly prints something from one of the site blogs?
-	* french plugin for #french that greets and chats with people in french (possibly french trivia/word
-	  testing) as well as a french dictionary.
 	* messages system so that people can leave others messages (maybe autoprint on join + access commands)
 	  (this is like memoserv so is it needed?)
 	* have a list of recomened readings
