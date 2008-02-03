@@ -19,7 +19,7 @@ sub do_command {
 
 	$channel =~ s/^#+//;
 	my $file = sprintf("$irc->{'logging'}->{'logdir'}/$channel/%02d-%02d-%02d.txt", $time->{'year'}, $time->{'month'}, $time->{'day'});
-	open(FILE, ">>$file") or (status_log("Cannot Open Log $file") and return(-1));
+	open(FILE, "$file") or (status_log("Cannot Open Log $file") and return(-1));
 	while (my $data = <FILE>) {
 		unshift(@lines, $data);
 	}
