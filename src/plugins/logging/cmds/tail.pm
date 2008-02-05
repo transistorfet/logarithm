@@ -27,8 +27,8 @@ sub do_command {
 		unshift(@data, $line);
 	}
 	close(FILE);
-	for (1..$lines) {
-		$irc->notice($msg->{'nick'}, shift(@data));
+	for my $i ($lines..1) {
+		$irc->notice($msg->{'nick'}, $data[$i]);
 	}
 	return(0);
 }
