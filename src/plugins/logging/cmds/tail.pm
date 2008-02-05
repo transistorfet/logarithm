@@ -27,7 +27,7 @@ sub do_command {
 		unshift(@data, $line);
 	}
 	close(FILE);
-	for my $i ($lines..1) {
+	foreach my $i (reverse 1..$lines) {
 		$irc->notice($msg->{'nick'}, $data[$i]);
 	}
 	return(0);
