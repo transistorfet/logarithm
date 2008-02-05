@@ -19,6 +19,7 @@ sub do_command {
 	my ($channel, $lines) = @{ $msg->{'args'} };
 
 	$lines =~ s/^-//;
+	$lines = 5 unless ($lines =~ /\d+/);
 	$channel =~ s/^#+//;
 	my $file = sprintf("$irc->{'logging'}->{'logdir'}/$channel/%02d-%02d-%02d.txt", $time->{'year'}, $time->{'month'}, $time->{'day'});
 	open(FILE, $file) or (status_log("Cannot Open Log $file") and return(-1));
