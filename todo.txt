@@ -1,4 +1,11 @@
 
+	* make a daemon command line option that starts logarithm in daemon mode (detaches) which disables
+	  outputting of status messages
+	* make a plugin that listens on a port for telnet styled connections from which logarithm can be
+	  controlled (for restart and shutdown type stuff)
+
+	* make a plugin that records ++ and -- commands somehow somewhy
+
 	* make definitions accept wildcards but you'd have to limit the number of responses
 	* fix the fucking autotopicifier
 	* fix the autoping reconnect code stuff
