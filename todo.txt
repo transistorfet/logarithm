@@ -1,8 +1,15 @@
 
+	* make imgcache plugin that will download (wget?) image links and store them locally for 4chan pics
+	* make a command for the polls that informs a user of which polls that user hasn't vote in yet
+	  as well as possibly the opposite (which ones he/she has voted for)
+
 	* make a daemon command line option that starts logarithm in daemon mode (detaches) which disables
 	  outputting of status messages
 	* make a plugin that listens on a port for telnet styled connections from which logarithm can be
-	  controlled (for restart and shutdown type stuff)
+	  controlled (for restart and shutdown type stuff).  Make it use the ICP or whatever protocol
+	  (does that require a centralized receiver?)
+	* add a license and copyright file before the next release
+	* Add Line Length Limiter to break up lines longer than the max
 
 	* make a plugin that records ++ and -- commands somehow somewhy
 
@@ -15,8 +22,6 @@
 	* if you try to make it multiserver, there has to be a way to keep logs in network directories and
 	  probably the same for etc/ files.
 
-	* add a license and copyright file before the next release
-	* Add Line Length Limiter to break up lines longer than the max
 	* should the default access level be really high instead of 0 (in case an error causes the
 	  module_info to not be defined or set to 0?)
 

@@ -2,6 +2,8 @@
 # Command Name:	tail.pm
 #
 
+use misc;
+
 sub get_info {{
 	'access' => 0,
 	'help' => [
