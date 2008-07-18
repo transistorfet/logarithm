@@ -1,4 +1,6 @@
 
+	* modify the date command to have a stored timezone for each user such that if that user runs the
+	  command or someone types !date <user>, it uses their timezone for printing the date
 	* make imgcache plugin that will download (wget?) image links and store them locally for 4chan pics
 	* make a command for the polls that informs a user of which polls that user hasn't vote in yet
 	  as well as possibly the opposite (which ones he/she has voted for)
