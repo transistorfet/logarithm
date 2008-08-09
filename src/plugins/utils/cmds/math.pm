@@ -15,8 +15,9 @@ my $ans = 0;
 sub do_command {
 	my ($irc, $msg, $privs) = @_;
 
-	if ($msg->{'phrase'} =~ /^(\(|\)|\+|-|\*|\/|\$pi|\$ans|cos|sin|abs|sqrt|exp|hex|oct|int|log|0x(\d|a|b|c|d|e|f)+|\d|\.|\s)*$/) {
+	if ($msg->{'phrase'} =~ /^(\(|\)|\+|-|\*|\/|\$pi|\$e|\$ans|cos|sin|abs|sqrt|exp|hex|oct|int|log|0x(\d|a|b|c|d|e|f)+|\d|\.|\s)*$/) {
 		my $pi = 3.141592653589793238462643383279502884197169399375105;
+		my $e = 2.71828182845904523536;
 		my $equation = '$ans = ' . $msg->{'phrase'} . ';';
 		return(-1) unless (defined(eval "$equation"));
 		$irc->private_msg($msg->{'respond'}, "The answer is: $ans");
