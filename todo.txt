@@ -10,7 +10,6 @@
 	* make a plugin that listens on a port for telnet styled connections from which logarithm can be
 	  controlled (for restart and shutdown type stuff).  Make it use the ICP or whatever protocol
 	  (does that require a centralized receiver?)
-	* add a license and copyright file before the next release
 	* Add Line Length Limiter to break up lines longer than the max
 
 	* make a plugin that records ++ and -- commands somehow somewhy
