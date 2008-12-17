@@ -9,12 +9,14 @@ use misc;
 my $change_day = 5;
 my $change_hour = 16;
 
+my $min_wait_time = 30;
+
 my $config_dir = "../etc";
 
 sub init_plugin {
 	my ($plugin_dir) = @_;
 
-	my $info = { 'changed' => 0, 'channels' => { } };
+	my $info = { 'changed' => 0, 'last' => 0, 'channels' => { } };
 	module->register_timer("topic", 1800, 1, "check_time", $info);
 	module->register_command("changetopic", "changetopic_command", $info);
 	module->register_command_directory("$plugin_dir/cmds");
@@ -29,6 +31,10 @@ sub changetopic_command {
 	my ($info, $irc, $msg, $privs) = @_;
 
 	return(-10) if ($privs < 100);
+	if ((time() - $info->{'last'}) < $min_wait_time) {
+		$irc->notice($msg->{'nick'}, "Please wait before changing the topic again.");
+		return(0);
+	}
 	$irc->identify();
 	change_topic($info, $irc, $msg->{'channel'});
 	return(0);
@@ -69,6 +75,7 @@ sub change_topic {
 	load_topics($info, $channel) unless (defined($info->{'channels'}->{ $channel }) and scalar(@{ $info->{'channels'}->{ $channel } }));
 	my $topic = shift(@{ $info->{'channels'}->{ $channel } });	
 	$irc->private_msg("chanserv", "topic $channel $topic") if ($topic);
+	$info->{'last'} = time();
 	return(0);
 }
 
