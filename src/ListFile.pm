@@ -1,14 +1,16 @@
 #
-# Module Name:	csv.pm
-# Description:	CSV Module
+# Module Name:	ListFile.pm
+# Description:	File-Based Array (Stored as CSV File)
 #
 
-package csv;
+package ListFile;
 
 use strict;
-use misc;
+use warnings;
 
-sub open_file {
+use Misc;
+
+sub new {
 	my ($this, $file, $delim, $case_insensitive) = @_;
 	my $class = ref($this) || $this;
 	my $self = { };
@@ -16,63 +18,65 @@ sub open_file {
 	$self->{'file'} = $file;
 	$self->{'delim'} = $delim ? $delim : ":";
 	$self->{'insensitive'} = $case_insensitive;
-	$self->load_file();
+	$self->_load();
 	return($self);
 }
 
-sub close_file {
-	my ($self) = @_;
-
-	$self->write_file();
-}
-
-sub add_entry {
+sub add {
 	my ($self, @values) = @_;
 
-	$self->check_age();
+	$self->_check_age();
 	push(@{ $self->{'entries'} }, [ @values ]);
-	$self->write_file();
+	$self->_write();
 	return(0);
 }
 
-sub remove_entry {
+sub remove {
 	my ($self, $index) = @_;
 
-	$self->check_age();
+	$self->_check_age();
 	$index = lc($index) if ($self->{'insensitive'});
 	for my $i (0..$#{ $self->{'entries'} }) {
 		my $key = $self->{'entries'}->[$i]->[0];
 		$key = lc($key) if ($self->{'insensitive'});
 		if ($key eq $index) {
 			splice(@{ $self->{'entries'} }, $i, 1);
-			$self->write_file();
+			$self->_write();
 			return(0);
 		}
 	}
 	return(-1);
 }
 
-sub replace_entry {
+sub replace {
 	my ($self, $index, @values) = @_;
 
-	$self->check_age();
+	$self->_check_age();
 	$index = lc($index) if ($self->{'insensitive'});
 	for my $i (0..$#{ $self->{'entries'} }) {
 		my $key = $self->{'entries'}->[$i]->[0];
 		$key = lc($key) if ($self->{'insensitive'});
 		if ($key eq $index) {
 			$self->{'entries'}->[$i] = [ $index, @values ];
-			$self->write_file();
+			$self->_write();
 			return(0);
 		}
 	}
 	return(0);
 }
 
-sub find_entry {
+sub get {
 	my ($self, $index) = @_;
 
-	$self->check_age();
+	$self->_check_age();
+	return(undef) if ($index > $#{ $self->{'entries'} });
+	return(@{ $self->{'entries'}->[$index] });
+}
+
+sub find {
+	my ($self, $index) = @_;
+
+	$self->_check_age();
 	$index = lc($index) if ($self->{'insensitive'});
 	for my $i (0..$#{ $self->{'entries'} }) {
 		my $key = $self->{'entries'}->[$i]->[0];
@@ -84,10 +88,10 @@ sub find_entry {
 	return(undef);
 }
 
-sub find_all_entries {
+sub find_all {
 	my ($self, $index) = @_;
 
-	$self->check_age();
+	$self->_check_age();
 	my @entries = ();
 	$index = lc($index) if ($self->{'insensitive'});
 	for my $i (0..$#{ $self->{'entries'} }) {
@@ -100,32 +104,24 @@ sub find_all_entries {
 	return(@entries);
 }
 
-sub get_size {
+sub size {
 	my ($self) = @_;
 
-	$self->check_age();
+	$self->_check_age();
 	return(scalar(@{ $self->{'entries'} }));
-}
-
-sub get_entry {
-	my ($self, $number) = @_;
-
-	$self->check_age();
-	return(undef) if ($number > $#{ $self->{'entries'} });
-	return(@{ $self->{'entries'}->[$number] });
 }
 
 ### Local Functions ###
 
-sub check_age {
+sub _check_age {
 	my ($self) = @_;
 
 	if ((-M $self->{'file'}) != $self->{'age'}) {
-		$self->load_file();
+		$self->_load();
 	}
 }
 
-sub load_file {
+sub _load {
 	my ($self) = @_;
 
 	$self->{'entries'} = [ ];
@@ -139,7 +135,7 @@ sub load_file {
 	close(FILE);
 }
 
-sub write_file {
+sub _write {
 	my ($self) = @_;
 
 	create_file_directory($self->{'file'});

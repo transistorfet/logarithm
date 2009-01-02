@@ -18,8 +18,8 @@ sub init_plugin {
 	my ($plugin_dir) = @_;
 
 	my $trivia = { 'plugin_dir' => $plugin_dir };
-	module->register_hook("trivia", "irc_dispatch_msg", "hook_msg_dispatch", $trivia);
-	module->register_command("trivia", "trivia_command", $trivia);
+	Hook->new("irc_dispatch_msg", Handler->new("hook_msg_dispatch", $trivia));
+	Command->add("trivia", Handler->new("trivia_command", $trivia));
 	return(0);
 }
 
@@ -135,7 +135,7 @@ sub next_question {
 		($question, $answer) = ($answer, $question) if ($trivia->{ $channel }->{'reverse'});
 		my @questions = split(/\s*,\s*/, $question);
 		$trivia->{ $channel }->{'answers'} = [ split(/\s*,\s*/, $answer) ];
-		$irc->private_msg($channel, @questions[0]);
+		$irc->private_msg($channel, $questions[0]);
 		module->reset_timer("$channel#answer");
 	}
 	return(0);
@@ -144,6 +144,7 @@ sub next_question {
 sub load_questions {
 	my ($dir, $name, $reverse, $max) = @_;
 
+	my $file;
 	if ($name =~ /^(\w+)$/) {
 		$file = "$dir/$name.lst";
 	}

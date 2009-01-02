@@ -3,8 +3,10 @@
 # Description:	Changes the topic of the channel once a week to a random topic from a list
 #
 
-use irc;
-use misc;
+use Misc;
+use Timer;
+use Command;
+use Handler;
 
 my $change_day = 5;
 my $change_hour = 16;
@@ -17,9 +19,9 @@ sub init_plugin {
 	my ($plugin_dir) = @_;
 
 	my $info = { 'changed' => 0, 'last' => 0, 'channels' => { } };
-	module->register_timer("topic", 1800, 1, "check_time", $info);
-	module->register_command("changetopic", "changetopic_command", $info);
-	module->register_command_directory("$plugin_dir/cmds");
+	Timer->new(1800, 1, Handler->new("check_time", $info));
+	Command->add("changetopic", Handler->new("changetopic_command", $info));
+	Command->add_directory("$plugin_dir/cmds");
 	return(0);
 }
 
@@ -71,7 +73,7 @@ sub change_topic {
 
 	my $options = $irc->{'channels'}->get_options($channel);
 	return(-1) unless ($options);
-	return(-1) unless ($options->get_scalar_value("enable_topicifier"));
+	return(-1) unless ($options->get_scalar("enable_topicifier"));
 	load_topics($info, $channel) unless (defined($info->{'channels'}->{ $channel }) and scalar(@{ $info->{'channels'}->{ $channel } }));
 	my $topic = shift(@{ $info->{'channels'}->{ $channel } });	
 	$irc->private_msg("chanserv", "topic $channel $topic") if ($topic);

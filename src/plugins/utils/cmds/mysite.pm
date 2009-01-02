@@ -15,7 +15,7 @@ sub do_command {
 
 	my $options = $irc->{'channels'}->get_options($msg->{'args'}->[0]);
 	$options = $irc->{'options'} unless ($options);
-	my $website = $options->get_scalar_value("usersite");
+	my $website = $options->get_scalar("usersite");
 	my $nick = $msg->{'args'}->[1] ? $msg->{'args'}->[1] : $msg->{'nick'};
 
 	if ($website) {

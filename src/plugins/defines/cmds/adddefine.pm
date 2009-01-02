@@ -2,7 +2,7 @@
 # Command Name:	adddefine.pm
 #
 
-use csv;
+use ListFile;
 
 sub get_info {{
 	'access' => 50,
@@ -27,9 +27,9 @@ sub do_command {
 	my $channel = ($msg->{'respond'} =~ /^\#/) ? $msg->{'respond'} : "global";
 	my $file = "$config_dir/$channel/defines.lst";
 	$file =~ s/\/#+/\//;
-	$defines->{ $channel } = csv->open_file($file, "\t", 1) unless (defined($defines->{ $channel }));
+	$defines->{ $channel } = ListFile->new($file, "\t", 1) unless (defined($defines->{ $channel }));
 
-	$defines->{ $channel }->add_entry($word, $define);
+	$defines->{ $channel }->add($word, $define);
 	$irc->notice($msg->{'nick'}, "Definition Added");
 	return(0);
 }

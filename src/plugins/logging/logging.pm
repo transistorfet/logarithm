@@ -3,7 +3,7 @@
 # Description:	IRC Logging Module
 #
 
-use misc;
+use Misc;
 
 my $default_logdir = "../logs";
 my $last_time = get_time();
@@ -11,13 +11,13 @@ my $last_time = get_time();
 sub init_plugin {
 	my ($plugin_dir) = @_;
 
-	module->register_hook("log", "irc_connect", "hook_connect");
-	module->register_hook("log", "irc_disconnect", "hook_disconnect");
-	module->register_hook("log", "irc_dispatch_msg", "hook_dispatch_msg");
-	module->register_hook("log", "irc_change_nick", "hook_change_nick");
-	module->register_hook("log", "irc_quit_channel", "hook_quit_channel");
+	Hook->new("irc_connect", Handler->new("hook_connect"));
+	Hook->new("irc_disconnect", Handler->new("hook_disconnect"));
+	Hook->new("irc_dispatch_msg", Handler->new("hook_dispatch_msg"));
+	Hook->new("irc_change_nick", Handler->new("hook_change_nick"));
+	Hook->new("irc_quit_channel", Handler->new("hook_quit_channel"));
 
-	module->register_command_directory("$plugin_dir/cmds");
+	Command->add_directory("$plugin_dir/cmds");
 	return(0);
 }
 
@@ -29,7 +29,7 @@ sub hook_connect {
 	my ($irc) = @_;
 
 	unless (defined($irc->{'logging'})) {
-		my $logdir = $irc->{'options'}->get_scalar_value("logdir");
+		my $logdir = $irc->{'options'}->get_scalar("logdir");
 		$logdir = $default_logdir unless ($logdir);
 		create_directory($logdir);
 		$irc->{'logging'} = {
@@ -154,7 +154,7 @@ sub open_logs {
 	if ($irc->{'connected'}) {
 		$channel =~ s/^#+//;
 		mkdir "$irc->{'logging'}->{'logdir'}/$channel" if (!(-e "$irc->{'logging'}->{'logdir'}/$channel"));
-		$file = sprintf("$irc->{'logging'}->{'logdir'}/$channel/%02d-%02d-%02d.txt", $time->{'year'}, $time->{'month'}, $time->{'day'});
+		my $file = sprintf("$irc->{'logging'}->{'logdir'}/$channel/%02d-%02d-%02d.txt", $time->{'year'}, $time->{'month'}, $time->{'day'});
 		open(FILE, ">>$file") or (status_log("Cannot Open Log $file") and return(-1));
 		return(0);
 	}
@@ -177,10 +177,10 @@ sub strip_colour {
 sub is_enabled {
 	my ($irc, $channel) = @_;
 
-	my $default = $irc->{'options'}->get_scalar_value("enable_logging");
+	my $default = $irc->{'options'}->get_scalar("enable_logging");
 	my $options = $irc->{'channels'}->get_options($channel);
 	return($default) unless ($options);
-	my $enabled = $options->get_scalar_value("enable_logging");
+	my $enabled = $options->get_scalar("enable_logging");
 	return(defined($enabled) ? $enabled : $default);
 }
 

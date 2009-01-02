@@ -1,17 +1,18 @@
 #
-# Module Name:	users.pm
+# Module Name:	Users.pm
 # Description:	Users Manager
 #
 
-package users;
+package Users;
 
 use strict;
+use warnings;
 
-use csv;
-use misc;
+use Misc;
+use ListFile;
 
 my $config_dir = "../etc";
-my $passwd_file = csv->open_file("$config_dir/passwd", ':', 1);
+my $passwd_file = ListFile->new("$config_dir/passwd", ':', 1);
 
 sub new {
 	my ($this, $file) = @_;
@@ -100,8 +101,8 @@ sub register {
 
 	$nick = lc($nick);
 	$password = crypt($password, $nick);
-	return(-1) if ($passwd_file->find_entry($nick));
-	$passwd_file->add_entry($nick, $password, "");
+	return(-1) if ($passwd_file->find($nick));
+	$passwd_file->add($nick, $password, "");
 	return(0);
 }
 
@@ -109,7 +110,7 @@ sub unregister {
 	my ($self, $nick) = @_;
 
 	$nick = lc($nick);
-	$passwd_file->remove_entry($nick);
+	$passwd_file->remove($nick);
 }
 
 sub change_password {
@@ -118,9 +119,9 @@ sub change_password {
 	$nick = lc($nick);
 	return(-1) unless (defined($self->{ $nick }) and $self->{ $nick }->{'authorized'});
 	$password = crypt($password, $nick);
-	my @entry = $passwd_file->find_entry($nick);
+	my @entry = $passwd_file->find($nick);
 	return(-1) unless (lc($entry[0]) eq $nick);
-	$passwd_file->replace_entry($nick, $password, $entry[2]);
+	$passwd_file->replace($nick, $password, $entry[2]);
 }
 
 sub change_hostmask {
@@ -128,9 +129,9 @@ sub change_hostmask {
 
 	$nick = lc($nick);
 	return(-1) unless (defined($self->{ $nick }) and $self->{ $nick }->{'authorized'});
-	my @entry = $passwd_file->find_entry($nick);
+	my @entry = $passwd_file->find($nick);
 	return(-1) unless (lc($entry[0]) eq $nick);
-	$passwd_file->replace_entry($nick, $entry[1], $mask);
+	$passwd_file->replace($nick, $entry[1], $mask);
 }
 
 sub login {
@@ -139,7 +140,7 @@ sub login {
 	$nick = lc($nick);
 	return(-1) unless (defined($self->{ $nick }));
 	$password = crypt($password, $nick);
-	my @entry = $passwd_file->find_entry($nick);
+	my @entry = $passwd_file->find($nick);
 	return(-1) unless ((lc($entry[0]) eq $nick) and ($entry[1] eq $password));
 	$self->{ $nick }->{'authorized'} = 1;
 	return(0);
@@ -158,7 +159,8 @@ sub check_hostmask {
 
 	$nick = lc($nick);
 	return(-1) unless (defined($self->{ $nick }));
-	my @entry = $passwd_file->find_entry($nick);
+	my @entry = $passwd_file->find($nick);
+	return(-1) unless($entry[0]);
 	my $regex = encode_regex($entry[2]);
 	return(-1) unless ($regex and (lc($entry[0]) eq $nick) and ($mask =~ /$regex/));
 	$self->{ $nick }->{'authorized'} = 1;
@@ -173,11 +175,11 @@ sub get_access {
 	$channel = lc($channel);
 	$channel =~ s/^#+//;
 	return(0) unless (defined($self->{ $nick }) and $self->{ $nick }->{'authorized'});
-	my $access_file = csv->open_file("$config_dir/access", ':', 1);
-	my @entry = $access_file->find_entry($nick);
+	my $access_file = ListFile->new("$config_dir/access", ':', 1);
+	my @entry = $access_file->find($nick);
 	unless ($entry[0]) {
-		$access_file = csv->open_file("$config_dir/$channel/access", ':', 1);
-		@entry = $access_file->find_entry($nick);
+		$access_file = ListFile->new("$config_dir/$channel/access", ':', 1);
+		@entry = $access_file->find($nick);
 	}
 	return(1) unless (lc($entry[0]) eq $nick);
 	return($entry[1]);
@@ -190,10 +192,10 @@ sub add_access {
 	$channel = lc($channel);
 	$channel =~ s/^#+//;
 	return if ($privs == 0);
-	my $access_file = csv->open_file("$config_dir/$channel/access", ':', 1);
-	my @entry = $access_file->find_entry($nick);
+	my $access_file = ListFile->new("$config_dir/$channel/access", ':', 1);
+	my @entry = $access_file->find($nick);
 	return(-1) if (lc($entry[0]) eq $nick);
-	$access_file->add_entry($nick, $privs);
+	$access_file->add($nick, $privs);
 }
 
 sub remove_access {
@@ -202,8 +204,8 @@ sub remove_access {
 	$nick = lc($nick);
 	$channel = lc($channel);
 	$channel =~ s/^#+//;
-	my $access_file = csv->open_file("$config_dir/$channel/access", ':', 1);
-	$access_file->remove_entry($nick);
+	my $access_file = ListFile->new("$config_dir/$channel/access", ':', 1);
+	$access_file->remove($nick);
 }
 
 sub modify_access {
@@ -213,10 +215,10 @@ sub modify_access {
 	$channel = lc($channel);
 	$channel =~ s/^#+//;
 	return if ($privs == 0);
-	my $access_file = csv->open_file("$config_dir/$channel/access", ':', 1);
-	my @entry = $access_file->find_entry($nick);
+	my $access_file = ListFile->new("$config_dir/$channel/access", ':', 1);
+	my @entry = $access_file->find($nick);
 	return(-1) unless (lc($entry[0]) eq $nick);
-	$access_file->replace_entry($nick, $privs);
+	$access_file->replace($nick, $privs);
 }
 
 1;

@@ -2,7 +2,7 @@
 # Command Name:	fortune.pm
 #
 
-use misc;
+use Misc;
 
 sub get_info {{
 	'access' => 1,

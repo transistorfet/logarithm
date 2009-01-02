@@ -3,15 +3,15 @@
 # Description:	IRC Image Caching Module
 #
 
-use misc;
+use Misc;
 
 my $default_cachedir = "../public_html/cache";
 
 sub init_plugin {
 	my ($plugin_dir) = @_;
 
-	module->register_hook("cache", "irc_dispatch_msg", "hook_dispatch_msg");
-	module->register_command_directory("$plugin_dir/cmds");
+	Hook->new("irc_dispatch_msg", Handler->new("hook_dispatch_msg"));
+	Command->add_directory("$plugin_dir/cmds");
 	return(0);
 }
 
@@ -35,7 +35,7 @@ sub hook_dispatch_msg {
 sub cache_image {
 	my ($irc, $channel, $url) = @_;
 
-	my $cachedir = $irc->{'options'}->get_scalar_value("cachedir");
+	my $cachedir = $irc->{'options'}->get_scalar("cachedir");
 	$cachedir = $default_cachedir unless ($cachedir);
 	create_directory($cachedir) unless (-e $cachedir);
 

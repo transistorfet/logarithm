@@ -6,7 +6,7 @@
 sub init_plugin {
 	my ($plugin_dir) = @_;
 
-	module->register_command_directory("$plugin_dir/cmds");
+	Command->add_directory("$plugin_dir/cmds");
 	return(0);
 }
 

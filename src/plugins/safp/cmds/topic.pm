@@ -2,7 +2,7 @@
 # Command Name:	topic.pm
 #
 
-use csv;
+use ListFile;
 
 sub get_info {{
 	'access' => 0,
@@ -25,7 +25,7 @@ sub do_command {
 
 	unless (defined($topics->{ $channel })) {
 		(my $dir = $channel) =~ s/^#+//;
-		$topics->{ $channel } = csv->open_file("$config_dir/$dir/topics.lst", ':', 1);
+		$topics->{ $channel } = ListFile->new("$config_dir/$dir/topics.lst", ':', 1);
 		return(-1) unless ($topics->{ $channel });
 	}
 
@@ -33,17 +33,17 @@ sub do_command {
 	my $category = (scalar(@{ $msg->{'args'} }) == 2) ? $msg->{'args'}->[1] : undef;
 	if ($category =~ /\s*(\d+)\s*/) {
 		$number = $1;
-		my @entry = $topics->{ $channel }->get_entry($number);
+		my @entry = $topics->{ $channel }->get($number);
 		$topic = $entry[1];
 	}
 	elsif (defined($category)) {
-		my @list = $topics->{ $channel }->find_all_entries($category);
+		my @list = $topics->{ $channel }->find_all($category);
 		$number = int(rand(scalar(@list)));
 		$topic = $list[$number]->[1];
 	}
 	else {
-		$number = int(rand($topics->{ $channel }->get_size()));
-		my @entry = $topics->{ $channel }->get_entry($number);
+		$number = int(rand($topics->{ $channel }->size()));
+		my @entry = $topics->{ $channel }->get($number);
 		$topic = $entry[1];
 	}
 

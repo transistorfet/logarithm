@@ -19,11 +19,11 @@ sub do_command {
 
 	my $index = "greet_$msg->{'nick'}_msg";
 	if ($msg->{'phrase'} eq "none") {
-		return(-1) if ($options->set_value($index, ""));
+		return(-1) if ($options->set($index, ""));
 		$irc->notice($msg->{'nick'}, "Greeting disabled");
 	}
 	else {
-		return(-1) if ($options->set_value($index, $msg->{'phrase'}));
+		return(-1) if ($options->set($index, $msg->{'phrase'}));
 		$irc->notice($msg->{'nick'}, "Greeting set to $msg->{'phrase'}");
 	}
 }

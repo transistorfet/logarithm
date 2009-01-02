@@ -1,10 +1,9 @@
 #
-# Module Name:	misc.pm
-# Version:	0.6
+# Module Name:	Misc.pm
 # Description:	Miscellaneous Functions
 #
 
-package misc;
+package Misc;
 
 require Exporter;
 @ISA 	= qw(Exporter);
@@ -19,6 +18,7 @@ require Exporter;
 );
 
 use strict;
+use warnings;
 
 my $misc_status_file = "../logs/status.log";
 

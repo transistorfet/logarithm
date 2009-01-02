@@ -27,30 +27,30 @@ sub do_command {
 
 	if ($cmd eq "set") {
 		$msg->{'phrase'} =~ s/(.*?)\Q$option\E\s*//;
-		return(-1) if ($options->set_value($option, $msg->{'phrase'}));
+		return(-1) if ($options->set($option, $msg->{'phrase'}));
 		$irc->notice($msg->{'nick'}, "$option Set To $msg->{'phrase'}");
 	}
 	elsif ($cmd eq "get") {
-		my @values = $options->get_value($option);
+		my @values = $options->get_all($option);
 		my $line = "$option = (" . join(', ', @values) . ")";
 		$irc->notice($msg->{'nick'}, "$line");
 	}
 	elsif ($cmd eq "add") {
 		$msg->{'phrase'} =~ s/(.*?)\Q$option\E\s*//;
-		return(-1) if ($options->add_value($option, $msg->{'phrase'}));
-		my @values = $options->get_value($option);
+		return(-1) if ($options->add($option, $msg->{'phrase'}));
+		my @values = $options->get_all($option);
 		my $line = "$option = (" . join(', ', @values) . ")";
 		$irc->notice($msg->{'nick'}, "$line");
 	}
 	elsif ($cmd eq "remove") {
 		$msg->{'phrase'} =~ s/(.*?)\Q$option\E\s*//;
-		return(-1) if ($options->remove_value($option, $msg->{'phrase'}));
-		my @values = $options->get_value($option);
+		return(-1) if ($options->remove($option, $msg->{'phrase'}));
+		my @values = $options->get_all($option);
 		my $line = "$option = (" . join(', ', @values) . ")";
 		$irc->notice($msg->{'nick'}, "$line");
 	}
 	elsif ($cmd eq "erase") {
-		return(-1) if ($options->delete_value($option, $msg->{'phrase'}));
+		return(-1) if ($options->delete($option, $msg->{'phrase'}));
 		$irc->notice($msg->{'nick'}, "$option Deleted");
 	}
 	else {

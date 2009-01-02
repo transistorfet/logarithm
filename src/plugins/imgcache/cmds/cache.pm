@@ -14,12 +14,12 @@ sub do_command {
 	my ($irc, $msg, $privs) = @_;
 
 	my $channel = $msg->{'args'}->[0];
-	my $cache = $irc->{'channels'}->get_options($channel)->get_scalar_value("cache_site", "");
+	my $cache = $irc->{'channels'}->get_options($channel)->get_scalar("cache_site", "");
 	if ($cache) {
 		$irc->private_msg($msg->{'respond'}, $cache);
 	}
 	else {
-		my $bot_site = $irc->{'options'}->get_scalar_value("bot_site", "");
+		my $bot_site = $irc->{'options'}->get_scalar("bot_site", "");
 		return(0) unless ($bot_site);
 		$bot_site =~ s/(\\|\/)$//;
 		$irc->private_msg($msg->{'respond'}, "$bot_site/cache/");

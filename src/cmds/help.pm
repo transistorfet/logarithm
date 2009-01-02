@@ -15,7 +15,13 @@ sub do_command {
 
 	my @help = ();
 	if (scalar(@{ $msg->{'args'} }) > 1) {
-		if (my $info = module->get_info(module->get_command_package($msg->{'args'}->[1]))) {
+		my $command = Command::get($msg->{'args'}->[1]);
+		if (!defined($command)) {
+			$irc->notice($msg->{'nick'}, "Sorry, The command $msg->{'args'}->[1] is not available");
+			return(0);
+		}
+		my $module = Module->get_module($command->handler()->package());
+		if (defined($module) and (my $info = $module->call("get_info"))) {
 			@help = @{ $info->{'help'} };
 		}
 		else {
@@ -26,7 +32,7 @@ sub do_command {
 	else {
 		my $line;
 		my $i = 0;
-		my @commands = sort(module->get_command_list());
+		my @commands = sort(Command::get_list());
 		foreach my $command (@commands) {
 			$command = uc($command);
 			my $blank = "";

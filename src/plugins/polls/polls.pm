@@ -3,8 +3,8 @@
 # Description:	Question Polls Plugin
 #
 
-use misc;
-use config;
+use Misc;
+use HashFile;
 
 my $config_dir = "../etc";
 
@@ -12,9 +12,9 @@ sub init_plugin {
 	my ($plugin_dir) = @_;
 
 	my $polls = { };
-	module->register_command_directory("$plugin_dir/cmds", $polls);
-	module->register_command_module("predict", "$plugin_dir/cmds/vote.pm", $polls);
-	module->register_command_module("predictions", "$plugin_dir/cmds/results.pm", $polls);
+	Command->add_directory("$plugin_dir/cmds", $polls);
+	Command->add_file("predict", "$plugin_dir/cmds/vote.pm", $polls);
+	Command->add_file("predictions", "$plugin_dir/cmds/results.pm", $polls);
 	return(0);
 }
 

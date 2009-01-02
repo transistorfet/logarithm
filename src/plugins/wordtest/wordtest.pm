@@ -17,8 +17,8 @@ sub init_plugin {
 	my ($plugin_dir) = @_;
 
 	my $wordtest = { 'plugin_dir' => $plugin_dir };
-	module->register_hook("wordtest", "irc_dispatch_msg", "hook_msg_dispatch", $wordtest);
-	module->register_command("wordtest", "wordtest_command", $wordtest);
+	Hook->new("irc_dispatch_msg", Handler->new("hook_msg_dispatch", $wordtest));
+	Command->add("wordtest", Handler->new("wordtest_command", $wordtest));
 	return(0);
 }
 
@@ -134,7 +134,7 @@ sub next_question {
 		($question, $answer) = ($answer, $question) if ($wordtest->{ $channel }->{'reverse'});
 		my @questions = split(/\s*,\s*/, $question);
 		$wordtest->{ $channel }->{'answers'} = [ split(/\s*,\s*/, $answer) ];
-		$irc->private_msg($channel, @questions[0]);
+		$irc->private_msg($channel, $questions[0]);
 	}
 	return(0);
 }
@@ -142,6 +142,7 @@ sub next_question {
 sub load_questions {
 	my ($dir, $name, $reverse, $max) = @_;
 
+	my $file;
 	if ($name =~ /^(\w+)$/) {
 		$file = "$dir/$name.lst";
 	}

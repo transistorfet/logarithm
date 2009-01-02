@@ -14,7 +14,7 @@ sub do_command {
 	my ($irc, $msg, $privs) = @_;
 
 	return(-20) if (scalar(@{ $msg->{'params'} }) < 2);
-	my $bot_site = $irc->{'options'}->get_scalar_value("bot_site", "");
+	my $bot_site = $irc->{'options'}->get_scalar("bot_site", "");
 	return(0) unless ($bot_site);
 
 	$msg->{'phrase'} =~ /^\s*(.+)\s*$/;

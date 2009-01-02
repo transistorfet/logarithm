@@ -25,9 +25,9 @@ sub do_command {
 	my $file = "$config_dir/$channel/defines.lst";
 	$file =~ s/\/#+/\//;
 	return(0) unless (-e $file);
-	$defines->{ $channel } = csv->open_file($file, "\t", 1) unless (defined($defines->{ $channel }));
+	$defines->{ $channel } = ListFile->new($file, "\t", 1) unless (defined($defines->{ $channel }));
 
-	if ($defines->{ $channel }->remove_entry($word)) {
+	if ($defines->{ $channel }->remove($word)) {
 		$irc->notice($msg->{'nick'}, "Error deleting $word");
 	}
 	else {

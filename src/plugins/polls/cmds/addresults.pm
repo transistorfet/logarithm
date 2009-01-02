@@ -2,7 +2,7 @@
 # Command Name:	addresults.pm
 #
 
-use config;
+use HashFile;
 
 sub get_info {{
 	'access' => 50,
@@ -26,11 +26,11 @@ sub do_command {
 	return(-1) unless ($msg->{'respond'} =~ /^\#/);
 	my $channel = $msg->{'respond'};
 	(my $dir = $channel) =~ s/^#+//;
-	$polls->{ $channel } = config->new("$config_dir/$dir/polls.dat") unless (defined($polls->{ $channel }));
+	$polls->{ $channel } = HashFile->new("$config_dir/$dir/polls.dat") unless (defined($polls->{ $channel }));
 
-	my ($owner, $question) = $polls->{ $channel }->get_value("${poll}_poll");
+	my ($owner, $question) = $polls->{ $channel }->get_all("${poll}_poll");
 	return(-10) unless (($owner eq $msg->{'nick'}) or ($privs >= 300));
-	$polls->{ $channel }->set_value("${poll}_results", $text);
+	$polls->{ $channel }->set("${poll}_results", $text);
 	$irc->notice($msg->{'nick'}, "Poll Results Added");
 	return(0);
 }

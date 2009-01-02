@@ -15,7 +15,7 @@ sub do_command {
 
 	return(-20) if (scalar(@{ $msg->{'args'} }) != 1);
 	$irc->leave_channel($msg->{'args'}->[0]);
-	$irc->{'options'}->remove_value("channels", $msg->{'args'}->[0]);
+	$irc->{'options'}->remove("channels", $msg->{'args'}->[0]);
 	return(0);
 }
 

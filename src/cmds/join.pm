@@ -14,7 +14,7 @@ sub do_command {
 	my ($irc, $msg, $privs) = @_;
 
 	return(-20) if (scalar(@{ $msg->{'args'} }) != 1);
-	$irc->{'options'}->add_value("channels", $msg->{'args'}->[0]);
+	$irc->{'options'}->add("channels", $msg->{'args'}->[0]);
 	$irc->join_channel($msg->{'args'}->[0]);
 	return(0);
 }

@@ -23,10 +23,10 @@ sub do_command {
 	my $file = "$config_dir/$channel/defines.lst";
 	$file =~ s/\/#+/\//;
 	$channel = "global" unless (-e $file);
-	$defines->{ $channel } = csv->open_file($file, "\t", 1) unless (defined($defines->{ $channel }));
+	$defines->{ $channel } = ListFile->new($file, "\t", 1) unless (defined($defines->{ $channel }));
 
-	my @results = $defines->{ $channel }->find_all_entries($word);
-	push(@results, $defines->{'global'}->find_all_entries($word)) unless ($channel eq 'global');
+	my @results = $defines->{ $channel }->find_all($word);
+	push(@results, $defines->{'global'}->find_all($word)) unless ($channel eq 'global');
 	if (scalar(@results)) {
 		$word = ucfirst($results[0]->[0]);
 		$irc->private_msg($msg->{'respond'}, "$word:");

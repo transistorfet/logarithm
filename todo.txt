@@ -1,7 +1,28 @@
 
+	* make a function that returns the etc/ directory so that plugins don't need to store that somewhere
+	* should get_info be called when a module is reloaded and stored in the module hash itself?
+	* fix the execute command stuff in the main script (should it be moved somewhere else?)
+
+	* convert the wordtest and trivia plugins to use the new timer (and hook and command) systems
+	* can you make the help system use info to get the priv settings for displaying in the help?  Can
+	  the actual command info be stored in the command object?
+	* move the ping timeout code into the IRC module
+
+
+	* should you move what is now in main() (most of it at least) to a Logarithm.pm module that forms
+	  the core of the system with as much funny/misc stuff moved there as possible and still have a
+	  script that can easily be written to make the bot do lots of customizable things (custom speech,
+	  direct inline commands, etc).
+	* make it possible to use logarithm as basically a perl based irc client in 2 possible fashions.
+	  First, with a direct frontend of some kind, and then also with an OSC process with an independant
+	  frontend either written in perl or in C using the stutter code
+	* this would work nicely (probably) if you transition to a Logarithm:: namespace
+
+	* re-evaluate and rework the anti-flood system
+	* merge topicifier and the old topics system and make it so that topics can be tagged (at any time)
+	  and so that topics can be selected based on tags
 	* modify the date command to have a stored timezone for each user such that if that user runs the
 	  command or someone types !date <user>, it uses their timezone for printing the date
-	* make imgcache plugin that will download (wget?) image links and store them locally for 4chan pics
 	* make a command for the polls that informs a user of which polls that user hasn't vote in yet
 	  as well as possibly the opposite (which ones he/she has voted for)
 

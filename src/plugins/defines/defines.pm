@@ -3,8 +3,8 @@
 # Description:	Word Definitions Plugin
 #
 
-use csv;
-use misc;
+use Misc;
+use ListFile;
 
 my $config_dir = "../etc";
 
@@ -16,9 +16,9 @@ sub init_plugin {
 	}
 
 	my $defines = {
-		'global' => csv->open_file("$config_dir/defines.lst", "\t", 1)
+		'global' => ListFile->new("$config_dir/defines.lst", "\t", 1)
 	};
-	module->register_command_directory("$plugin_dir/cmds", $defines);
+	Command->add_directory("$plugin_dir/cmds", $defines);
 	return(0);
 }
 

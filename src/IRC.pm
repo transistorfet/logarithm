@@ -1,26 +1,29 @@
 #
-# Module Name:	irc.pm
+# Module Name:	IRC.pm
 # Description:	IRC Module
 #
 
-package irc;
+package IRC;
 
 use strict;
+use warnings;
 use IO::Socket;
 
-use misc;
-use users;
-use channels;
-use module;
+use Misc;
+use Users;
+use Channels;
+use HashFile;
+use Module;
+
+use Hook;
+use Selector;
 
 my $options_dir = "../etc";
 
 my $default_nick = "logarithm";
 my $default_password = "";
-my $default_min_tick = 0.1;
-my $default_max_tick = 2;
 
-my $irc_trys = 3;
+my $irc_tries = 3;
 my $irc_max_flush = 5;
 my $irc_flush_delay = 2;
 my $irc_max_length = 512;
@@ -40,16 +43,14 @@ sub new {
 	my $class = ref($this) || $this;
 	my $self = { };
 	bless($self, $class);
-	$self->{'options'} = config->new("$options_dir/options.conf");
-	$self->{'nick'} = $self->{'options'}->get_scalar_value("nick", $default_nick);
-	$self->{'channels'} = channels->new();
-	$self->{'users'} = users->new();
-	$self->{'sock'} = 0;
+	$self->{'options'} = HashFile->new("$options_dir/options.conf");
+	$self->{'nick'} = $self->{'options'}->get_scalar("nick", $default_nick);
+	$self->{'channels'} = Channels->new();
+	$self->{'users'} = Users->new();
+	$self->{'socket'} = undef;
 	$self->{'server'} = "";
 	$self->{'connected'} = 0;
-	$self->{'tick'} = $default_max_tick;
-	$self->{'min_tick'} = $default_min_tick;
-	$self->{'max_tick'} = $default_max_tick;
+	$self->{'remaining'} = "";
 	$self->{'recv_queue'} = [ ];
 	$self->{'send_queue'} = [ ];
 	$self->{'last_flush'} = 0;
@@ -74,34 +75,27 @@ sub connect {
 	my ($self) = @_;
 
 	return(0) if ($self->{'connected'});
-	return(-1) if ($self->server_connect());
+	return(-1) if ($self->_server_connect());
 	$self->identify();
 	status_log("Joining Channels...");
 	my @channels = $self->{'channels'}->get_channel_list();
-	@channels = $self->{'options'}->get_value("channels") unless (scalar(@channels));
+	@channels = $self->{'options'}->get_all("channels") unless (scalar(@channels));
 	foreach my $channel (@channels) {
 		$self->send_msg("JOIN $channel\n");
 	}
-	module->evaluate_hooks("irc_connect", $self);
+	Hook::do_hook("irc_connect", $self);
 }
 
 sub disconnect {
 	my ($self) = @_;
 
-	module->evaluate_hooks("irc_disconnect", $self);
-	$self->flush_queue();
-	my $sock = $self->{'sock'};
+	Hook::do_hook("irc_disconnect", $self);
+	$self->_flush_queue();
+	my $sock = $self->{'socket'};
 	print $sock "QUIT :bye\n";
+	$sock->close();
 	$self->{'connected'} = 0;
-}
-
-sub receive_msg {
-	my ($self) = @_;
-
-	$self->read_msgs() unless (scalar(@{ $self->{'recv_queue'} }));
-	my $msg = shift(@{ $self->{'recv_queue'} });
-	$self->dispatch_msg($msg);
-	return($msg);
+	$self->{'socket'} = 0;
 }
 
 sub send_msg {
@@ -109,8 +103,8 @@ sub send_msg {
 
 	$msgtext =~ s/(\r|)\n/\r\n/;
 	push(@{ $self->{'send_queue'} }, $msgtext);
-	$self->flush_queue();
-	my $msg = $self->parse_msg($msgtext);
+	$self->_flush_queue();
+	my $msg = $self->_parse_msg($msgtext);
 	$msg->{'nick'} = $self->{'nick'};
 	$msg->{'outbound'} = 1;
 	push(@{ $self->{'recv_queue'} }, $msg);
@@ -119,7 +113,7 @@ sub send_msg {
 sub change_nick {
 	my ($self, $nick) = @_;
 
-	$self->send_msg($self, "NICK $nick\n");
+	$self->send_msg("NICK $nick\n");
 }
 
 sub join_channel {
@@ -164,18 +158,8 @@ sub notice {
 sub identify {
 	my ($self) = @_;
 
-	my $password = $self->{'options'}->get_scalar_value("password", $default_password);
+	my $password = $self->{'options'}->get_scalar("password", $default_password);
 	$self->send_msg("NICKSERV :identify $password\n") if ($password);
-}
-
-sub set_tick {
-	my ($self, $seconds) = @_;
-
-	if (($seconds >= $self->{'min_tick'}) and ($seconds <= $self->{'max_tick'})) {
-		$self->{'tick'} = $seconds;
-		return(0);
-	}
-	return(-1);
 }
 
 sub make_msg {
@@ -187,8 +171,8 @@ sub make_msg {
 	return({
 		'cmd' => uc($cmd),
 		'outbound' => 0,
-		'nick' => $nick,
-		'host' => $host,
+		'nick' => defined($nick) ? $nick : "",
+		'host' => defined($host) ? $host : "",
 		'channel' => $channel,
 		'respond' => $respond,
 		'params' => [ @params ],
@@ -198,31 +182,28 @@ sub make_msg {
 
 ### Local Functions ###
 
-sub server_connect {
+sub _server_connect {
 	my ($self) = @_;
 
 	my $sock;
-	my @servers = $self->{'options'}->get_value("servers");
+	my @servers = $self->{'options'}->get_all("servers");
 	while (1) {
 		for my $i (0..$#servers) {
 			status_log("Connecting to $servers[$i]...");
-			for (1..$irc_trys) {
-				$servers[$i] =~ /^(.*)(|:(.*))$/;
-				my ($server, $port) = ($1, $3);
-				$port = 6667 unless ($port);
-				if ($sock = IO::Socket::INET->new(PeerAddr => $server, PeerPort => $port, Proto => 'tcp', Timeout => 30)) {
-					$self->{'sock'} = $sock;
-					$self->{'server'} = $server;
-					print $sock "NICK $self->{'nick'}\n";
-					print $sock "USER $self->{'nick'} 0 0 :The Bot\n";
-					status_log("Connected...");
-					return(0) unless ($self->init_connection());
-					last;
-				}
-				else {
-					status_log("Connection Failed:  Retrying...");
-					sleep 2;
-				}
+			$servers[$i] =~ /^(.*)(|:(.*))$/;
+			my ($server, $port) = ($1, $3);
+			$port = 6667 unless ($port);
+			if ($sock = Selector::create_socket(PeerAddr => $server, PeerPort => $port, Timeout => 30, Retries => $irc_tries, Handler => Handler->new("_handle_socket", $self))) {
+				$self->{'socket'} = $sock;
+				$self->{'server'} = $server;
+				print $sock "NICK $self->{'nick'}\n";
+				print $sock "USER $self->{'nick'} 0 0 :The Bot\n";
+				status_log("Connected...");
+				return(0);
+			}
+			else {
+				status_log("Connection Failed:  Retrying...");
+				sleep 2;
 			}
 			status_log("Connection Failed:  Trying Next...");
 		}
@@ -231,57 +212,36 @@ sub server_connect {
 	return(-1);
 }
 
-sub init_connection {
-	my ($self) = @_;
+sub _handle_socket {
+	my ($self, $sock) = @_;
 
-	my $msg;
-	my $time = time();
-	my $sock = $self->{'sock'};
-	do {
-		$msg = $self->receive_msg();
-		if ($msg->{'cmd'} eq "001") {
-			$self->{'nick'} = $msg->{'params'}->[0];
-			$self->{'connected'} = 1;
-			return(0);
-		}
-		elsif ($msg->{'cmd'} eq "433") {
-			$self->{'nick'} = "$self->{'nick'}_";
-			status_log("Nick in use.  Changing to $self->{'nick'}");
-			print $sock "NICK $self->{'nick'}\n";
-		}
-		elsif ($msg->{'cmd'} =~ /ERROR/) {
-			status_log("Received error on connect ($msg->{'text'}).  Retrying in $irc_reconnect_delay seconds.");
-			sleep $irc_reconnect_delay;
-			return(-1);
-		}
-	} while (!($msg->{'cmd'} eq -1) and ((time() - $time) < $irc_connect_timeout));
-	status_log("Failed to Initialize Connection");
-	return(-1);
+	$self->_read_msgs();
+	while (@{ $self->{'recv_queue'} }) {
+		my $msg = shift(@{ $self->{'recv_queue'} });
+		$self->_dispatch_msg($msg);
+	}
 }
 
-sub read_msgs {
+sub _read_msgs {
 	my ($self) = @_;
 
-	$self->flush_queue();
-	my ($rin, $rout, $line, $num);
-	my $sock = $self->{'sock'};
-	vec($rin, fileno($sock), 1) = 1;
-	unless (select($rout=$rin, undef, undef, $self->{'tick'})) {
-		push(@{ $self->{'recv_queue'} }, $self->make_msg("", "", "TICK"));
-		return(0);
-	}
+	# TODO should this be here? how should this work?
+	$self->_flush_queue();
 
+	my $sock = $self->{'socket'};
 	my $data = $self->{'remaining'};
 	my $count = length($data);
-	while (($num = select($rout=$rin, undef, undef, 0)) > 0) {
+	my $num;
+	while (($num = Selector::is_ready($sock)) > 0) {
 		$count = sysread($sock, $data, 1024, $count);
 	}
 
 	if ($num < 0) {
-		push(@{ $self->{'recv_queue'} }, $self->make_msg("", "", "ERROR"));
+		push(@{ $self->{'recv_queue'} }, $self->make_msg("", "", "ERROR", "Error reading from socket"));
 		return(0);
 	}
 
+	my $line;
 	while ($data =~ /^(.*?\r\n)(.*)$/s) {
 		($line, $data) = ($1, $2);
 		#print $line;
@@ -291,23 +251,25 @@ sub read_msgs {
 			push(@{ $self->{'recv_queue'} }, $self->make_msg("", "", "PING", $self->{'nick'}));
 		}
 		else {
-			push(@{ $self->{'recv_queue'} }, $self->parse_msg($line));
+			push(@{ $self->{'recv_queue'} }, $self->_parse_msg($line));
 		}
 	}
 	$self->{'remaining'} = $data;
 	return(0);
 }
 
-sub parse_msg {
+sub _parse_msg {
 	my ($self, $line) = @_;
 
 	my ($nick, $host, $cmd, $msg, $text, @params);
 	$line = strip_return($line);
 	if ($line =~ /(^:\S+ )?(\S+) (.*)$/) {
 		my ($nick, $cmd, $msg) = ($1, $2, $3);
-		$nick =~ s/^(:)//;
-		chop($nick);
-		($nick, $host) = split("!", $nick);
+		if ($nick) {
+			$nick =~ s/^(:)//;
+			chop($nick);
+			($nick, $host) = split("!", $nick);
+		}
 		if ($msg =~ /:(.*)$/) {
 			$text = $1;
 			$msg =~ s/( |):.*$//;
@@ -316,10 +278,10 @@ sub parse_msg {
 		push(@params, $text) if ($text);
 		return($self->make_msg($nick, $host, $cmd, @params));
 	}
-	return($self->make_msg("", "", "ERROR"));
+	return($self->make_msg("", "", "ERROR", "Error parsing message"));
 }
 
-sub flush_queue {
+sub _flush_queue {
 	my ($self) = @_;
 
 	return(-1) unless ($self->{'connected'});
@@ -332,7 +294,7 @@ sub flush_queue {
 	$size = scalar(@{ $self->{'send_queue'} }) if ($size > scalar(@{ $self->{'send_queue'} }));
 	return unless ($size);
 
-	my $sock = $self->{'sock'};
+	my $sock = $self->{'socket'};
 	for (1..$size) {
 		print $sock shift(@{ $self->{'send_queue'} });
 	}
@@ -340,10 +302,23 @@ sub flush_queue {
 	return(0);
 }
 
-sub dispatch_msg {
+sub _dispatch_msg {
 	my ($self, $msg) = @_;
 
-	if ($msg->{'cmd'} eq "PRIVMSG") {
+	if ($msg->{'cmd'} eq "001") {
+		$self->{'nick'} = $msg->{'params'}->[0];
+		$self->{'connected'} = 1;
+	}
+	elsif ($msg->{'cmd'} eq "433") {
+		$self->{'nick'} .= "_";
+		status_log("Nick in use.  Changing to $self->{'nick'}");
+		my $sock = $self->{'socket'};
+		print $sock "NICK $self->{'nick'}\n";
+	}
+	elsif ($msg->{'cmd'} =~ /ERROR/) {
+		status_log("Received error ($msg->{'text'}).");
+	}
+	elsif ($msg->{'cmd'} eq "PRIVMSG") {
 		if ($msg->{'text'} =~ /^\x01PING/) {
 			$self->notice($msg->{'nick'}, $msg->{'text'});
 		}
@@ -363,12 +338,12 @@ sub dispatch_msg {
 	}
 	elsif ($msg->{'cmd'} eq "NICK") {
 		foreach my $channel ($self->{'users'}->change_nick($msg->{'nick'}, $msg->{'text'})) {
-			module->evaluate_hooks("irc_change_nick", $self, $msg, $channel);
+			Hook::do_hook("irc_change_nick", $self, $msg, $channel);
 		}
 	}
 	elsif ($msg->{'cmd'} eq "QUIT") {
 		foreach my $channel ($self->{'users'}->quit($msg->{'nick'})) {
-			module->evaluate_hooks("irc_quit_channel", $self, $msg, $channel);
+			Hook::do_hook("irc_quit_channel", $self, $msg, $channel);
 		}
 	}
 	elsif ($msg->{'cmd'} eq "353") {
@@ -383,15 +358,15 @@ sub dispatch_msg {
 	if ($msg->{'cmd'} eq "JOIN") {
 		if (($msg->{'nick'} eq $self->{'nick'}) and !$msg->{'outbound'}) {	
 			$self->{'channels'}->join_channel($msg->{'channel'});
-		#	foreach my $command ($self->{'channels'}->get_options($msg->{'channel'})->get_value("on_join")) {
+		#	foreach my $command ($self->{'channels'}->get_options($msg->{'channel'})->get_all("on_join")) {
 		#		push(@{ $self->{'recv_queue'} }, irc_make_msg($irc->{'nick'}, "", "PRIVMSG", $msg->{'channel'}, $command));
 		#	}
 		}
 		$self->{'users'}->join_channel($msg->{'channel'}, $msg->{'nick'}, $msg->{'host'});
-		module->evaluate_hooks("irc_dispatch_msg", $self, $msg) unless ($msg->{'outbound'});
+		Hook::do_hook("irc_dispatch_msg", $self, $msg) unless ($msg->{'outbound'});
 	}
 	elsif (($msg->{'cmd'} eq "PART") or ($msg->{'cmd'} eq "KICK")) {
-		module->evaluate_hooks("irc_dispatch_msg", $self, $msg) unless ($msg->{'outbound'});
+		Hook::do_hook("irc_dispatch_msg", $self, $msg) unless ($msg->{'outbound'});
 		my $nick = ($msg->{'cmd'} eq "KICK") ? $msg->{'params'}->[1] : $msg->{'nick'};
 		$self->{'users'}->leave_channel($msg->{'channel'}, $nick);
 		if (($nick eq $self->{'nick'}) and !$msg->{'outbound'}) {
@@ -400,7 +375,8 @@ sub dispatch_msg {
 		}
 	}
 	else {
-		module->evaluate_hooks("irc_dispatch_msg", $self, $msg);
+		## Only dispatch here when the message is not a join, part, or kick message
+		Hook::do_hook("irc_dispatch_msg", $self, $msg);
 	}
 }
 

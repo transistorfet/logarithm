@@ -1,14 +1,15 @@
 #
-# Module Name:	channels.pm
+# Module Name:	Channels.pm
 # Description:	Channels Manager
 #
 
-package channels;
+package Channels;
 
 use strict;
+use warnings;
 
-use misc;
-use config;
+use Misc;
+use HashFile;
 
 my $options_dir = "../etc";
 
@@ -28,7 +29,7 @@ sub join_channel {
 	(my $name = $channel) =~ s/^#+//;
 	$self->{ $channel } = {
 		'name' => $channel,
-		'options' => config->new("$options_dir/$name/options.conf")
+		'options' => HashFile->new("$options_dir/$name/options.conf")
 	};
 	return(0);
 }

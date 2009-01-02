@@ -6,8 +6,8 @@
 sub init_plugin {
 	my ($plugin_dir) = @_;
 
-	module->register_hook("greet", "irc_dispatch_msg", "hook_dispatch_msg");
-	module->register_command_directory("$plugin_dir/cmds");
+	Hook->new("irc_dispatch_msg", Handler->new("hook_dispatch_msg"));
+	Command->add_directory("$plugin_dir/cmds");
 	return(0);
 }
 
@@ -22,7 +22,7 @@ sub hook_dispatch_msg {
 		my $index = "greet_" . $msg->{'nick'} . "_msg";
 		my $options = $irc->{'channels'}->get_options($msg->{'respond'});
 		$options = $irc->{'options'} unless ($options);
-		my $greet = $options->get_scalar_value($index);
+		my $greet = $options->get_scalar($index);
 		$irc->private_msg($msg->{'respond'}, $greet) if ($greet);
 	}
 }

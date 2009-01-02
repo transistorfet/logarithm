@@ -16,16 +16,20 @@ sub do_command {
 	return(-20) if (scalar(@{ $msg->{'args'} }) != 3);
 	my ($channel, $cmd, $name) = @{ $msg->{'args'} };
 
-	my $plugin = "plugins/$name/$name.pm";
+	my $plugin_dir = "plugins/$name";
+	my $plugin = "$plugin_dir/$name.pm";
 	return(-1) unless (-e $plugin);
 	if ($cmd eq "enable") {
-		$irc->{'options'}->add_value("plugins", $name);
-		module->load_plugin($plugin, $irc);
+		$irc->{'options'}->add("plugins", $name);
+		my $module = Module->load($plugin);
+		$module->call("init_plugin", $plugin_dir);
 		$irc->notice($msg->{'nick'}, "Plugin $name loaded successfully");
 	}
 	elsif ($cmd eq "disable") {
-		$irc->{'options'}->remove_value("plugins", $name);
-		module->unload_plugin($plugin);
+		$irc->{'options'}->remove("plugins", $name);
+		my $module = Module::get_module($plugin);
+		$module->call("release_plugin");
+		$module->release();
 		$irc->notice($msg->{'nick'}, "Plugin $name disabled");
 	}
 	else {

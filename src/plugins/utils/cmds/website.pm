@@ -15,7 +15,7 @@ sub do_command {
 
 	my $options = $irc->{'channels'}->get_options($msg->{'args'}->[0]);
 	$options = $irc->{'options'} unless ($options);
-	my $website = $options->get_scalar_value("website");
+	my $website = $options->get_scalar("website");
 
 	if ($website) {
 		$irc->private_msg($msg->{'respond'}, $website);

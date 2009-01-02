@@ -2,7 +2,7 @@
 # Command Name:	pollcontrol.pm
 #
 
-use config;
+use HashFile;
 
 sub get_info {{
 	'access' => 50,
@@ -23,17 +23,17 @@ sub do_command {
 	return(-1) unless ($msg->{'respond'} =~ /^\#/);
 	my $channel = $msg->{'respond'};
 	(my $dir = $channel) =~ s/^#+//;
-	$polls->{ $channel } = config->new("$config_dir/$dir/polls.dat") unless (defined($polls->{ $channel }));
+	$polls->{ $channel } = HashFile->new("$config_dir/$dir/polls.dat") unless (defined($polls->{ $channel }));
 
-	my ($owner, $question, @options) = $polls->{ $channel }->get_value("${poll}_poll");
+	my ($owner, $question, @options) = $polls->{ $channel }->get_all("${poll}_poll");
 	return(-10) unless (($owner eq $msg->{'nick'}) or ($privs >= 300));
 
 	if ($operation eq "enable") {
-		$polls->{ $channel }->set_value("${poll}_disabled", 0);
+		$polls->{ $channel }->set("${poll}_disabled", 0);
 		$irc->notice($msg->{'nick'}, "Poll Enabled");
 	}
 	elsif ($operation eq "disable") {
-		$polls->{ $channel }->set_value("${poll}_disabled", 1);
+		$polls->{ $channel }->set("${poll}_disabled", 1);
 		$irc->notice($msg->{'nick'}, "Poll Disabled");
 	}
 	else {
