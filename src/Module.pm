@@ -37,6 +37,7 @@ sub load {
 sub release {
 	my ($self) = @_;
 	# TODO is this the best way to do this?
+	# TODO this no longer works because of the way you do handlers using Module::call()
 	Command::purge($self->{'package'});
 	Timer::purge($self->{'package'});
 	Hook::purge($self->{'package'});

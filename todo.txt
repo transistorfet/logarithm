@@ -1,11 +1,11 @@
 
 	* make a function that returns the etc/ directory so that plugins don't need to store that somewhere
-	* should get_info be called when a module is reloaded and stored in the module hash itself?
-	* fix the execute command stuff in the main script (should it be moved somewhere else?)
+	* the anti-flood queue is not flushed on a regular basis with the new selector system
+	* the purge functions don't work now because the package that most handlers point to is actually
+	  Module (because they call Module::call which then calls the actual module's function).
 
 	* convert the wordtest and trivia plugins to use the new timer (and hook and command) systems
-	* can you make the help system use info to get the priv settings for displaying in the help?  Can
-	  the actual command info be stored in the command object?
+	* can you make the help system use info to get the priv settings for displaying in the help?
 	* move the ping timeout code into the IRC module
 
 
@@ -17,8 +17,8 @@
 	  First, with a direct frontend of some kind, and then also with an OSC process with an independant
 	  frontend either written in perl or in C using the stutter code
 	* this would work nicely (probably) if you transition to a Logarithm:: namespace
+	* make an OSC control plugin
 
-	* re-evaluate and rework the anti-flood system
 	* merge topicifier and the old topics system and make it so that topics can be tagged (at any time)
 	  and so that topics can be selected based on tags
 	* modify the date command to have a stored timezone for each user such that if that user runs the
@@ -28,15 +28,11 @@
 
 	* make a daemon command line option that starts logarithm in daemon mode (detaches) which disables
 	  outputting of status messages
-	* make a plugin that listens on a port for telnet styled connections from which logarithm can be
-	  controlled (for restart and shutdown type stuff).  Make it use the ICP or whatever protocol
-	  (does that require a centralized receiver?)
 	* Add Line Length Limiter to break up lines longer than the max
 
 	* make a plugin that records ++ and -- commands somehow somewhy
 
 	* make definitions accept wildcards but you'd have to limit the number of responses
-	* fix the fucking autotopicifier
 	* fix the autoping reconnect code stuff
 
 	* should plugins that register a channel specific something (timer or hook) always also hook the
@@ -71,6 +67,4 @@
 	* Add support for Multiple Hostmasks
 	* Multiserver??
 
-	* possibly add threading for commands or plugins so that you don't have to worry about
-	  making evreything event driven?
 

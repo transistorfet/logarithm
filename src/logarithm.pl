@@ -84,18 +84,15 @@ sub parse_chat {
 sub parse_cmd {
 	my ($irc, $msg, $allow_bare_commands) = @_;
 
-	my ($options, $lead);
-	$options = $irc->{'channels'}->get_options($msg->{'respond'});
-	$lead = $options->get_scalar("command_designator") if ($options);
-	$lead = $irc->{'options'}->get_scalar("command_designator", "!") unless ($lead);
+	my $lead = $irc->get_scalar_config($msg->{'respond'}, "command_designator", "!");
 	return(0) unless (($msg->{'text'} =~ /^\Q$lead\E/) or $allow_bare_commands);
-	$msg->{'text'} =~ s/^\Q$lead\E//;
 
 	$msg->{'args'} = [ split(" ", $msg->{'text'}) ];
 	my $command = lc(shift(@{ $msg->{'args'} }));
+	$command =~ s/^\Q$lead\E//;
 	$msg->{'command'} = $command;
 	$msg->{'phrase'} = $msg->{'text'};
-	$msg->{'phrase'} =~ s/^\Q$command\E\s*//;
+	$msg->{'phrase'} =~ s/^(\Q$lead\E|)\Q$command\E\s*//;
 	unshift(@{ $msg->{'args'} }, $msg->{'respond'}) if (scalar(@{ $msg->{'args'} }) <= 0 or !($msg->{'args'}->[0] =~ /^\#/));
 
 	my $ret = evaluate_command($irc, $msg);
@@ -163,6 +160,5 @@ sub command_enabled {
 		return(1);
 	}
 }
-
 
 

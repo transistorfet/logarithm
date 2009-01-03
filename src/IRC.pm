@@ -14,6 +14,7 @@ use Users;
 use Channels;
 use HashFile;
 use Module;
+use Timer;
 
 use Hook;
 use Selector;
@@ -25,12 +26,12 @@ my $default_password = "";
 
 my $irc_tries = 3;
 my $irc_max_flush = 5;
-my $irc_flush_delay = 2;
+my $irc_flush_delay = 4;
 my $irc_max_length = 512;
 my $irc_connect_timeout = 300;
 my $irc_reconnect_delay = 60;
 
-my $irc_time = get_time();
+my $flush_timer = Timer->new(2, 1, Handler->new("_flush_all"));
 
 my @connections = ();
 
@@ -104,6 +105,7 @@ sub send_msg {
 	$msgtext =~ s/(\r|)\n/\r\n/;
 	push(@{ $self->{'send_queue'} }, $msgtext);
 	$self->_flush_queue();
+	# TODO should you only be "receiving" privmsg and notices here instead of all messages?
 	my $msg = $self->_parse_msg($msgtext);
 	$msg->{'nick'} = $self->{'nick'};
 	$msg->{'outbound'} = 1;
@@ -127,9 +129,6 @@ sub leave_channel {
 	my ($self, $channel) = @_;
 
 	return unless ($self->{'channels'}->in_channel($channel));
-	#foreach (channel_get_option($irc->{'channels'}, $channel, "on_leave")) {
-	#	push(@{ $irc->{'recv_queue'} }, irc_make_msg($irc->{'nick'}, "", "PRIVMSG", $channel, $_));
-	#}
 	$self->send_msg("PART $channel\n");
 }
 
@@ -178,6 +177,26 @@ sub make_msg {
 		'params' => [ @params ],
 		'text' => $params[$#params]
 	});
+}
+
+sub get_all_config {
+	my ($self, $channel, $name, @def) = @_;
+
+	my $options = $self->{'channels'}->get_options($channel);
+	return(undef) unless defined($options);
+	my @value = $options->get_scalar($name);
+	@value = $self->{'options'}->get_scalar($name, @def) unless defined($value[0]);
+	return(@value);
+}
+
+sub get_scalar_config {
+	my ($self, $channel, $name, $def) = @_;
+
+	my $options = $self->{'channels'}->get_options($channel);
+	return(undef) unless defined($options);
+	my $value = $options->get_scalar($name);
+	$value = $self->{'options'}->get_scalar($name, $def) unless defined($value);
+	return($value);
 }
 
 ### Local Functions ###
@@ -279,6 +298,12 @@ sub _parse_msg {
 		return($self->make_msg($nick, $host, $cmd, @params));
 	}
 	return($self->make_msg("", "", "ERROR", "Error parsing message"));
+}
+
+sub _flush_all {
+	foreach my $irc (@connections) {
+		$irc->_flush_queue();
+	}
 }
 
 sub _flush_queue {

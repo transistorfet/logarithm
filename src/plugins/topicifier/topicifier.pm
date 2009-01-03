@@ -20,7 +20,7 @@ sub init_plugin {
 
 	my $info = { 'changed' => 0, 'last' => 0, 'channels' => { } };
 	Timer->new(1800, 1, Handler->new("check_time", $info));
-	Command->add("changetopic", Handler->new("changetopic_command", $info));
+	Command->add("changetopic", Handler->new("do_changetopic", $info));
 	Command->add_directory("$plugin_dir/cmds");
 	return(0);
 }
@@ -29,7 +29,7 @@ sub release_plugin {
 	return(0);
 }
 
-sub changetopic_command {
+sub do_changetopic {
 	my ($info, $irc, $msg, $privs) = @_;
 
 	return(-10) if ($privs < 100);

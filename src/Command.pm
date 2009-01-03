@@ -25,9 +25,11 @@ sub add {
 }
 
 sub add_file {
-	my ($class, $command, $file, @params) = @_;
+	my ($class, $name, $file, @params) = @_;
 	my $module = Module->load($file);
-	return(add($class, $command, $module->make_handler("do_command", @params)));
+	my $command = add($class, $name, $module->make_handler("do_command", @params));
+	$command->{'file'} = $file;
+	return($command);
 }
 
 sub add_directory {
@@ -67,7 +69,8 @@ sub handler {
 
 sub module {
 	my ($self) = @_;
-	return(Module::get_module($self->{'handler'}->package));
+	return(undef) unless defined($self->{'file'});
+	return(Module::get_module($self->{'file'}));
 }
 
 
