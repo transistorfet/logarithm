@@ -35,7 +35,6 @@
 	  as well as possibly the opposite (which ones he/she has voted for)
 
 	* make a plugin that records ++ and -- commands somehow somewhy
-
 	* make definitions accept wildcards but you'd have to limit the number of responses
 	* fix the autoping reconnect code stuff
 
