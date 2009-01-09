@@ -17,7 +17,6 @@ use Timer;
 use Command;
 use Handler;
 
-my $time_last_msg = time();
 my $time_last_ping = time();
 
 main();
@@ -41,7 +40,6 @@ sub main {
 			$irc->send_msg("PING $irc->{'server'}\n");
 			$time_last_ping = time();
 		}
-		check_ping_timeout($irc);
 		Timer::check_timers();
 	}
 }
@@ -49,7 +47,6 @@ sub main {
 sub hook_msg_dispatch {
 	my ($irc, $msg) = @_;
 
-	$time_last_msg = time() unless (($msg->{'outbound'} == 1) and ($msg->{'cmd'} eq "PING"));
 	if ($msg->{'cmd'} eq "ERROR") {
 		$irc->disconnect();
 		$irc->connect();
@@ -122,18 +119,6 @@ sub evaluate_command {
 	my $privs = $irc->{'users'}->get_access($msg->{'args'}->[0], $msg->{'nick'});
 	return(-10) if ($privs < $access);
 	return(Command::evaluate_command($command, $irc, $msg, $privs));
-}
-
-sub check_ping_timeout {
-	my ($irc) = @_;
-
-	my $ping_timeout = $irc->{'options'}->get_scalar("ping_timeout");
-	if ($ping_timeout and ((time() - $time_last_msg) >= $ping_timeout)) {
-		status_log("Ping Timeout, Restarting...");
-		$time_last_msg = time();
-		$irc->disconnect();
-		$irc->connect();
-	}
 }
 
 sub command_enabled {

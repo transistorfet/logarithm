@@ -1,34 +1,38 @@
 
 	* make a function that returns the etc/ directory so that plugins don't need to store that somewhere
-	* the anti-flood queue is not flushed on a regular basis with the new selector system
 	* the purge functions don't work now because the package that most handlers point to is actually
 	  Module (because they call Module::call which then calls the actual module's function).
+	* make ListFile put quotes around entries, at least if they contain the seperator char
 
 	* convert the wordtest and trivia plugins to use the new timer (and hook and command) systems
 	* can you make the help system use info to get the priv settings for displaying in the help?
-	* move the ping timeout code into the IRC module
-
-
+	* should you move everything to a Logarithm:: namespace?
+	* should plugins and commands actually manage their own package names so that they can access code
+	  in other modules and stuff?
 	* should you move what is now in main() (most of it at least) to a Logarithm.pm module that forms
 	  the core of the system with as much funny/misc stuff moved there as possible and still have a
 	  script that can easily be written to make the bot do lots of customizable things (custom speech,
 	  direct inline commands, etc).
+	* make a daemon command line option that starts logarithm in daemon mode (detaches) which disables
+	  outputting of status messages
+
+	* merge topicifier and the old topics system and make it so that topics can be tagged (at any time)
+	  and so that topics can be selected based on tags
+	* update the web help page
+
+--- Release as 0.9
+
 	* make it possible to use logarithm as basically a perl based irc client in 2 possible fashions.
 	  First, with a direct frontend of some kind, and then also with an OSC process with an independant
 	  frontend either written in perl or in C using the stutter code
 	* this would work nicely (probably) if you transition to a Logarithm:: namespace
 	* make an OSC control plugin
 
-	* merge topicifier and the old topics system and make it so that topics can be tagged (at any time)
-	  and so that topics can be selected based on tags
+	* add line length limiter to break up lines longer than the max
 	* modify the date command to have a stored timezone for each user such that if that user runs the
 	  command or someone types !date <user>, it uses their timezone for printing the date
 	* make a command for the polls that informs a user of which polls that user hasn't vote in yet
 	  as well as possibly the opposite (which ones he/she has voted for)
-
-	* make a daemon command line option that starts logarithm in daemon mode (detaches) which disables
-	  outputting of status messages
-	* Add Line Length Limiter to break up lines longer than the max
 
 	* make a plugin that records ++ and -- commands somehow somewhy
 

@@ -30,8 +30,10 @@ my $irc_flush_delay = 4;
 my $irc_max_length = 512;
 my $irc_connect_timeout = 300;
 my $irc_reconnect_delay = 60;
+my $irc_idle_time = 2;
+my $irc_ping_timeout = 300;
 
-my $flush_timer = Timer->new(2, 1, Handler->new("_flush_all"));
+my $idle_timer = Timer->new($irc_idle_time, 1, Handler->new("_idle_cycle"));
 
 my @connections = ();
 
@@ -56,6 +58,7 @@ sub new {
 	$self->{'send_queue'} = [ ];
 	$self->{'last_flush'} = 0;
 	$self->{'flush_count'} = 0;
+	$self->{'last_activity'} = time();
 	push(@connections, $self);
 	return($self);
 }
@@ -91,12 +94,13 @@ sub disconnect {
 	my ($self) = @_;
 
 	Hook::do_hook("irc_disconnect", $self);
-	$self->_flush_queue();
 	my $sock = $self->{'socket'};
 	print $sock "QUIT :bye\n";
 	$sock->close();
 	$self->{'connected'} = 0;
 	$self->{'socket'} = 0;
+	$self->{'recv_queue'} = [ ];
+	$self->{'send_queue'} = [ ];
 }
 
 sub send_msg {
@@ -104,7 +108,7 @@ sub send_msg {
 
 	$msgtext =~ s/(\r|)\n/\r\n/;
 	push(@{ $self->{'send_queue'} }, $msgtext);
-	$self->_flush_queue();
+	$self->_flush_send_queue();
 	# TODO should you only be "receiving" privmsg and notices here instead of all messages?
 	my $msg = $self->_parse_msg($msgtext);
 	$msg->{'nick'} = $self->{'nick'};
@@ -183,8 +187,8 @@ sub get_all_config {
 	my ($self, $channel, $name, @def) = @_;
 
 	my $options = $self->{'channels'}->get_options($channel);
-	return(undef) unless defined($options);
-	my @value = $options->get_scalar($name);
+	my @value;
+	@value = $options->get_scalar($name) if defined($options);
 	@value = $self->{'options'}->get_scalar($name, @def) unless defined($value[0]);
 	return(@value);
 }
@@ -193,13 +197,27 @@ sub get_scalar_config {
 	my ($self, $channel, $name, $def) = @_;
 
 	my $options = $self->{'channels'}->get_options($channel);
-	return(undef) unless defined($options);
-	my $value = $options->get_scalar($name);
+	my $value;
+	$value = $options->get_scalar($name) if defined($options);
 	$value = $self->{'options'}->get_scalar($name, $def) unless defined($value);
 	return($value);
 }
 
 ### Local Functions ###
+
+sub _idle_cycle {
+	foreach my $irc (@connections) {
+		my $ping_timeout = $irc->{'options'}->get_scalar("ping_timeout", $irc_ping_timeout);
+		if ($ping_timeout and ((time() - $irc->{'last_activity'}) >= $ping_timeout)) {
+			status_log("Ping Timeout, Restarting...");
+			$irc->disconnect();
+			$irc->connect();
+		}
+		$irc->_flush_send_queue();
+		$irc->_flush_recv_queue();
+	}
+}
+
 
 sub _server_connect {
 	my ($self) = @_;
@@ -243,9 +261,6 @@ sub _handle_socket {
 
 sub _read_msgs {
 	my ($self) = @_;
-
-	# TODO should this be here? how should this work?
-	$self->_flush_queue();
 
 	my $sock = $self->{'socket'};
 	my $data = $self->{'remaining'};
@@ -300,13 +315,16 @@ sub _parse_msg {
 	return($self->make_msg("", "", "ERROR", "Error parsing message"));
 }
 
-sub _flush_all {
-	foreach my $irc (@connections) {
-		$irc->_flush_queue();
+sub _flush_recv_queue {
+	my ($self) = @_;
+
+	while (@{ $self->{'recv_queue'} }) {
+		my $msg = shift(@{ $self->{'recv_queue'} });
+		$self->_dispatch_msg($msg);
 	}
 }
 
-sub _flush_queue {
+sub _flush_send_queue {
 	my ($self) = @_;
 
 	return(-1) unless ($self->{'connected'});
@@ -330,6 +348,7 @@ sub _flush_queue {
 sub _dispatch_msg {
 	my ($self, $msg) = @_;
 
+	$self->{'last_activity'} = time() unless (($msg->{'outbound'} == 1) and ($msg->{'cmd'} eq "PING"));
 	if ($msg->{'cmd'} eq "001") {
 		$self->{'nick'} = $msg->{'params'}->[0];
 		$self->{'connected'} = 1;
