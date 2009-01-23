@@ -98,7 +98,7 @@ sub get_list {
 
 sub evaluate_command {
 	my ($name, @params) = @_;
-	return(-1) unless defined($commands->{ $name });
+	return(-100) unless defined($commands->{ $name });
 	return($commands->{ $name }->evaluate(@params));
 }
 

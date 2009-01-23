@@ -102,6 +102,9 @@ sub parse_cmd {
 	elsif ($ret == -20) {
 		$irc->notice($msg->{'nick'}, "Sorry, Invalid Syntax");
 	}
+	elsif ($ret == -100) {
+		$irc->notice($msg->{'nick'}, "Sorry, No Such Command");
+	}
 	return(0);
 }
 
