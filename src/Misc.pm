@@ -52,8 +52,9 @@ sub strip_return {
 sub get_time {
 	my ($sec, $min, $hour, $mday, $mon, $year, $wday) = localtime(time);
 	$mon++;
-	$year =~ s/^\d?//;
-	return( { 'sec' => $sec, 'min' => $min, 'hour' => $hour, 'month' => $mon, 'year' => $year, 'day' => $mday, 'wday' => $wday } );
+	my $cent = int((1900 + $year) / 100);
+	$year -= ($cent * 100) - 1900;
+	return( { 'sec' => $sec, 'min' => $min, 'hour' => $hour, 'month' => $mon, 'year' => $year, 'day' => $mday, 'wday' => $wday, 'cent' => $cent } );
 }
 
 sub create_file_directory {
