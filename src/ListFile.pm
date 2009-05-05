@@ -130,7 +130,8 @@ sub _load {
 	open(FILE, $self->{'file'}) or return;
 	while (my $line = <FILE>) {
 		$line = strip_return($line);
-		push(@{ $self->{'entries'} }, [ split($self->{'delim'}, $line) ]) if ($line);
+		#push(@{ $self->{'entries'} }, [ split($self->{'delim'}, $line) ]) if ($line);
+		push(@{ $self->{'entries'} }, [ _parse_value($self->{'delim'}, $line) ]) if ($line);
 	}
 	close(FILE);
 }
@@ -144,6 +145,28 @@ sub _write {
 		print FILE join($self->{'delim'}, @{ $entry }) . "\n";
 	}
 	close(FILE);
+}
+
+sub _parse_value {
+	my ($delim, $values) = @_;
+
+	my @ret = ();
+	while ($values) {
+		my $value;
+		if ($values =~ /\"([^"]+)\"/) {
+			$value = $1;
+			$values =~ s/\"([^"]+)\"($delim|)//;
+		}
+		elsif ($values =~ /([^$delim"]+)/) {
+			$value = $1;
+			$values =~ s/([^$delim"]+)($delim|)//;
+		}
+		else {
+			last;
+		}
+		push(@ret, $value);
+	}
+	return(@ret);
 }
 
 1;
