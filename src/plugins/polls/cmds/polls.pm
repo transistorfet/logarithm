@@ -7,7 +7,9 @@ sub get_info {{
 	'help' => [
 		"Usage: polls [<poll-name|poll-num>]",
 		"Description: Displays the active polls for the specified channel or the details",
-		"             of a poll if the poll's name or number is given."
+		"             of a poll if the poll's name or number is given.  See also: vote,",
+		"             results, predict, predictions, addpoll, delpoll, addresults,",
+		"             pollcontrol."
 	]
 }}
 
