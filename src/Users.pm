@@ -160,7 +160,7 @@ sub check_hostmask {
 	$nick = lc($nick);
 	return(-1) unless (defined($self->{ $nick }));
 	my @entry = $passwd_file->find($nick);
-	return(-1) unless($entry[0]);
+	return(-1) unless($entry[0] and $entry[2]);
 	my $regex = encode_regex($entry[2]);
 	return(-1) unless ($regex and (lc($entry[0]) eq $nick) and ($mask =~ /$regex/));
 	$self->{ $nick }->{'authorized'} = 1;
