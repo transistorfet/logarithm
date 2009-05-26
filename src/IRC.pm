@@ -265,12 +265,13 @@ sub _read_msgs {
 	my $sock = $self->{'socket'};
 	my $data = $self->{'remaining'};
 	my $count = length($data);
-	my $num;
-	while (($num = Selector::is_ready($sock)) > 0) {
+	while (Selector::is_ready($sock) > 0) {
 		$count = sysread($sock, $data, 1024, $count);
+		if ($count <= 0) {
+			last;
+		}
 	}
-
-	if ($num < 0) {
+	if ($count <= 0) {
 		push(@{ $self->{'recv_queue'} }, $self->make_msg("", "", "ERROR", "Error reading from socket"));
 		return(0);
 	}
