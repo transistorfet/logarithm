@@ -49,6 +49,8 @@ sub hook_msg_dispatch {
 
 	if ($msg->{'cmd'} eq "ERROR") {
 		$irc->disconnect();
+		status_log("Disconnected.  Waiting 30 seconds before reconnect.");
+		sleep(30);
 		$irc->connect();
 	}
 	elsif ($msg->{'cmd'} eq "PRIVMSG") {

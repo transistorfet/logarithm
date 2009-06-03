@@ -96,7 +96,7 @@ sub disconnect {
 	Hook::do_hook("irc_disconnect", $self);
 	my $sock = $self->{'socket'};
 	print $sock "QUIT :bye\n";
-	$sock->close();
+	Selector::close_socket($sock);
 	$self->{'connected'} = 0;
 	$self->{'socket'} = 0;
 	$self->{'recv_queue'} = [ ];

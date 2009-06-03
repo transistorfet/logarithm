@@ -1,4 +1,16 @@
 
+	* it is possible to delete $INC{'mod-filename'} and then require 'filename' in order to reload the
+	  module but this doesn't update code references (which doesn't happen anyways atm)
+	* I was able to delete a poll without logging in (i believe it was one i did not create).  kaos was
+	  not able to delete a poll that he did not have permissions to delete and me as pooface was not able
+	  to delete a poll that i did not create so maybe it's a case of my access being different than
+	  what it says or something
+
+	* add command to topicifier to reshuffle the topics
+	* would logging pings help with finding the problem where logarithm occationally stops working.  The
+	  last time this happened, logarithm went full CPU and wouldn't restart
+
+	* you could possibly make TopicList be a simple mod found by using use lib '.';
 	* make a function that returns the etc/ directory so that plugins don't need to store that somewhere
 	* the purge functions don't work now because the package that most handlers point to is actually
 	  Module (because they call Module::call which then calls the actual module's function).
@@ -21,6 +33,10 @@
 	* update the web help page
 
 --- Release as 0.9
+
+	* add a response system so that basic matched patterns in chat can trigger logarithm to respond
+	  in a certain way (possibly one of many responses) like Bucket in #xkcd
+	* add a decision thing that will make a decision based on 2 or more options (similar to 8ball)
 
 	* make it possible to use logarithm as basically a perl based irc client in 2 possible fashions.
 	  First, with a direct frontend of some kind, and then also with an OSC process with an independant

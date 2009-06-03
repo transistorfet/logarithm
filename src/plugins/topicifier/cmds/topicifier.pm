@@ -1,11 +1,11 @@
 #
-# Command Name:	topicifier.pm
+# Command Name:	addtopic.pm
 #
 
 sub get_info {{
 	'access' => 50,
 	'help' => [
-		"Usage: topicifier <topic>",
+		"Usage: addtopic <topic>",
 		"Description: Adds the topic to the channel topics list for the current channel's auto topic setter"
 	]
 }}
@@ -13,7 +13,7 @@ sub get_info {{
 my $config_dir = "../etc";
 
 sub do_command {
-	my ($irc, $msg, $privs) = @_;
+	my ($info, $irc, $msg, $privs) = @_;
 
 	return(-20) if (scalar(@{ $msg->{'args'} }) < 2);
 
