@@ -3,6 +3,7 @@
 # Description:	Changes the topic of the channel once a week to a random topic from a list
 #
 
+use IRC;
 use Misc;
 use Timer;
 use Command;
@@ -59,7 +60,7 @@ sub change_all_topics {
 	my ($info) = @_;
 
 	status_log("Topicifier: Changing topics");
-	my $connections = irc->get_connections();
+	my $connections = IRC::get_connections();
 	foreach my $irc (@{ $connections }) {
 		$irc->identify();
 		foreach my $channel ($irc->{'channels'}->get_channel_list()) {
