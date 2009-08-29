@@ -8,6 +8,7 @@ use Misc;
 my $default_cachedir = "../public_html/cache";
 
 my $size_limit = "4M";
+my $user_agent = "Firefox";
 
 sub init_plugin {
 	my ($plugin_dir) = @_;
@@ -44,7 +45,8 @@ sub cache_image {
 	$cachedir .= sprintf("/%04d-%02d", ($time->{'cent'} * 100) + $time->{'year'}, $time->{'month'});
 	create_directory($cachedir) unless (-e $cachedir);
 
-	my $cmd = "wget -qc -Q$size_limit -P $cachedir \"$1\" &";
+	my $user_agent_arg = $user_agent ? "-U $user_agent" : "";
+	my $cmd = "wget -qc -Q$size_limit $user_agent_arg -P $cachedir \"$1\" &";
 	status_log("imgcache: Running \"$cmd\"");
 	system($cmd);
 }
