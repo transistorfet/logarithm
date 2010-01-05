@@ -45,8 +45,10 @@ sub cache_image {
 	$cachedir .= sprintf("/%04d-%02d", ($time->{'cent'} * 100) + $time->{'year'}, $time->{'month'});
 	create_directory($cachedir) unless (-e $cachedir);
 
+	$url =~ /.*\/(.*?)$/;
+	my $file = $1;
 	my $user_agent_arg = $user_agent ? "-U $user_agent" : "";
-	my $cmd = "wget -qc -Q$size_limit $user_agent_arg -P $cachedir \"$1\" &";
+	my $cmd = "wget -qc -Q$size_limit $user_agent_arg -P $cachedir \"$url\" && touch -c \"$cachedir/$file\" &";
 	status_log("imgcache: Running \"$cmd\"");
 	system($cmd);
 }

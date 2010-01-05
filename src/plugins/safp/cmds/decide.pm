@@ -17,7 +17,7 @@ sub do_command {
 
 	return(-20) if (scalar(@{ $msg->{'args'} }) < 2);
 	my $list = $msg->{'phrase'};
-	$list =~ s/\s*(.*)\s*(|\r)\n$/\1/;
+	$list =~ s/\s*(.*)\s*(|\r)\n$/$1/;
 	return if ($list =~ /^$/);
 
 	my @options = split(/\s+or\s+/, $list);
