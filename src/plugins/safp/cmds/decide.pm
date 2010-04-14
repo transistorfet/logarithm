@@ -5,7 +5,7 @@
 use Misc;
 
 sub get_info {{
-	'access' => 1,
+	'access' => 0,
 	'help' => [
 		"Usage: decide <option> or <option> [or ...]",
 		"Description: Randomly selects an option from a number of options"
