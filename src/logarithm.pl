@@ -117,9 +117,10 @@ sub evaluate_command {
 	$irc->{'users'}->check_hostmask($msg->{'nick'}, $msg->{'host'}) unless ($irc->{'users'}->is_authorized($msg->{'nick'}));
 	return(0) unless (command_enabled($irc, $msg->{'respond'}, $command));
 	my $info = Command::get_info($command);
+	return(-100) unless (defined($info));
 	my $options = $irc->{'channels'}->get_options($msg->{'respond'});
 	my $channel_access = $options ? $options->get_scalar("${command}_access", 0) : 0;
-	my $access = $irc->{'options'}->get_scalar("${command}_access", $info ? $info->{'access'} : 0);
+	my $access = $irc->{'options'}->get_scalar("${command}_access", $info ? $info->{'access'} : 500);
 	$access = $channel_access if ($channel_access > $access);
 	my $privs = $irc->{'users'}->get_access($msg->{'args'}->[0], $msg->{'nick'});
 	return(-10) if ($privs < $access);
