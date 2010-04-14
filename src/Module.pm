@@ -77,6 +77,7 @@ sub _check_age {
 
 	if ($self->{'age'} > -M $self->{'file'}) {
 		$self->_reload();
+		# TODO you should call init again here
 	}
 }
 

@@ -1,4 +1,20 @@
 
+	* add logging of commands
+	* could you make it so that various hooks (and bassically all callbacks) can only have one per
+	  module per function, such that trying to set a callback where one already exists will replace
+	  the old callback.  If you need chaining, that could be done on a module by module basis.  Then
+	  you can have the module init be called again after the module is reloaded so that it changes all
+	  the calbacks.  You could also maybe have a way to tell if a callback is no longer valid(???).  Also
+	  is there a way to make it so that you cal much more easily make plugins?
+	* make a plugin to facilitate D&D hosting
+	* combine the topicifier and topic list into one, even without the fancy changes
+	* make logarithm write the pid file somewhere so that it can be controlled via a command line
+	  controller like unreal and anoperc
+
+	* fix imgcache's timestamp update code to correctly update the timestamp of files that don't exactly
+	  match the url filename (files with %20 in the url are saved to filenames with them converted to
+	  spaces, so extracting the url's filename doesn't always work because wget will use a different name)
+
 	* make a daemon command line option that starts logarithm in daemon mode (detaches) which disables
 	  outputting of status messages (or rather make it redirect I/O to files).
 	* it is possible to delete $INC{'mod-filename'} and then require 'filename' in order to reload the
