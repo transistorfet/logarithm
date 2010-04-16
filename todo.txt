@@ -6,6 +6,9 @@
 	  you can have the module init be called again after the module is reloaded so that it changes all
 	  the calbacks.  You could also maybe have a way to tell if a callback is no longer valid(???).  Also
 	  is there a way to make it so that you cal much more easily make plugins?
+	* instead of automatically reloading modules that change, you just need a !reload command that does
+	  all module updating/reinitializing at once
+
 	* make a plugin to facilitate D&D hosting
 	* combine the topicifier and topic list into one, even without the fancy changes
 	* make logarithm write the pid file somewhere so that it can be controlled via a command line
