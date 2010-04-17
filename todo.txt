@@ -1,4 +1,6 @@
 
+	* rename cmds/ to Commands/ ??
+
 	* you could maybe make a perl script that compiles the help from the commands into a webpage?
 
 	* add logging of commands

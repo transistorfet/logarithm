@@ -108,7 +108,7 @@ sub _purge {
 	my ($package) = @_;
 
 	foreach my $key (keys(%{ $commands })) {
-		if ($commands->{ $key }->{'handler'}->package() eq $package) {
+		if ($commands->{ $key }->{'handler'}->owner() eq $package) {
 			delete($commands->{ $key });
 		}
 	}

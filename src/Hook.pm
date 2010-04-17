@@ -58,7 +58,7 @@ sub _purge {
 	foreach my $key (keys(%{ $hooks })) {
 		my $list = $hooks->{ $key };
 		for my $i (0..$#{ $list }) {
-			if ($list->[$i]->{'handler'}->package() eq $package) {
+			if ($list->[$i]->{'handler'}->owner() eq $package) {
 				splice(@{ $list }, $i, 1);
 			}
 		}

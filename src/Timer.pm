@@ -94,7 +94,7 @@ sub _purge {
 	my ($package) = @_;
 
 	for my $i (0..$#{ $timers }) {
-		if ($timers->[$i]->{'handler'}->package() eq $package) {
+		if ($timers->[$i]->{'handler'}->owner() eq $package) {
 			splice(@{ $timers }, $i, 1);
 		}
 	}

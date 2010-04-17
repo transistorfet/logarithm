@@ -1,5 +1,5 @@
 #
-# Name:		logarithmd.pl
+# Name:		Logarithm.pm
 # Description:	Logarithm IRC Bot
 #
 

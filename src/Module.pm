@@ -37,7 +37,6 @@ sub load {
 sub release {
 	my ($self) = @_;
 	# TODO is this the best way to do this?
-	# TODO this no longer works because of the way you do handlers using Module::call()
 	Command::purge($self->{'package'});
 	Timer::purge($self->{'package'});
 	Hook::purge($self->{'package'});
@@ -56,7 +55,9 @@ sub call {
 
 sub make_handler {
 	my ($self, $func, @params) = @_;
-	return(Handler->new("call", $self, $func, @params));
+	my $handler = Handler->new("call", $self, $func, @params);
+	$handler->{'owner'} = $self->{'package'};
+	return($handler);
 }
 
 

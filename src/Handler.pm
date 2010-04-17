@@ -15,6 +15,7 @@ sub new {
 	my $class = ref($this) || $this;
 	my $self = { };
 	bless($self, $class);
+	$self->{'owner'} = caller();
 	$self->{'package'} = caller();
 	$self->{'func'} = $func;
 	$self->{'params'} = [ @params ];
@@ -26,6 +27,13 @@ sub handle {
 	my $ret = eval "$self->{'package'}::$self->{'func'}(\@{ \$self->{'params'} }, \@params);";
 	status_log($@) if ($@);
 	return($ret);
+}
+
+sub owner {
+	my $self = shift(@_);
+	# TODO this is read only right?
+	#$self->{'owner'} = shift(@_) if (scalar(@_));
+	return($self->{'owner'});
 }
 
 sub package {

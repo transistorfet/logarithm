@@ -112,7 +112,10 @@ sub _load {
 
 	$self->{'file'} = $file;
 	$self->{'values'} = { };
-	return(0) unless (-e $file);
+	unless (-e $file) {
+		open(FILE, ">$file") or return(0);
+		close(FILE);
+	}
 	$self->{'age'} = -M $file;
 	open(FILE, $file) or return(0);
 	while (my $line = <FILE>) {

@@ -27,6 +27,7 @@ sub join_channel {
 	$channel = lc($channel);
 	return(-1) if (defined($self->{ $channel }));
 	(my $name = $channel) =~ s/^#+//;
+	mkdir("$options_dir/$name") unless (-d "$options_dir/$name");
 	$self->{ $channel } = {
 		'name' => $channel,
 		'options' => HashFile->new("$options_dir/$name/options.conf")
