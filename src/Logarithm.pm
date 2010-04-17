@@ -1,8 +1,9 @@
-#!/usr/bin/perl
 #
-# Name:		logarithm.pl
+# Name:		logarithmd.pl
 # Description:	Logarithm IRC Bot
 #
+
+package Logarithm;
 
 use strict;
 use warnings;
@@ -19,10 +20,12 @@ use Handler;
 
 my $time_last_ping = time();
 
-main();
-exit(0);
+sub new {
+	my ($this) = @_;
+	my $class = ref($this) || $this;
+	my $self = { };
+	bless($self, $class);
 
-sub main {
 	my $irc = IRC->new();
 	Hook->new("irc_dispatch_msg", Handler->new("hook_msg_dispatch"));
 	foreach my $plugin ($irc->{'options'}->get_all("plugins")) {
@@ -34,6 +37,14 @@ sub main {
 	}
 	$irc->connect();
 
+	$self->{'irc'} = $irc;
+	return($self);
+}
+
+sub loop {
+	my($self) = @_;
+
+	my $irc = $self->{'irc'};
 	while (Selector::wait_all(Timer::get_max_wait()) >= 0) {
 		my $ping_interval = $irc->{'options'}->get_scalar("ping_interval");
 		if ($ping_interval and ((time() - $time_last_ping) > $ping_interval)) {
@@ -152,4 +163,5 @@ sub command_enabled {
 	}
 }
 
+1;
 

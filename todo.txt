@@ -1,4 +1,6 @@
 
+	* you could maybe make a perl script that compiles the help from the commands into a webpage?
+
 	* add logging of commands
 	* could you make it so that various hooks (and bassically all callbacks) can only have one per
 	  module per function, such that trying to set a callback where one already exists will replace
@@ -49,13 +51,6 @@
 	* update the web help page
 
 --- Release as 0.9
-
-Bugs:
-
-	* I was able to delete a poll without logging in (i believe it was one i did not create).  kaos was
-	  not able to delete a poll that he did not have permissions to delete and me as pooface was not able
-	  to delete a poll that i did not create so maybe it's a case of my access being different than
-	  what it says or something
 
 General:
 
