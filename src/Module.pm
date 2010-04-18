@@ -11,7 +11,12 @@ use warnings;
 use Misc;
 use Handler;
 
+use Command;
+
+my $plugins_path = "Plugins";
+
 my $modules = { };
+my $current_owner = "core";
 
 sub load {
 	my ($this, $file) = @_;
@@ -29,34 +34,73 @@ sub load {
 	$self->{'package'} = $package;
 	$self->{'file'} = $file;
 	$self->{'age'} = 0;
+	$self->{'type'} = "module";
+	$self->{'owner'} = $current_owner;
 	$modules->{ $package } = $self;
 	$self->_reload();
 	return($self);
 }
 
+sub load_plugin {
+	my ($this, $name) = @_;
+
+	my $path = "$plugins_path/$name";
+	my $file = "$path/Init.pm";
+	my $self = load($this, $file);
+	unless (defined($self)) {
+		status_log("Error: Plugin \"$name\" not found.");
+		return(undef);
+	}
+	return ($self) if ($self->{'type'} eq "plugin");	## Means we've already init'd so just return
+
+	$self->{'owner'} = $self->{'package'};
+	$self->{'type'} = "plugin";
+	$self->{'path'} = $path;
+	my $result = $self->call("init_plugin", $path);
+	if (!defined($result) || $result < 0) {
+		$self->release();
+		status_log("Error: Failed initializing plugin \"$name\".");
+		return(undef);
+	}
+	return($self);
+}
+
 sub release {
 	my ($self) = @_;
-	# TODO is this the best way to do this?
+
+	$self->call("release_plugin") if ($self->{'type'} eq "plugin");
 	Command::purge($self->{'package'});
 	Timer::purge($self->{'package'});
 	Hook::purge($self->{'package'});
 	return(0);
 }
 
+sub release_plugin {
+	my ($class, $name) = @_;
+
+	my $plugin = "$plugins_path/$name/Init.pm";
+	my $module = Module::get_module($plugin);
+	return(-1) unless (defined($module));
+	$module->release();
+	return(0);
+}
+
 sub call {
 	my ($self, $func, @params) = @_;
 
-	$self->_check_age();
 	return(undef) unless eval("defined(*$self->{'package'}::${func}{CODE})");
+	my $tmp_owner = $current_owner;
+	$current_owner = $self->{'owner'};
 	my $ret = eval "$self->{'package'}::$func(\@params);";
 	status_log($@) if ($@);
+	$current_owner = $tmp_owner;
 	return($ret);
 }
 
 sub make_handler {
 	my ($self, $func, @params) = @_;
 	my $handler = Handler->new("call", $self, $func, @params);
-	$handler->{'owner'} = $self->{'package'};
+	$handler->{'owner'} = $self->{'owner'};
 	return($handler);
 }
 
@@ -71,6 +115,13 @@ sub get_module_list {
 	return(keys(%{ $modules }));
 }
 
+sub reload_all {
+	my @list = keys(%{ $modules });
+	foreach my $name (@list) {
+		$modules->{ $name }->_check_age();
+	}
+}
+
 ### Local Functions ###
 
 sub _check_age {
@@ -78,38 +129,23 @@ sub _check_age {
 
 	if ($self->{'age'} > -M $self->{'file'}) {
 		$self->_reload();
-		# TODO you should call init again here
+		$self->call("init_plugin", $self->{'path'}) if ($self->{'type'} eq "plugin");
 	}
 }
 
 sub _reload {
 	my ($self) = @_;
 
-	my $file_contents;
-	open(FILE, $self->{'file'}) or return(0);
-	{
-		local $/ = undef;
-		$file_contents = <FILE>;
-	}
-	close(FILE);
-
-	my $program = join("\n",
-		"package $self->{'package'};",
-		$file_contents,
-		"1;"
-	);
-
-	eval $program;
+	do $self->{'file'};
 	status_log($@) if ($@);
 	$self->{'age'} = -M $self->{'file'};
 }
 
 sub _get_package_name {
 	my ($file) = @_;
-
-	my $name = $file;
-	$name =~ tr/A-Za-z0-9/_/cs;
-	return("Logarithm::${name}");
+	$file =~ s/(\\|\/)/::/g;
+	$file =~ s/\.pm$//;
+	return($file);
 }
 
 1;

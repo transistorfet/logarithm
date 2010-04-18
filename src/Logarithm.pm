@@ -29,11 +29,7 @@ sub new {
 	my $irc = IRC->new();
 	Hook->new("irc_dispatch_msg", Handler->new("hook_msg_dispatch"));
 	foreach my $plugin ($irc->{'options'}->get_all("plugins")) {
-		my $module = Module->load("plugins/$plugin/$plugin.pm");
-		$module->call("init_plugin", "plugins/$plugin");
-	}
-	foreach my $dir ($irc->{'options'}->get_all("command_path")) {
-		Command->add_directory($dir);
+		Module->load_plugin($plugin);
 	}
 	$irc->connect();
 

@@ -50,9 +50,7 @@ sub do_hook {
 }
 
 
-### Local Functions ###
-
-sub _purge {
+sub purge {
 	my ($package) = @_;
 
 	foreach my $key (keys(%{ $hooks })) {

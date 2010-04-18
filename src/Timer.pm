@@ -88,9 +88,7 @@ sub check_timers {
 	return(0);
 }
 
-### Local Functions ###
-
-sub _purge {
+sub purge {
 	my ($package) = @_;
 
 	for my $i (0..$#{ $timers }) {

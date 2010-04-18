@@ -1,7 +1,14 @@
 
-	* rename cmds/ to Commands/ ??
+	* plugin initialization doesn't work for some reason, even though it *seemed* like commands did
+	* rename plugins to Plugins, various other capitals all over
+	* sholud you move Commands/ to a core plugin?
 
-	* you could maybe make a perl script that compiles the help from the commands into a webpage?
+	* in plugins, instead of putting 'use <package>;', you could do a dynamic load using Module.pm and
+	  hopefully, if it uses require perhaps, it will be identical to 'use', except since a module entry
+	  is in the list, the loaded module will be reloadable
+	* make a command to reload modules manually.  It only should reload modules directly loaded using
+	  Module.pm
+	* add a function to load and initialize a plugin (either in module or in a new Plugin.pm)
 
 	* add logging of commands
 	* could you make it so that various hooks (and bassically all callbacks) can only have one per
@@ -10,64 +17,45 @@
 	  you can have the module init be called again after the module is reloaded so that it changes all
 	  the calbacks.  You could also maybe have a way to tell if a callback is no longer valid(???).  Also
 	  is there a way to make it so that you cal much more easily make plugins?
-	* instead of automatically reloading modules that change, you just need a !reload command that does
-	  all module updating/reinitializing at once
+
+	* make logarithm write the pid file somewhere so that it can be controlled via a command line
+	  controller like unreal and anoperc
+	* make a daemon command line option that starts logarithm in daemon mode (detaches) which disables
+	  outputting of status messages (or rather make it redirect I/O to files).
 
 	* make a plugin to facilitate D&D hosting
 	* combine the topicifier and topic list into one, even without the fancy changes
-	* make logarithm write the pid file somewhere so that it can be controlled via a command line
-	  controller like unreal and anoperc
+	* merge topicifier and the old topics system and make it so that topics can be tagged (at any time)
+	  and so that topics can be selected based on tags
+	* add command to topicifier to reshuffle the topics
 
 	* fix imgcache's timestamp update code to correctly update the timestamp of files that don't exactly
 	  match the url filename (files with %20 in the url are saved to filenames with them converted to
 	  spaces, so extracting the url's filename doesn't always work because wget will use a different name)
 
-	* make a daemon command line option that starts logarithm in daemon mode (detaches) which disables
-	  outputting of status messages (or rather make it redirect I/O to files).
-	* it is possible to delete $INC{'mod-filename'} and then require 'filename' in order to reload the
-	  module but this doesn't update code references (which doesn't happen anyways atm)
-
-	* should plugins and commands actually manage their own package names so that they can access code
-	  in other modules and stuff?
-
-	* add command to topicifier to reshuffle the topics
 	* would logging pings help with finding the problem where logarithm occationally stops working.  The
 	  last time this happened, logarithm went full CPU and wouldn't restart
 
 	* you could possibly make TopicList be a simple mod found by using use lib '.';
 	* make a function that returns the etc/ directory so that plugins don't need to store that somewhere
-	* the purge functions don't work now because the package that most handlers point to is actually
-	  Module (because they call Module::call which then calls the actual module's function).
 	* make ListFile put quotes around entries, at least if they contain the seperator char
 
 	* convert the wordtest and trivia plugins to use the new timer (and hook and command) systems
 	* can you make the help system use info to get the priv settings for displaying in the help?
-	* should you move everything to a Logarithm:: namespace?
-	* should you move what is now in main() (most of it at least) to a Logarithm.pm module that forms
-	  the core of the system with as much funny/misc stuff moved there as possible and still have a
-	  script that can easily be written to make the bot do lots of customizable things (custom speech,
-	  direct inline commands, etc).
 
-	* merge topicifier and the old topics system and make it so that topics can be tagged (at any time)
-	  and so that topics can be selected based on tags
+	* you could maybe make a perl script that compiles the help from the commands into a webpage?
 	* update the web help page
 
 --- Release as 0.9
 
 General:
 
-	* make it possible to write plugins in an OO style.  Can we do this while still being able to have
-	  plugins be hot-reloadable
-
 	* add a response system so that basic matched patterns in chat can trigger logarithm to respond
 	  in a certain way (possibly one of many responses) like Bucket in #xkcd
-	* add a decision thing that will make a decision based on 2 or more options (similar to 8ball)
 
 	* make it possible to use logarithm as basically a perl based irc client in 2 possible fashions.
 	  First, with a direct frontend of some kind, and then also with an OSC process with an independant
 	  frontend either written in perl or in C using the stutter code
-	* this would work nicely (probably) if you transition to a Logarithm:: namespace
-	* make an OSC control plugin
 
 	* add line length limiter to break up lines longer than the max
 	* modify the date command to have a stored timezone for each user such that if that user runs the
@@ -79,11 +67,6 @@ General:
 
 	* should plugins that register a channel specific something (timer or hook) always also hook the
 	  irc messages and deregister when logarithm leaves a channel? (only affects wordtest)
-	* if you try to make it multiserver, there has to be a way to keep logs in network directories and
-	  probably the same for etc/ files.
-
-	* should the default access level be really high instead of 0 (in case an error causes the
-	  module_info to not be defined or set to 0?)
 
 	* make a link command that stores a list of links for each channel (using config where the first
 	  value is always the link and the second is an optional description).  The file could be displayed
@@ -116,6 +99,6 @@ Features:
 
 	* Quote feature
 	* Signifigant events list (?)
-	* Multiserver??
+	* Multiserver?? (Complicated and unnecessary, just run multiple copies of the program)
 
 

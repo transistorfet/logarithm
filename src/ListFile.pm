@@ -125,7 +125,10 @@ sub _load {
 	my ($self) = @_;
 
 	$self->{'entries'} = [ ];
-	return(0) unless (-e $self->{'file'});
+	unless (-e $self->{'file'}) {
+		open(FILE, ">$self->{'file'}") or return(0);
+		close(FILE);
+	}
 	$self->{'age'} = -M $self->{'file'};
 	open(FILE, $self->{'file'}) or return;
 	while (my $line = <FILE>) {

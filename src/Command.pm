@@ -102,9 +102,7 @@ sub evaluate_command {
 	return($commands->{ $name }->evaluate(@params));
 }
 
-### Local Functions ###
-
-sub _purge {
+sub purge {
 	my ($package) = @_;
 
 	foreach my $key (keys(%{ $commands })) {
