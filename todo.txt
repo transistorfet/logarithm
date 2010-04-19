@@ -1,7 +1,4 @@
 
-	* in plugins, instead of putting 'use <package>;', you could do a dynamic load using Module.pm and
-	  hopefully, if it uses require perhaps, it will be identical to 'use', except since a module entry
-	  is in the list, the loaded module will be reloadable
 	* make ListFile put quotes around entries, at least if they contain the seperator char
 	* add logging of commands (for security)
 
@@ -10,6 +7,9 @@
 	  and so that topics can be selected based on tags
 	* add command to topicifier to reshuffle the topics
 	* you could possibly make TopicList be a simple mod found by using use lib '.';
+	* in plugins, instead of putting 'use <package>;', you could do a dynamic load using Module.pm and
+	  hopefully, if it uses require perhaps, it will be identical to 'use', except since a module entry
+	  is in the list, the loaded module will be reloadable
 
 	* convert the wordtest and trivia plugins to use the new timer (and hook and command) systems
 

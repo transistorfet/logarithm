@@ -47,6 +47,7 @@ function print_logs ($channel, $date, $logs) {
 			$line = str_replace("<", "&lt;", $line);
 			$line = str_replace(">", "&gt;", $line);
 			$line = preg_replace("/(http:\/\/\S*)/", "<a href=\"\\1\">\\1</a>", $line);
+			$line = preg_replace("/(https:\/\/\S*)/", "<a href=\"\\1\">\\1</a>", $line);
 			echo("<tr><td>$line</td></tr>\n");
 		}
 		echo("</table>\n");
