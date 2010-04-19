@@ -2,7 +2,9 @@
 # Command Name:	deldefine.pm
 #
 
-package Plugins::define::Commands::deldefine;
+package Plugins::defines::Commands::deldefine;
+
+use Misc;
 
 sub get_info {{
 	'access' => 50,
@@ -12,7 +14,7 @@ sub get_info {{
 	]
 }}
 
-my $config_dir = "../etc";
+my $config_dir = config_dir();
 
 sub do_command {
 	my ($defines, $irc, $msg, $privs) = @_;

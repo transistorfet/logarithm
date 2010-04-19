@@ -12,7 +12,7 @@ sub get_info {{
 	]
 }}
 
-my $config_dir = "../etc";
+my $config_dir = config_dir();
 
 sub do_command {
 	my ($irc, $msg, $privs) = @_;

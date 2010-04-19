@@ -8,7 +8,7 @@ package plugins::topicifier::TopicList;
 use Misc;
 use ListFile;
 
-my $config_dir = "../etc";
+my $config_dir = config_dir();
 
 sub new {
 	my ($this, $channel) = @_;
@@ -80,7 +80,7 @@ sub change_topic {
 	my ($info, $irc, $channel) = @_;
 
 	my $options = $irc->{'channels'}->get_options($channel);
-	return(-1) unless (defined($options) and $options->get_scalar("enable_topicifier"));
+	return(-1) unless (defined($options) and $options->get_scalar("topicifier_enabled"));
 
 	# TODO something something
 	my $topic = shift(@{ $info->{'channels'}->{ $channel } });	

@@ -11,7 +11,7 @@ use warnings;
 use Misc;
 use ListFile;
 
-my $config_dir = "../etc";
+my $config_dir = config_dir();
 my $passwd_file = ListFile->new("$config_dir/passwd", ':', 1);
 
 sub new {

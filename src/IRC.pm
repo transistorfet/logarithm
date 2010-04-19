@@ -19,7 +19,7 @@ use Timer;
 use Hook;
 use Selector;
 
-my $options_dir = "../etc";
+my $options_dir = config_dir();
 
 my $default_nick = "logarithm";
 my $default_password = "";

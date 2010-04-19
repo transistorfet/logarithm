@@ -11,7 +11,7 @@ use warnings;
 use Misc;
 use HashFile;
 
-my $options_dir = "../etc";
+my $options_dir = config_dir();
 
 sub new {
 	my ($this, $file) = @_;

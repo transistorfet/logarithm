@@ -2,8 +2,9 @@
 # Command Name:	adddefine.pm
 #
 
-package Plugins::define::Commands::adddefine;
+package Plugins::defines::Commands::adddefine;
 
+use Misc;
 use ListFile;
 
 sub get_info {{
@@ -14,7 +15,7 @@ sub get_info {{
 	]
 }}
 
-my $config_dir = "../etc";
+my $config_dir = config_dir();
 
 sub do_command {
 	my ($defines, $irc, $msg, $privs) = @_;

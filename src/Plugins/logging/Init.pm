@@ -37,7 +37,7 @@ sub hook_connect {
 		$irc->{'logging'} = {
 			'logdir' => $logdir,
 			'logging' => 1,
-			'echo' => 1
+			'echo' => 0
 		};
 	}
 
@@ -179,10 +179,11 @@ sub strip_colour {
 sub is_enabled {
 	my ($irc, $channel) = @_;
 
-	my $default = $irc->{'options'}->get_scalar("enable_logging");
+	my $default = $irc->{'options'}->get_scalar("logging_enabled");
 	my $options = $irc->{'channels'}->get_options($channel);
 	return($default) unless ($options);
-	my $enabled = $options->get_scalar("enable_logging");
+	my $enabled = $options->get_scalar("logging_enabled");
+	$irc->{'echo'} = $options->get_scalar("logging_echo");
 	return(defined($enabled) ? $enabled : $default);
 }
 

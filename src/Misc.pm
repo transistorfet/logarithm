@@ -8,7 +8,9 @@ package Misc;
 require Exporter;
 @ISA 	= qw(Exporter);
 @EXPORT = qw(
+	config_dir
 	status_log
+	debug_log
 	encode_regex
 	strip_return
 	get_time
@@ -20,7 +22,12 @@ require Exporter;
 use strict;
 use warnings;
 
+my $conf_dir = "../etc";
 my $misc_status_file = "../logs/status.log";
+
+sub config_dir {
+	return($conf_dir);
+}
 
 sub status_log {
 	my ($msg) = @_;
@@ -32,6 +39,11 @@ sub status_log {
 	print STATUS "$msg\n";
 	close(STATUS);
 	return(0);
+}
+
+sub debug_log {
+	my ($msg) = @_;
+	print "$msg\n" if ($Logarithm::DEBUG);
 }
 
 sub encode_regex {

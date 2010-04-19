@@ -4,6 +4,8 @@
 
 package Plugins::topicifier::Commands::addtopic;
 
+use Misc;
+
 sub get_info {{
 	'access' => 50,
 	'help' => [
@@ -12,7 +14,7 @@ sub get_info {{
 	]
 }}
 
-my $config_dir = "../etc/";
+my $config_dir = config_dir();
 
 sub do_command {
 	my ($irc, $msg, $privs) = @_;

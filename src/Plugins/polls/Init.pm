@@ -8,7 +8,7 @@ package Plugins::polls::Init;
 use Misc;
 use HashFile;
 
-my $config_dir = "../etc";
+my $config_dir = config_dir();
 
 sub init_plugin {
 	my ($plugin_dir) = @_;

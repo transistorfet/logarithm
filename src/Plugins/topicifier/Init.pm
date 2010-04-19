@@ -16,7 +16,7 @@ my $change_hour = 16;
 
 my $min_wait_time = 30;
 
-my $config_dir = "../etc";
+my $config_dir = config_dir();
 
 sub init_plugin {
 	my ($plugin_dir) = @_;
@@ -76,7 +76,7 @@ sub change_topic {
 
 	my $options = $irc->{'channels'}->get_options($channel);
 	return(-1) unless ($options);
-	return(-1) unless ($options->get_scalar("enable_topicifier"));
+	return(-1) unless ($options->get_scalar("topicifier_enabled"));
 	load_topics($info, $channel) unless (defined($info->{'channels'}->{ $channel }) and scalar(@{ $info->{'channels'}->{ $channel } }));
 	my $topic = shift(@{ $info->{'channels'}->{ $channel } });	
 	$irc->private_msg("chanserv", "topic $channel $topic") if ($topic);

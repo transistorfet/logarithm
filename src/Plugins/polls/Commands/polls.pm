@@ -4,6 +4,8 @@
 
 package Plugins::polls::Commands::polls;
 
+use Misc;
+
 sub get_info {{
 	'access' => 0,
 	'help' => [
@@ -15,7 +17,7 @@ sub get_info {{
 	]
 }}
 
-my $config_dir = "../etc";
+my $config_dir = config_dir();
 
 sub do_command {
 	my ($polls, $irc, $msg, $privs) = @_;

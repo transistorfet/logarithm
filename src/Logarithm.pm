@@ -18,6 +18,8 @@ use Timer;
 use Command;
 use Handler;
 
+my $DEBUG = 0;
+
 my $time_last_ping = time();
 
 sub new {
@@ -35,6 +37,12 @@ sub new {
 
 	$self->{'irc'} = $irc;
 	return($self);
+}
+
+sub release {
+	my($self) = @_;
+
+	$self->{'irc'}->disconnect();
 }
 
 sub loop {

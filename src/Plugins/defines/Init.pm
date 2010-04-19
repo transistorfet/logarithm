@@ -8,7 +8,7 @@ package Plugins::defines::Init;
 use Misc;
 use ListFile;
 
-my $config_dir = "../etc";
+my $config_dir = config_dir();
 
 sub init_plugin {
 	my ($plugin_dir) = @_;

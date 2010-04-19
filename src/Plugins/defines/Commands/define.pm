@@ -2,7 +2,9 @@
 # Command Name:	define.pm
 #
 
-package Plugins::define::Commands::define;
+package Plugins::defines::Commands::define;
+
+use Misc;
 
 sub get_info {{
 	'access' => 0,
@@ -12,7 +14,7 @@ sub get_info {{
 	]
 }}
 
-my $config_dir = "../etc";
+my $config_dir = config_dir();
 
 sub do_command {
 	my ($defines, $irc, $msg, $privs) = @_;

@@ -1,0 +1,46 @@
+#!/bin/sh
+
+LOGPATH="src"
+LOGPROG="logarithmd.pl"
+LOGPIDF="logarithmd.pid"
+
+if [ "$1" = "start" ] ; then
+	echo "Starting Logarithm"
+	if [ -r $LOGPATH/$LOGPIDF ] ; then
+		rm $LOGPATH/$LOGPIDF
+	fi
+	cd $LOGPATH && perl $LOGPROG
+	sleep 1
+	if [ ! -r $LOGPIDF ] ; then
+		echo "Possible error encountered (logaritm seemingly not started)"	
+		#tail -n 5 logs/status.log
+	fi
+elif [ "$1" = "stop" ] ; then
+	if [ ! -r $LOGPATH/$LOGPIDF ] ; then
+		echo "Logarithm is not currently running."
+		exit
+	fi
+	echo "Stopping Logarithm"
+	kill `cat $LOGPATH/$LOGPIDF`
+elif [ "$1" = "reload" ] ; then
+	if [ ! -r $LOGPATH/$LOGPIDF ] ; then
+		echo "Logarithm is not currently running."
+		exit
+	fi
+	echo "Reloading Logarithm"
+	kill -HUP `cat $LOGPATH/$LOGPIDF`
+elif [ "$1" = "restart" ] ; then
+	if [ ! -r $LOGPATH/$LOGPIDF ] ; then
+		echo "Logarithm is not currently running."
+		exit
+	fi
+	echo "Restarting Logarithm"
+	kill `cat $LOGPATH/$LOGPIDF`
+	sleep 2
+	cd $LOGPATH && perl $LOGPROG
+	sleep 1
+	if [ ! -r $LOGPIDF ] ; then
+		echo "Possible error encountered (logaritm seemingly not started)"	
+		#tail -n 5 logs/status.log
+	fi
+fi
