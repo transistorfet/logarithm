@@ -21,7 +21,9 @@ exit(0);
 sub main {
 
 	my $result = process_args();
-	die "Invalid Arguments.\n$usage\n" if ($result < 0);
+	die "Invalid Arguments.\n$usage" if ($result < 0);
+
+	die "Logarithm appears to already be running. Exiting\n" if (-e $pid_file);
 
 	my $pid = fork();
 	if ($pid < 0) {

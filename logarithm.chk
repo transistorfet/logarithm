@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Check if logarithm is running and start if not.
+# This script should be scheduled to run via cron
+#
+
+LOGPATH="src"
+LOGPIDF="logarithmd.pid"
+LOGPROG="logarithmd.pl"
+
+LOGPID=
+
+cd $LOGPATH
+if [ -f $LOGPIDF ] ; then
+	LOGPID=`cat $LOGPIDF`
+	if [ `ps -auwx | grep $LOGPROG | grep $LOGPID | grep -v -c grep` = 1 ] ; then
+		exit	
+	fi
+	rm -f $LOGPIDF
+fi
+
+perl $LOGPROG
+
