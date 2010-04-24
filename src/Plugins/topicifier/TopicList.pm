@@ -33,7 +33,7 @@ sub check_time {
 
 	my $time = get_time();
 	if (($time->{'wday'} == $day) and ($time->{'hour'} == $hour)) {
-		$self->change_all_topics() unless ($info->{'changed'});
+		$self->change_all_topics() unless ($self->{'changed'});
 		$self->{'changed'} = 1;
 	}
 	else {

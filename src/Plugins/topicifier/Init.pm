@@ -17,7 +17,7 @@ sub init_plugin {
 	my ($plugin_dir) = @_;
 
 	my $topics = Plugins::topicifier::TopicList->new();
-	Timer->new(3600, 1, Handler->new("check_time", $topics));
+	Timer->new(1800, 1, Handler->new("check_time", $topics));
 	Command->add_directory("$plugin_dir/Commands", $topics);
 	return(0);
 }
