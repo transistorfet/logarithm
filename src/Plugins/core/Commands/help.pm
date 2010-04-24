@@ -19,6 +19,7 @@ sub do_command {
 	if (scalar(@{ $msg->{'args'} }) > 1) {
 		if (my $info = Command::get_info($msg->{'args'}->[1])) {
 			@help = @{ $info->{'help'} };
+			unshift(@help, "Access Level Required: $info->{'access'}");
 		}
 		else {
 			$irc->notice($msg->{'nick'}, "Sorry, No help available on $msg->{'args'}->[1]");

@@ -1,9 +1,7 @@
 
+	* add use strict to all files?
 	* make ListFile put quotes around entries, at least if they contain the seperator char
 	* add logging of commands (for security)
-	* add use strict to all files?
-
-	* can you make the help system use info to get the priv settings for displaying in the help?
 	* update README, changelog mabye, and scripting.txt?
 
 --- Release as 0.9
