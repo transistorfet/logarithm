@@ -69,7 +69,8 @@ sub handler {
 
 sub module {
 	my ($self) = @_;
-	return(undef) unless defined($self->{'file'});
+	return(undef) unless defined($self->{'handler'});
+	return(Module::get_module($self->{'handler'}->package)) unless defined($self->{'file'});
 	return(Module::get_module($self->{'file'}));
 }
 

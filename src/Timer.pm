@@ -53,6 +53,13 @@ sub remove {
 	return(0);
 }
 
+sub set {
+	my ($self, $seconds) = @_;
+
+	$self->{'seconds'} = $seconds;
+	$self->reset();
+}
+
 sub reset {
 	my ($self) = @_;
 
