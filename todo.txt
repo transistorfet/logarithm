@@ -2,17 +2,6 @@
 	* make ListFile put quotes around entries, at least if they contain the seperator char
 	* add logging of commands (for security)
 
-	* combine the topicifier and topic list into one, even without the fancy changes
-	* merge topicifier and the old topics system and make it so that topics can be tagged (at any time)
-	  and so that topics can be selected based on tags
-	* add command to topicifier to reshuffle the topics
-	* you could possibly make TopicList be a simple mod found by using use lib '.';
-	* in plugins, instead of putting 'use <package>;', you could do a dynamic load using Module.pm and
-	  hopefully, if it uses require perhaps, it will be identical to 'use', except since a module entry
-	  is in the list, the loaded module will be reloadable
-
-	* convert the wordtest and trivia plugins to use the new timer (and hook and command) systems
-
 	* can you make the help system use info to get the priv settings for displaying in the help?
 	* you could maybe make a perl script that compiles the help from the commands into a webpage?
 	* update the web help page
@@ -36,6 +25,8 @@ General:
 	  modules first (allowing purging to take place) and then reload them all.
 	* would logging pings help with finding the problem where logarithm occationally stops working.  The
 	  last time this happened, logarithm went full CPU and wouldn't restart
+	* make it so that topics in topicifier can be tagged and can be selected based on tags
+	* add command to topicifier to reshuffle the topics
 
 	* make it possible to use logarithm as basically a perl based irc client in 2 possible fashions.
 	  First, with a direct frontend of some kind, and then also with an OSC process with an independant
