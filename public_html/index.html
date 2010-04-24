@@ -5,28 +5,142 @@
 <body>
 
 <h2>Logarithm's Page</h2>
-
 <hr>
-
 <p>Hello and Welcome to My Page.  I don't say much but I mantain the <a href="logs.php">logs</a> for the channel.  I also do stuff for people.
 
-<p>Channel Commands
-<table border="1" cellpadding="2">
-<tr><td><b>Command</b></td><td><b>Lvl</b></td><td><b>Description</b></td></tr>
-<tr><td>!help</td><td>0</td><td>Display a list of commands</td></tr>
-<tr><td>!website</td><td>0</td><td>Display the address of the channel website</td></tr>
-<tr><td>!logs</td><td>0</td><td>Display the address of the channel logs</td></tr>
-<tr><td>!define &lt;word&gt;</td><td>0</td><td>Display a definition for word</td></tr>
-<tr><td>!topics</td><td>0</td><td>Display a list of topic category names</td></tr>
-<tr><td>!topic [word]</td><td>0</td><td>Randomly select and display a discussion topic (if word is given then a topic from only that category is selected)</td></tr>
-<tr><td>!adddefine &lt;word&gt;: &lt;description&gt;</td><td>50</td><td>Adds a definition to the definitions list</td></tr>
-<tr><td>!addtopic [category:]&lt;topic&gt;</td><td>50</td><td>Adds a topic (under the category if given) to the topics list</td></tr>
-<tr><td>!deldefine &lt;word&gt;</td><td>150</td><td>Deletes the definition for word from the definitions list</td></tr>
+<h3>Core</h3>
+<table border=1>
+<tr><td><b>Command</b></td><td><b>Access</b></td><td><b>Description</b></td></tr>
+<tr><td>access</td><td>0</td><td>Usage: access [[&lt;channel&gt;] &lt;nick&gt;]<br>
+Description: Returns the access level of nick (you if unspecified) in channel (current if unspecified)</td></tr>
+<tr><td>add</td><td>350</td><td>Usage: add [&lt;channel&gt;] &lt;nick&gt; &lt;level&gt;<br>
+Description: Adds the nick to the access list of channel (current if unspecified) to level</td></tr>
+<tr><td>bye</td><td>500</td><td>bye<br>
+Causes logarithm to exit</td></tr>
+<tr><td>del</td><td>400</td><td>Usage: del [&lt;channel&gt;] &lt;nick&gt;<br>
+Description: Deletes the access level for nick in channel (current if unspecified)</td></tr>
+<tr><td>help</td><td>0</td><td>Usage: help [&lt;command&gt;]<br>
+Description: Displays a list of commands or the help description for a specified command</td></tr>
+<tr><td>id</td><td>0</td><td>Usage: id &lt;password&gt;<br>
+Description: Identifies yourself using the given password</td></tr>
+<tr><td>join</td><td>450</td><td>Usage: join &lt;channel&gt;<br>
+Description: Causes the bot to join the specified channel</td></tr>
+<tr><td>leave</td><td>475</td><td>Usage: leave &lt;channel&gt;<br>
+Description: Causes the bot to leave the specified channel</td></tr>
+<tr><td>me</td><td>200</td><td>Usage: me [&lt;channel&gt;] &lt;action&gt;<br>
+Description: Causes the bot to say the action in channel (current if unspecified)</td></tr>
+<tr><td>mod</td><td>350</td><td>Usage: mod [&lt;channel&gt;] &lt;nick&gt; &lt;level&gt;<br>
+Description: Modifies the access level for nick in channel (current if unspecified)</td></tr>
+<tr><td>nickserv</td><td>50</td><td>Usage: nickserv<br>
+Description: Causes the bot to attempt to identify with nickserv.</td></tr>
+<tr><td>options</td><td>300</td><td>Usage: options [&lt;channel&gt;] set|get|add|remove|erase &lt;option&gt; [&lt;value&gt;]<br>
+Description: Sets, Displays, Adds to, Removes from, or Erases the specified option (using value if needed) for channel (current if unspecified)</td></tr>
+<tr><td>plugin</td><td>450</td><td>Usage: plugin enable|disable &lt;name&gt;<br>
+Description: Enables or disables the named plugin</td></tr>
+<tr><td>register</td><td>0</td><td>Usage: register &lt;password&gt;<br>
+Description: Registers your nick using password</td></tr>
+<tr><td>say</td><td>200</td><td>Usage: say [&lt;channel&gt;] &lt;phrase&gt;<br>
+Description: Causes the bot to say the phrase in channel (current if unspecified)</td></tr>
+<tr><td>user</td><td>0</td><td>Usage: user &lt;password|hostmask&gt; &lt;value&gt;<br>
+Description: Changes your password of hostmask</td></tr>
 </table>
-
-<hr>
-
-
+<h3>Defines</h3>
+<table border=1>
+<tr><td><b>Command</b></td><td><b>Access</b></td><td><b>Description</b></td></tr>
+<tr><td>adddefine</td><td>50</td><td>Usage: adddefine &lt;phrase&gt;: &lt;definition&gt;<br>
+Description: Adds the definition for phrase to the list for the specified channel</td></tr>
+<tr><td>define</td><td>0</td><td>Usage: define &lt;phrase&gt;<br>
+Description: Displays the definition for the phrase</td></tr>
+<tr><td>deldefine</td><td>50</td><td>Usage: deldefine &lt;phrase&gt;<br>
+Description: Deletes all definition of phrase in the current channel's definitions list</td></tr>
+</table>
+<h3>Greeter</h3>
+<table border=1>
+<tr><td><b>Command</b></td><td><b>Access</b></td><td><b>Description</b></td></tr>
+<tr><td>greet</td><td>50</td><td>Usage: greet &lt;msg&gt;<br>
+Description: Sets the greet message displayed when you join the channel.  Use 'none' to disable.</td></tr>
+</table>
+<h3>Imgcache</h3>
+<table border=1>
+<tr><td><b>Command</b></td><td><b>Access</b></td><td><b>Description</b></td></tr>
+<tr><td>cache</td><td>0</td><td>Usage: cache [&lt;channel&gt;]<br>
+Description: Displays the link to the image cache for the channel (current if unspecified)</td></tr>
+</table>
+<h3>Karma</h3>
+<table border=1>
+<tr><td><b>Command</b></td><td><b>Access</b></td><td><b>Description</b></td></tr>
+</table>
+<h3>Logging</h3>
+<table border=1>
+<tr><td><b>Command</b></td><td><b>Access</b></td><td><b>Description</b></td></tr>
+<tr><td>logs</td><td>0</td><td>Usage: logs [&lt;channel&gt;]<br>
+Description: Displays the link to the channel logs for channel (current if unspecified)</td></tr>
+<tr><td>search</td><td>0</td><td>Usage: search &lt;phrase&gt;<br>
+Description: Displays the website link for a logs search for phrase</td></tr>
+<tr><td>tail</td><td>0</td><td>Usage: tail [&lt;channel&gt;] [&lt;lines&gt;]<br>
+Description: Sends the last 10 lines of the channel logs (current if unspecified) as a notice.</td></tr>
+</table>
+<h3>Polls</h3>
+<table border=1>
+<tr><td><b>Command</b></td><td><b>Access</b></td><td><b>Description</b></td></tr>
+<tr><td>addpoll</td><td>50</td><td>Usage: addpoll &lt;name&gt; "&lt;question&gt;" "&lt;option1&gt;" ...<br>
+Description: Adds the given poll for the specified channel under the given name.<br>
+             The name must contain only alphanumeric characters or the '_'<br>
+             character and be less than 32 letters.</td></tr>
+<tr><td>addresults</td><td>50</td><td>Usage: addresults &lt;name&gt; &lt;text&gt;<br>
+Description: Adds the given poll results for the specified channel under the given name.<br>
+             The &lt;text&gt; will appear verbatim at the end of the poll results.</td></tr>
+<tr><td>delpoll</td><td>50</td><td>Usage: delpoll &lt;name&gt;<br>
+Description: Deletes the given poll for the specified channel.</td></tr>
+<tr><td>pollcontrol</td><td>50</td><td>Usage: pollcontrol &lt;name&gt; (enable|disable)<br>
+Description: Controls the given poll for the specified channel.</td></tr>
+<tr><td>polls</td><td>0</td><td>Usage: polls [&lt;poll-name|poll-num&gt;]<br>
+Description: Displays the active polls for the specified channel or the details<br>
+             of a poll if the poll's name or number is given.  See also: vote,<br>
+             results, predict, predictions, addpoll, delpoll, addresults,<br>
+             pollcontrol.</td></tr>
+<tr><td>results</td><td>0</td><td>Usage: (results|predictions) [&lt;poll-name|poll-num&gt;]<br>
+Description: Displays the results or predictions for the specified poll.</td></tr>
+<tr><td>vote</td><td>0</td><td>Usage: (vote|predict) [&lt;poll-name|poll-num&gt;] &lt;option&gt;<br>
+Description: Registers your vote or prediction for the given poll</td></tr>
+</table>
+<h3>Safp</h3>
+<table border=1>
+<tr><td><b>Command</b></td><td><b>Access</b></td><td><b>Description</b></td></tr>
+<tr><td>8ball</td><td>0</td><td>Ask me any question and the answer is yours.<br>
+Just type !8ball &lt;Your question here&gt;</td></tr>
+<tr><td>decide</td><td>0</td><td>Usage: decide &lt;option&gt; or &lt;option&gt; [or ...]<br>
+Description: Randomly selects an option from a number of options</td></tr>
+<tr><td>fortune</td><td>1</td><td>Usage: fortune<br>
+Description: Displays a random fortune</td></tr>
+</table>
+<h3>Topicifier</h3>
+<table border=1>
+<tr><td><b>Command</b></td><td><b>Access</b></td><td><b>Description</b></td></tr>
+<tr><td>addtopic</td><td>100</td><td>Usage: addtopic &lt;topic&gt;<br>
+Description: Adds the topic to the channel topics list for the current channel's auto topic setter</td></tr>
+<tr><td>changetopic</td><td>100</td><td>Usage: changetopic &lt;topic&gt;<br>
+Description: Change the topic of the current channel to the next auto topic setter topic</td></tr>
+</table>
+<h3>Utils</h3>
+<table border=1>
+<tr><td><b>Command</b></td><td><b>Access</b></td><td><b>Description</b></td></tr>
+<tr><td>date</td><td>0</td><td>Usage: date<br>
+Description: Displays the current date</td></tr>
+<tr><td>google</td><td>0</td><td>Usage: google &lt;phrase&gt;<br>
+Description: Displays the website link for a google search for phrase</td></tr>
+<tr><td>math</td><td>0</td><td>Usage: math &lt;math expression&gt;<br>
+Description: Calculates the answer to simple math equations containing the operations +, -, *, /, cos, sin, abs, sqrt, exp, log, hex, oct, and int. The variables $pi and $ans can also be used.</td></tr>
+<tr><td>mysite</td><td>0</td><td>Usage: mysite [&lt;name&gt;]<br>
+Description: Displays the website for the nick (current if unspecified)</td></tr>
+<tr><td>random</td><td>0</td><td>Usage: random [&lt;number&gt;]<br>
+Description: Displays a random number between 1 and number (100 if unspecified)</td></tr>
+<tr><td>uptime</td><td>0</td><td>Usage: uptime<br>
+Description: Displays the current uptime</td></tr>
+<tr><td>website</td><td>0</td><td>Usage: website [&lt;channel&gt;]<br>
+Description: Displays the website for channel (current if unspecified)</td></tr>
+</table>
+<br><hr>
 <p><a href="./">Home</a><br>
 <a href="http://jabberwocky.ca/">The Jabberwocky Network</a><br>
 <a href="mailto:philosophy@jabberwocky.ca"><i>&lt;philosophy@jabberwocky.ca&gt;</i></a><br>

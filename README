@@ -1,11 +1,12 @@
 
 Logarithm Perl IRC Bot
-Version 0.8
+Version 0.9
 
 Installing and Running:
-	Uncompress the source or checkout the cvs into the directory you want
-	to install to, configure as necessary, and run using the logarithm.sh
-	script (which will automatically restart the bot if the perl script
+	Uncompress the source or checkout the git into the directory you want
+	to install to, configure as necessary, and run using
+	'./logarithm start' which will run logarithm as a daemon.  
+ (which will automatically restart the bot if the perl script
 	exits).  Alternatively, you can cd into the source dir and run the
 	logarithm.pl script directly.  Note: the bot is not run as a daemon
 	and will print status information to the terminal it starts on.
