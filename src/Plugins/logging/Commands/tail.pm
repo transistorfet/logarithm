@@ -4,6 +4,9 @@
 
 package Plugins::logging::Commands::tail;
 
+use strict;
+use warnings;
+
 use Misc;
 
 sub get_info {{

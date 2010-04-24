@@ -4,6 +4,9 @@
 
 package Plugins::core::Commands::del;
 
+use strict;
+use warnings;
+
 sub get_info {{
 	'access' => 400,
 	'help' => [

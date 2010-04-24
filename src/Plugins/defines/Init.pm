@@ -5,6 +5,9 @@
 
 package Plugins::defines::Init;
 
+use strict;
+use warnings;
+
 use Misc;
 use ListFile;
 

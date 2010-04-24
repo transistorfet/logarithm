@@ -4,6 +4,9 @@
 
 package Plugins::defines::Commands::adddefine;
 
+use strict;
+use warnings;
+
 use Misc;
 use ListFile;
 

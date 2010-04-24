@@ -5,6 +5,9 @@
 
 package Plugins::polls::Init;
 
+use strict;
+use warnings;
+
 use Misc;
 use HashFile;
 

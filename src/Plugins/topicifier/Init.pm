@@ -5,6 +5,9 @@
 
 package Plugins::topicifier::Init;
 
+use strict;
+use warnings;
+
 use Timer;
 use Command;
 use Handler;

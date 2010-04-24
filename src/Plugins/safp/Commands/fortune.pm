@@ -4,6 +4,9 @@
 
 package Plugins::safp::Commands::fortune;
 
+use strict;
+use warnings;
+
 use Misc;
 
 sub get_info {{

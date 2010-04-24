@@ -4,6 +4,9 @@
 
 package Plugins::topicifier::Commands::changetopic;
 
+use strict;
+use warnings;
+
 sub get_info {{
 	'access' => 100,
 	'help' => [

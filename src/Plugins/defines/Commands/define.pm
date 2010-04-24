@@ -4,6 +4,9 @@
 
 package Plugins::defines::Commands::define;
 
+use strict;
+use warnings;
+
 use Misc;
 
 sub get_info {{

@@ -5,6 +5,9 @@
 
 package Plugins::imgcache::Init;
 
+use strict;
+use warnings;
+
 use Misc;
 
 my $default_cachedir = "../public_html/cache";

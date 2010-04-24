@@ -4,6 +4,9 @@
 
 package Plugins::safp::Commands::decide;
 
+use strict;
+use warnings;
+
 use Misc;
 
 sub get_info {{

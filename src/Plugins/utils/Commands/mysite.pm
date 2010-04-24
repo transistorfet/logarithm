@@ -4,6 +4,9 @@
 
 package Plugins::utils::Commands::mysite;
 
+use strict;
+use warnings;
+
 sub get_info {{
 	'access' => 0,
 	'help' => [

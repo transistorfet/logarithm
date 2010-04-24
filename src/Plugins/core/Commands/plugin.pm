@@ -4,6 +4,9 @@
 
 package Plugins::core::Commands::plugin;
 
+use strict;
+use warnings;
+
 sub get_info {{
 	'access' => 450,
 	'help' => [

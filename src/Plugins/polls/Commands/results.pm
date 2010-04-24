@@ -4,6 +4,9 @@
 
 package Plugins::polls::Commands::results;
 
+use strict;
+use warnings;
+
 use Misc;
 
 sub get_info {{

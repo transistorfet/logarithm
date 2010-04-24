@@ -4,6 +4,9 @@
 
 package Plugins::core::Commands::nickserv;
 
+use strict;
+use warnings;
+
 sub get_info {{
 	'access' => 50,
 	'help' => [

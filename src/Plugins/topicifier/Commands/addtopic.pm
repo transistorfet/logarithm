@@ -4,6 +4,9 @@
 
 package Plugins::topicifier::Commands::addtopic;
 
+use strict;
+use warnings;
+
 sub get_info {{
 	'access' => 100,
 	'help' => [

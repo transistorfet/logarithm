@@ -5,6 +5,9 @@
 
 package Plugins::topicifier::TopicList;
 
+use strict;
+use warnings;
+
 use IRC;
 use Misc;
 use Timer;

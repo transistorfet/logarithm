@@ -4,6 +4,9 @@
 
 package Plugins::core::Commands::leave;
 
+use strict;
+use warnings;
+
 sub get_info {{
 	'access' => 475,
 	'help' => [

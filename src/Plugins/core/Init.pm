@@ -5,6 +5,9 @@
 
 package Plugins::core::Init;
 
+use strict;
+use warnings;
+
 sub init_plugin {
 	my ($plugin_dir) = @_;
 

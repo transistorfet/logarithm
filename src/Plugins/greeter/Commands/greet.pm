@@ -4,6 +4,9 @@
 
 package Plugins::greeter::Commands::greet;
 
+use strict;
+use warnings;
+
 sub get_info {{
 	'access' => 50,
 	'help' => [

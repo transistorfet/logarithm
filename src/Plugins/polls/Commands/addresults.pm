@@ -4,6 +4,9 @@
 
 package Plugins::polls::Commands::addresult;
 
+use strict;
+use warnings;
+
 use Misc;
 use HashFile;
 

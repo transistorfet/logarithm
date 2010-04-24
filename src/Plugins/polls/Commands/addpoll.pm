@@ -4,6 +4,9 @@
 
 package Plugins::polls::Commands::addpoll;
 
+use strict;
+use warnings;
+
 use Misc;
 use HashFile;
 

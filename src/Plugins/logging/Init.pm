@@ -5,6 +5,9 @@
 
 package Plugins::logging::Init;
 
+use strict;
+use warnings;
+
 use Misc;
 
 my $default_logdir = "../logs";

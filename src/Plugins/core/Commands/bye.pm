@@ -4,6 +4,9 @@
 
 package Plugins::core::Commands::bye;
 
+use strict;
+use warnings;
+
 sub get_info {{
 	'access' => 500,
 	'help' => [
