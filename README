@@ -2,35 +2,53 @@
 Logarithm Perl IRC Bot
 Version 0.9
 
-Installing and Running:
-	Uncompress the source or checkout the git into the directory you want
-	to install to, configure as necessary, and run using
-	'./logarithm start' which will run logarithm as a daemon.  
- (which will automatically restart the bot if the perl script
-	exits).  Alternatively, you can cd into the source dir and run the
-	logarithm.pl script directly.  Note: the bot is not run as a daemon
-	and will print status information to the terminal it starts on.
+Installing:
+	Uncompress the source tarball (or checkout the git repository) into the
+	directory you want the final install to be.
 
 Configuring:
+	1. Set the server and channel options in <logarithm>/etc/options.conf
+	   (as well as any others)
+
+	2. Add an entry into <logarithm>/etc/passwd using the passwd.pl tool in
+	   <logarithm>/tools/
+
+	3. Add an access entry into <logarithm>/access
+
+	Configuration options are stored in the <logarithm>/etc/options.conf
+	file (global options) and the <logarithm>/etc/<channel>/options.conf
+	file (channel-specific options).  These files can be managed through
+	the bot itself using the options command, or they can be edited
+	directly using a text editor. The server and channel options will need
+	to be set using a text editor no matter what.  If the file changes
+	while logarithm is running, the new file will be loaded.  Every time a
+	change is made through logarithm, the option.conf file is written to
+	disk.  All options are stored in the form:
+		<option> = "<value>","<value",...
+	See the Options section for a list of all the available options.
+
 	Logarithm has a permissions system so before running the bot for the
 	first type, you should register your nick using the passwd.pl script
 	in tools (passwd.pl <nick> <password> [<hostmask>] where hostmask is
 	a string with '*' wildcards that is matched with the host you are
 	connecting to IRC from in order to automatically identify you).  You
 	should also add yourself with a global access level of 500 by
-	modifying the etc/access file with a line <nick>:500.  See the
-	etc/access.example.
+	modifying the <logarithm>/etc/access file with a line <nick>:500.  (See
+	the <logarithm>/etc/access.example).
 
-	Configuration options are stored in the etc/options.conf file for
-	global options and etc/<channel>/options.conf for channel-specific
-	options.  These files can be managed through the bot itself using the
-	options command or they can be edited directly using a text editor. If
-	the file changes while logarithm is running, the new file will be
-	loaded.  Every time a change is made through logarithm, the
-	option.conf file is written to disk.  All options are stored in the
-	form <option> = "<value>","<value",...  See the Options section for a
-	list of all the available options.
+Running:
+	For running as a daemon:
+		./logarithm (start|stop|restart|reload)
 
+	For running as a shell program with output:
+		cd src/
+		perl logarithm.pl
+
+	When logarithm is started as a daemon, it will write its pid number
+	into a file called <logarithm>/src/logarithmd.pid.  The script
+	<logarithm>/logarithm.chk can be scheduled as a cron job to check
+	if logarithm is still running and if not, to start a new instance.
+	
 Using:
 	Commands can be executed by users in the same channel as logarithm
 	though the channel itself or by sending private messages directly to
@@ -52,70 +70,6 @@ Plugins:
 	enabled or disabled using the plugin command.  The 'plugins' option in
 	the options.conf file contains a list of plugins to load when logarithm
 	starts and is modified when the plugin command is used.
-
-Commands:
-	All commands can either be sent to logarithm as a private message or
-	sent to the channel occupied by logarithm with a special prefix append
-	to the command name.  Certain commands will assume the channel is the
-	current channel if one is not provided.  The prefix is '!' by default
-	and can be changed using the 'command_designator' option.  The
-	following is a brief list of commands.
-
-	access [<channel>] [<nick>]
-		Outputs the access granted to the nick for the specified
-		channel.  If no nick is specified, your nick is assumed.  Your
-		hostmask (regardless of whether you specify a nick) is printed
-		in brackets at the end of the message.
-
-	add [<channel>] <nick> <access>
-		Adds the nick to the access list for the specified channel with
-		the specified access level.
-
-	bye
-		Terminate logarithm.  If the logarithm.sh script is being used,
-		logarithm will restart after 15 seconds so this acts more like
-		a reboot command.
-
-	del [<channel>] <nick>
-		Delete the nick from the access list for the specified channel.
-
-	id <password>
-		Identify yourself to logarithm.
-
-	join <channel>
-		Cause logarithm to join the specified channel.
-
-	leave <channel>
-		Cause logarithm to leave the specified channel.
-
-	me [<channel>] <message>
-		Cause logarithm to output the specified message as an action.
-
-	mod [<channel>] <nick> <access>
-		Modify the access level of the specified nick for the specified
-		channel.
-
-	options (set|get|add|remove|erase) [<channel>] <option> [<value>]
-		Control channel options.
-		Set sets the option to <value> replacing any previous value.
-		Get returns the value of the specified option.
-		Add adds <value> to the existing list of values for option.
-		Remove removes <value> from the current list of values.
-		Erase deletes the option entirely.
-
-	plugin (enable|disable) <name>
-		Enables or disables the plugin of the given name.
-
-	register <nick> <password>
-		Registers the nick with the specified password.
-
-	say [<channel>] <message>
-		Cause logarithm to say the specified message.
-
-	user (password|hostmask) <value>
-		Changes user options.  You must be identified.  'password' will
-		change the current password for your nick.  'hostmask' will
-		change the hostmask to use for automatic identification.
 
 Global Options:
 	nick:

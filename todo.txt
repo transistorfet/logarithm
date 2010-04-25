@@ -1,9 +1,4 @@
 
-	* add logging of commands (for security)
-	* update README, changelog mabye, and scripting.txt?
-
---- Release as 0.9
-
 Bugs:
 
 	* fix imgcache's timestamp update code to correctly update the timestamp of files that don't exactly
@@ -12,6 +7,7 @@ Bugs:
 
 General:
 
+	* add logging of commands (for security)
 	* make a plugin to facilitate D&D hosting
 	* add a response system so that basic matched patterns in chat can trigger logarithm to respond
 	  in a certain way (possibly one of many responses) like Bucket in #xkcd

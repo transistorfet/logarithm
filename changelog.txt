@@ -1,8 +1,6 @@
 
 current:
-	* Modified the plugins to only use global variables for constants
-	* Added a list of server connections
-	* Modified topicifier to use the new irc->get_connections function
+	<See the git log>
 
 0.8:
 	* Completely rewrote all modules, commands, and plugins
