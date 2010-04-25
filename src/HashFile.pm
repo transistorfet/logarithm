@@ -149,13 +149,13 @@ sub _parse_value {
 	my @ret = ();
 	while ($values) {
 		my $value;
-		if ($values =~ /\"([^"]+)\"/) {
+		if ($values =~ /^\s*\"([^"]+)\"/) {
 			$value = $1;
-			$values =~ s/\"([^"]+)\"(,|)//;
+			$values =~ s/^\s*\"([^"]+)\"(,|)//;
 		}
-		elsif ($values =~ /([^,"]+)/) {
+		elsif ($values =~ /^\s*([^,"]+)/) {
 			$value = $1;
-			$values =~ s/([^,"]+)(,|)//;
+			$values =~ s/^\s*([^,"]+)(,|)//;
 		}
 		else {
 			last;

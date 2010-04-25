@@ -1,5 +1,4 @@
 
-	* make ListFile put quotes around entries, at least if they contain the seperator char
 	* add logging of commands (for security)
 	* update README, changelog mabye, and scripting.txt?
 

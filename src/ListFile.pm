@@ -133,7 +133,6 @@ sub _load {
 	open(FILE, $self->{'file'}) or return;
 	while (my $line = <FILE>) {
 		$line = strip_return($line);
-		#push(@{ $self->{'entries'} }, [ split($self->{'delim'}, $line) ]) if ($line);
 		push(@{ $self->{'entries'} }, [ _parse_value($self->{'delim'}, $line) ]) if ($line);
 	}
 	close(FILE);
@@ -145,7 +144,13 @@ sub _write {
 	create_file_directory($self->{'file'});
 	open(FILE, ">$self->{'file'}") or return(-1);
 	foreach my $entry (@{ $self->{'entries'} }) {
-		print FILE join($self->{'delim'}, @{ $entry }) . "\n";
+		my @list = @{ $entry };
+		foreach my $i (0..$#list) {
+			## Only quote the value if it contains the deliminator
+			#  char or starts or ends with whitespace
+			$list[$i] = "\"$list[$i]\"" if ($list[$i] =~ /\Q$self->{'delim'}\E/ or $list[$i] =~ /(^\s+|\s+$)/);
+		}
+		print FILE join($self->{'delim'}, @list) . "\n";
 	}
 	close(FILE);
 }
@@ -156,13 +161,14 @@ sub _parse_value {
 	my @ret = ();
 	while ($values) {
 		my $value;
-		if ($values =~ /\"([^"]+)\"/) {
+		if ($values =~ /^\s*\"([^"]+)\"/) {
 			$value = $1;
-			$values =~ s/\"([^"]+)\"($delim|)//;
+			$values =~ s/^\s*\"([^"]+)\"\s*($delim|)//;
 		}
-		elsif ($values =~ /([^$delim"]+)/) {
+		elsif ($values =~ /^\s*([^$delim"]+)/) {
 			$value = $1;
-			$values =~ s/([^$delim"]+)($delim|)//;
+			$value =~ s/\s+$//;
+			$values =~ s/^\s*([^$delim"]+)\s*($delim|)//;
 		}
 		else {
 			last;
