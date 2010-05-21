@@ -13,7 +13,7 @@ LOGPID=
 cd $LOGPATH
 if [ -f $LOGPIDF ] ; then
 	LOGPID=`cat $LOGPIDF`
-	if [ `ps -auwx | grep $LOGPROG | grep $LOGPID | grep -v -c grep` = 1 ] ; then
+	if [ `ps auwx | grep $LOGPROG | grep $LOGPID | grep -v -c grep` = 1 ] ; then
 		exit	
 	fi
 	rm -f $LOGPIDF

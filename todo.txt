@@ -1,4 +1,6 @@
 
+	* make a plugin that records ++ and -- commands somehow somewhy (karma)
+
 Bugs:
 
 	* fix imgcache's timestamp update code to correctly update the timestamp of files that don't exactly
@@ -7,8 +9,8 @@ Bugs:
 
 General:
 
-	* add logging of commands (for security)
-	* make a plugin to facilitate D&D hosting
+	* add logging of commands (for security) (record the command name and user who tried to use it)
+	* make a plugin to facilitate D&D hosting (what would it do??)
 	* add a response system so that basic matched patterns in chat can trigger logarithm to respond
 	  in a certain way (possibly one of many responses) like Bucket in #xkcd
 
@@ -19,20 +21,14 @@ General:
 	* make it so that topics in topicifier can be tagged and can be selected based on tags
 	* add command to topicifier to reshuffle the topics
 
-	* make it possible to use logarithm as basically a perl based irc client in 2 possible fashions.
-	  First, with a direct frontend of some kind, and then also with an OSC process with an independant
-	  frontend either written in perl or in C using the stutter code
-
 	* add line length limiter to break up lines longer than the max
 	* modify the date command to have a stored timezone for each user such that if that user runs the
 	  command or someone types !date <user>, it uses their timezone for printing the date
 	* make a command for the polls that informs a user of which polls that user hasn't vote in yet
 	  as well as possibly the opposite (which ones he/she has voted for)
 
-	* make definitions accept wildcards but you'd have to limit the number of responses
-
 	* should plugins that register a channel specific something (timer or hook) always also hook the
-	  irc messages and deregister when logarithm leaves a channel? (only affects wordtest)
+	  irc messages and deregister when logarithm leaves a channel? (only affects trivia??)
 
 	* make a link command that stores a list of links for each channel (using config where the first
 	  value is always the link and the second is an optional description).  The file could be displayed
@@ -41,6 +37,10 @@ General:
 
 	* Add support for Multiple Hostmasks
 	* add the ability to use the current hostmask if none is given when set (is this even possible)?
+
+	* make it possible to use logarithm as basically a perl based irc client in 2 possible fashions.
+	  First, with a direct frontend of some kind, and then also with an OSC process with an independant
+	  frontend either written in perl or in C using the stutter code
 
 Website:
 
@@ -54,11 +54,8 @@ Website:
 
 Features:
 
-	* make a plugin that records ++ and -- commands somehow somewhy
 	* make a calander feature for keeping track of events complete with reminders
 	* a command that randomly prints something from one of the site blogs?
-	* messages system so that people can leave others messages (maybe autoprint on join + access commands)
-	  (this is like memoserv so is it needed?)
 	* have a list of recomened readings
 	* an fserve/dcc plugin maybe that allows people to upload files and then download them with a 
 	  system of quotas for uploaders and stuff.  There could be a dcc plugin seperately that uses
@@ -67,5 +64,4 @@ Features:
 	* Quote feature
 	* Signifigant events list (?)
 	* Multiserver?? (Complicated and unnecessary, just run multiple copies of the program)
-
 
