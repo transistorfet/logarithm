@@ -234,7 +234,8 @@ sub _server_connect {
 				$self->{'socket'} = $sock;
 				$self->{'server'} = $server;
 				print $sock "NICK $self->{'nick'}\n";
-				print $sock "USER $self->{'nick'} 0 0 :The Bot\n";
+				print $sock "USER $self->{'nick'} 0 0 :transistor's bot\n";
+				print $sock "MODE $self->{'nick'} +b\n";
 				status_log("Connected...");
 				return(0);
 			}
@@ -394,7 +395,7 @@ sub _dispatch_msg {
 	elsif ($msg->{'cmd'} eq "353") {
 		$msg->{'channel'} = $msg->{'params'}->[2];
 		foreach my $nick (split(" ", $msg->{'text'})) {
-			$nick =~ s/^(\@|\+)//;
+			$nick =~ s/^(\@|\+|\~)//;
 			$self->{'users'}->join_channel($msg->{'channel'}, $nick, $msg->{'host'});
 		}
 	}
