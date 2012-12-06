@@ -33,7 +33,7 @@ sub hook_dispatch_msg {
 	if ($msg->{'cmd'} eq "PRIVMSG") {
 		if ($irc->{'channels'}->in_channel($msg->{'channel'})) {
 			my $text = ($msg->{'text'} =~ /^\x01ACTION (.*)\x01$/) ? $1 : $msg->{'text'};
-			if ($text =~ /(http\:\/\/\S+\.(png|jpg|jpeg|gif|bmp))/i) {
+			if ($text =~ /((http|https)\:\/\/\S+\.(png|jpg|jpeg|gif|bmp))/i) {
 				cache_image($irc, $msg, $1);
 			}
 		}
