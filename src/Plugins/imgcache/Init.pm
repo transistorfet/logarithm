@@ -36,6 +36,9 @@ sub hook_dispatch_msg {
 			if ($text =~ /((http|https)\:\/\/\S+\.(png|jpg|jpeg|gif|bmp))/i) {
 				cache_image($irc, $msg, $1);
 			}
+			elsif ($text =~ /http\:\/\/imgur\.com\/gallery\/(\S+)/i) {
+				cache_image($irc, $msg, "http://i.imgur.com/$1.jpg");
+			}
 		}
 	}
 }
