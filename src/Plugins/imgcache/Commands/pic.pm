@@ -18,15 +18,14 @@ sub get_info {{
 sub do_command {
 	my ($irc, $msg, $privs) = @_;
 
-	opendir(DIR, "public_html/cache/") or return;
+	opendir(DIR, "../public_html/cache/") or return;
 	my @files = readdir(DIR);
 	closedir(DIR);
 	@files =  grep { $_ ne "." and $_ ne ".." } @files;
 	my $r = int(rand(scalar(@files)));
 	my $dir = $files[$r];
 
-	print "public_html/cache/$dir\n";
-	opendir(DIR, "public_html/cache/$dir") or (print "PEE\n" and return);
+	opendir(DIR, "../public_html/cache/$dir") or return;
 	@files = readdir(DIR);
 	closedir(DIR);
 	@files =  grep { $_ ne "." and $_ ne ".." } @files;
