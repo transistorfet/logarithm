@@ -12,7 +12,7 @@ use Misc;
 
 my $default_cachedir = "../public_html/cache";
 
-my $size_limit = "4M";
+my $size_limit = "6M";
 my $user_agent = "Firefox";
 
 sub init_plugin {
@@ -34,7 +34,7 @@ sub hook_dispatch_msg {
 		if ($irc->{'channels'}->in_channel($msg->{'channel'})) {
 			my $text = ($msg->{'text'} =~ /^\x01ACTION (.*)\x01$/) ? $1 : $msg->{'text'};
 			if ($text =~ /((http|https)\:\/\/\S+\.(png|jpg|jpeg|gif|bmp))/i) {
-				cache_image($irc, $msg, $1);
+				cache_image($irc, $msg, $1) if $1 !~ /jabberwocky\.ca\/\~logarithm/;
 			}
 			elsif ($text =~ /http\:\/\/imgur\.com\/gallery\/(\S+)/i) {
 				cache_image($irc, $msg, "http://i.imgur.com/$1.jpg");
